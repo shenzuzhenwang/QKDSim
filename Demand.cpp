@@ -130,6 +130,11 @@ void CDemand::SetRouted(bool routed)
 	m_bRouted=routed;
 }
 
+void CDemand::SetAllDelivered(bool delivered)
+{
+	m_bAllDelivered = delivered;
+}
+
 bool CDemand::GetRouted()
 {
 	return m_bRouted;

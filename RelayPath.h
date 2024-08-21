@@ -8,14 +8,14 @@ public:
 	void operator=(const CRelayPath& path);
 
 private:
-	NODEID m_uiSourceId;
-	NODEID m_uiSinkId;
-	DEMANDID m_uiAssociateDemand;
+	NODEID m_uiSourceId;	// 路径的源节点ID
+	NODEID m_uiSinkId;	// 路径的目的节点ID（汇节点）
+	DEMANDID m_uiAssociateDemand;	// 与此路径关联的需求ID
 
 public:
-	list<NODEID> m_lTraversedNodes;
-	list<LINKID> m_lTraversedLinks;
-	map<NODEID,NODEID> m_mNextNode;
+	list<NODEID> m_lTraversedNodes;	// 一个节点ID的列表，表示路径上依次经过的节点
+	list<LINKID> m_lTraversedLinks;	// 一个链路ID的列表，表示路径上依次经过的链路
+	map<NODEID,NODEID> m_mNextNode;	// 一个节点ID到下一个节点ID的映射，用于快速查找路径中某节点的下一个节点
 
 public:
 	void SetSourceId(NODEID SourceId);

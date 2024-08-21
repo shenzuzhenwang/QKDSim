@@ -8,9 +8,9 @@ public:
 	void operator=(const CNetEvent& netEvent);
 
 private:
-	EVENTTYPE m_enEventType;
-	TIME m_dEventTime;
-	DEMANDID m_uiAssociatedDemand;
+	EVENTTYPE m_enEventType;	// 事件的类型，可能代表不同种类的网络事件（例如需求到达、链路故障等）
+	TIME m_dEventTime;	// 事件发生的时间
+	DEMANDID m_uiAssociatedDemand;	// 与此事件相关联的需求ID
 
 public:
 	void SetEventType(EVENTTYPE eventType);
