@@ -46,6 +46,11 @@ void CRelayPath::SetSinkId(NODEID sinkId)
 	m_uiSinkId=sinkId;
 }
 
+NODEID CRelayPath::GetSinkId()
+{
+	return m_uiSinkId;
+}
+
 void CRelayPath::SetAssociateDemand(DEMANDID demandId)
 {
 	m_uiAssociateDemand=demandId;

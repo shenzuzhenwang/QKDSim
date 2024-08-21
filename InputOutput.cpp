@@ -19,6 +19,7 @@ CInputOutput::CInputOutput(CNetwork* Network)
 
 void CInputOutput::InitNodes(UINT nodeNum)
 {
+	// 根据传入的节点数量 nodeNum，逐个创建节点对象 CNode 并设置其 nodeId，然后将这些节点添加到网络对象 m_pNetwork 的节点列表 m_vAllNodes 中
 	for (NODEID nodeId=0;nodeId<nodeNum;nodeId++)
 	{
 		CNode newNode;
@@ -39,6 +40,7 @@ void CInputOutput::InputNetworkInfo(string fileName)
 	NODEID sourceId, sinkId;
 	RATE keyRate;
 	TIME proDelay;
+	// 逐行读取链路信息，包括链路ID、源节点ID、目标节点ID、量子密钥速率 (keyRate) 和链路延迟 (proDelay)
 	while (fin>>linkId>>sourceId>>sinkId>>keyRate>>proDelay)
 	{
 		CLink newLink;
@@ -64,6 +66,7 @@ void CInputOutput::InputDemandInfo(string fileName)
 	NODEID sourceId, sinkId;
 	VOLUME demandVolume;
 	TIME arriveTime;
+	// 逐行读取需求ID、源节点ID、目标节点ID、需求数据量和需求到达时间
 	while (fin>>demandId>>sourceId>>sinkId>>demandVolume>>arriveTime)
 	{
 		CDemand newDemand;

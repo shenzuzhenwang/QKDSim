@@ -10,20 +10,20 @@ public:
 
 
 private:
-	LINKID m_uiLinkId;
-	NODEID m_uiSourceId;
-	NODEID m_uiSinkId;
-	RATE m_dQKDRate;
-	TIME m_dDelay;
-	RATE m_dBandwidth;
-	CKeyManager m_KeyManager;
+	LINKID m_uiLinkId;	// 链路的唯一标识符
+	NODEID m_uiSourceId;	// 链路的源节点ID
+	NODEID m_uiSinkId;	// 链路的目的节点ID（汇节点）
+	RATE m_dQKDRate;	// 链路的量子密钥分发（QKD）速率
+	TIME m_dDelay;	// 链路的传输延迟
+	RATE m_dBandwidth;	// 链路的带宽
+	CKeyManager m_KeyManager;	// 与链路相关联的密钥管理器，用于管理链路上的密钥分发和消耗
 
 
 private://data structure for algorithms
-	WEIGHT m_dWeight;
+	WEIGHT m_dWeight;	// 链路的权重，用于路径选择算法中
 
 public:
-	list<DEMANDID> m_lCarriedDemands;
+	list<DEMANDID> m_lCarriedDemands;	// 一个需求ID的列表，表示当前链路上正在传输的所有需求
 
 
 	void SetLinkId(LINKID linkId);
@@ -48,8 +48,8 @@ public:
 	WEIGHT GetWeight();
 
 	//key manager operations
-	void ConsumeKeys(VOLUME keys);
-	VOLUME GetAvaialbeKeys();
-	void UpdateRemainingKeys(TIME executionTime);
+	void ConsumeKeys(VOLUME keys);	// 消耗链路上指定数量的密钥
+	VOLUME GetAvaialbeKeys();	// 获取链路上可用的密钥数量
+	void UpdateRemainingKeys(TIME executionTime);	// 根据执行时间更新链路上剩余的密钥量
 };
 

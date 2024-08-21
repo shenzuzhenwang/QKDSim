@@ -130,6 +130,11 @@ void CDemand::SetRouted(bool routed)
 	m_bRouted=routed;
 }
 
+void CDemand::SetAllDelivered(bool delivered)
+{
+	m_bAllDelivered = delivered;
+}
+
 bool CDemand::GetRouted()
 {
 	return m_bRouted;
@@ -157,7 +162,7 @@ void CDemand::InitRelayPath(list<NODEID>& nodeList, list<LINKID>& linkList)
 	m_Path.SetAssociateDemand(m_uiDemandID);
 	m_Path.m_lTraversedNodes=nodeList;
 	m_Path.m_lTraversedLinks=linkList;
-	m_Path.SetSourceId(m_uiSinkId);
+	m_Path.SetSourceId(m_uiSourceId);
 	m_Path.SetSinkId(m_uiSinkId);
 	list<NODEID>::iterator nodeIter;
 	nodeIter=nodeList.begin();
