@@ -6,7 +6,7 @@
 *.lo
 *.o
 *.obj
-Debug
+release
 
 # Precompiled Headers
 *.gch
@@ -34,6 +34,11 @@ Debug
 
 # Visual Studio
 *.vs
+*.stash
+*.qtvscr
+*.vcxproj
+*.filters
 
 # Qt
 *.user
+Debug
