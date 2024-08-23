@@ -1,5 +1,6 @@
 ﻿
 #include "GUI/qkdsim.h"
+#include "Alg/Network.h"
 
 #include <QApplication>
 
@@ -21,6 +22,10 @@ int main(int argc, char *argv[])
             break;
         }
     }
+
+    CNetwork net;
+    net.MainProcess();
+
     QKDSim w;
     w.show();
     return a.exec();

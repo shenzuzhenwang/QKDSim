@@ -92,7 +92,7 @@ void QKDSim::open_net()
 {
     // 加载文件至接收内容显示框
     QString filename = QFileDialog::getOpenFileName(this, tr("打开网络拓扑文件"));
-    QStringList headers = {"linkId", "sourceId", "sinkId", "keyRate", "proDelay"};
+    QStringList headers = {"linkId", "sourceId", "sinkId", "keyRate", "proDelay", "bandwidth", "weight"};
     loadCSV(filename, Network, headers);
     ui->tabWidget->setCurrentIndex(0);
 }

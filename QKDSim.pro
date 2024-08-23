@@ -17,6 +17,7 @@ SOURCES += \
     Alg/Network.cpp \
     Alg/Node.cpp \
     Alg/RelayPath.cpp \
+    Alg/stdafx.cpp \
     GUI/qkdsim.cpp \
     main.cpp
 
@@ -29,6 +30,8 @@ HEADERS += \
     Alg/Network.h \
     Alg/Node.h \
     Alg/RelayPath.h \
+    Alg/stdafx.h \
+    Alg/targetver.h \
     GUI/qkdsim.h
 
 FORMS += \
