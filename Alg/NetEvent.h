@@ -1,4 +1,4 @@
-#pragma once
+ï»¿#pragma once
 class CNetEvent
 {
 public:
@@ -8,9 +8,9 @@ public:
 	void operator=(const CNetEvent& netEvent);
 
 private:
-	EVENTTYPE m_enEventType;	// ÊÂ¼şµÄÀàĞÍ£¬¿ÉÄÜ´ú±í²»Í¬ÖÖÀàµÄÍøÂçÊÂ¼ş£¨ÀıÈçĞèÇóµ½´ï¡¢Á´Â·¹ÊÕÏµÈ£©
-	TIME m_dEventTime;	// ÊÂ¼ş·¢ÉúµÄÊ±¼ä
-	DEMANDID m_uiAssociatedDemand;	// Óë´ËÊÂ¼şÏà¹ØÁªµÄĞèÇóID
+	EVENTTYPE m_enEventType;	// äº‹ä»¶çš„ç±»å‹ï¼Œå¯èƒ½ä»£è¡¨ä¸åŒç§ç±»çš„ç½‘ç»œäº‹ä»¶ï¼ˆä¾‹å¦‚éœ€æ±‚åˆ°è¾¾ã€é“¾è·¯æ•…éšœç­‰ï¼‰
+	TIME m_dEventTime;	// äº‹ä»¶å‘ç”Ÿçš„æ—¶é—´
+	DEMANDID m_uiAssociatedDemand;	// ä¸æ­¤äº‹ä»¶ç›¸å…³è”çš„éœ€æ±‚ID
 
 public:
 	void SetEventType(EVENTTYPE eventType);

@@ -1,4 +1,4 @@
-#include "StdAfx.h"
+ï»¿#include "StdAfx.h"
 #include "Network.h"
 
 
@@ -16,7 +16,7 @@ TIME CNetwork::CurrentTime()
 {
 	return m_dSimTime;
 }
-// ÍÆ½øÄ£ÄâÊ±¼ä m_dSimTime£¬²¢É¾³ıËùÓĞÒÑµ½´ïµÄĞèÇó
+// æ¨è¿›æ¨¡æ‹Ÿæ—¶é—´ m_dSimTimeï¼Œå¹¶åˆ é™¤æ‰€æœ‰å·²åˆ°è¾¾çš„éœ€æ±‚
 void CNetwork::MoveSimTime(TIME executionTime)
 {
 	m_dSimTime+=executionTime;
@@ -62,7 +62,7 @@ UINT CNetwork::GetDemandNum()
 {
 	return m_uiDemandNum;
 }
-// ÎªÌØ¶¨Á´Â· linkId ³õÊ¼»¯ÃÜÔ¿¹ÜÀíÆ÷ CKeyManager£¬²¢½«ÆäÓëÁ´Â·¡¢Ô´½ÚµãºÍÄ¿±ê½Úµã¹ØÁªÆğÀ´
+// ä¸ºç‰¹å®šé“¾è·¯ linkId åˆå§‹åŒ–å¯†é’¥ç®¡ç†å™¨ CKeyManagerï¼Œå¹¶å°†å…¶ä¸é“¾è·¯ã€æºèŠ‚ç‚¹å’Œç›®æ ‡èŠ‚ç‚¹å…³è”èµ·æ¥
 void CNetwork::InitKeyManagerOverLink(LINKID linkId)
 {
 	CKeyManager newKeyManager;
@@ -74,13 +74,13 @@ void CNetwork::InitKeyManagerOverLink(LINKID linkId)
 	newKeyManager.SetAvailableKeys(0);
 	m_vAllKeyManager.push_back(newKeyManager);
 }
-// Ê¹ÓÃ×î¶ÌÂ·¾¶Ëã·¨Dijkstra¼ÆËã´ÓÔ´½Úµã sourceId µ½»ã½Úµã sinkId µÄ×î¶ÌÂ·¾¶£¬²¢½«Â·¾¶ÖĞµÄ½ÚµãºÍÁ´Â·¼ÇÂ¼ÔÚ nodeList ºÍ linkList ÖĞ¡£Èç¹ûÕÒµ½ÓĞĞ§Â·¾¶£¬·µ»Ø true£¬·ñÔò·µ»Ø false
+// ä½¿ç”¨æœ€çŸ­è·¯å¾„ç®—æ³•Dijkstraè®¡ç®—ä»æºèŠ‚ç‚¹ sourceId åˆ°æ±‡èŠ‚ç‚¹ sinkId çš„æœ€çŸ­è·¯å¾„ï¼Œå¹¶å°†è·¯å¾„ä¸­çš„èŠ‚ç‚¹å’Œé“¾è·¯è®°å½•åœ¨ nodeList å’Œ linkList ä¸­ã€‚å¦‚æœæ‰¾åˆ°æœ‰æ•ˆè·¯å¾„ï¼Œè¿”å› trueï¼Œå¦åˆ™è¿”å› false
 bool CNetwork::ShortestPath(NODEID sourceId, NODEID sinkId, list<NODEID>& nodeList, list<LINKID>& linkList)
 {
 	UINT NodeNum=m_vAllNodes.size();
-	vector<NODEID> preNode(NodeNum,sourceId);	// ¼ÇÂ¼Ã¿¸ö½ÚµãÔÚ×î¶ÌÂ·¾¶ÖĞµÄÇ°Çı½Úµã
-	vector<WEIGHT> curDist(NodeNum, INF);	// ÓÃÓÚ¼ÇÂ¼´Ó sourceId µ½¸÷½ÚµãµÄµ±Ç°×î¶Ì¾àÀë
-	vector<bool> visited(NodeNum,false);	// ÓÃÓÚ¼ÇÂ¼Ã¿¸ö½ÚµãÊÇ·ñÒÑ±»·ÃÎÊ
+	vector<NODEID> preNode(NodeNum,sourceId);	// è®°å½•æ¯ä¸ªèŠ‚ç‚¹åœ¨æœ€çŸ­è·¯å¾„ä¸­çš„å‰é©±èŠ‚ç‚¹
+	vector<WEIGHT> curDist(NodeNum, INF);	// ç”¨äºè®°å½•ä» sourceId åˆ°å„èŠ‚ç‚¹çš„å½“å‰æœ€çŸ­è·ç¦»
+	vector<bool> visited(NodeNum,false);	// ç”¨äºè®°å½•æ¯ä¸ªèŠ‚ç‚¹æ˜¯å¦å·²è¢«è®¿é—®
 	curDist[sourceId]=0;
 	visited[sourceId]=true;
 	NODEID curNode=sourceId;
@@ -140,7 +140,7 @@ bool CNetwork::ShortestPath(NODEID sourceId, NODEID sinkId, list<NODEID>& nodeLi
 	return true;
 }
 
-// ÎªÖ¸¶¨ĞèÇó demandId ³õÊ¼»¯ÖĞ¼ÌÂ·¾¶¡£Èç¹ûĞèÇóÒÑ¾­±»Â·ÓÉ£¬ÔòÌø¹ı´Ë²Ù×÷
+// ä¸ºæŒ‡å®šéœ€æ±‚ demandId åˆå§‹åŒ–ä¸­ç»§è·¯å¾„ã€‚å¦‚æœéœ€æ±‚å·²ç»è¢«è·¯ç”±ï¼Œåˆ™è·³è¿‡æ­¤æ“ä½œ
 void CNetwork::InitRelayPath(DEMANDID demandId)
 {
 	if (m_vAllDemands[demandId].GetRouted())
@@ -151,12 +151,12 @@ void CNetwork::InitRelayPath(DEMANDID demandId)
 	NODEID sinkId=m_vAllDemands[demandId].GetSinkId();
 	list<NODEID> nodeList;
 	list<LINKID> linkList;
-	// µ÷ÓÃ ShortestPath º¯Êı£¬Ñ°ÕÒ´Ó sourceId µ½ sinkId µÄ×î¶ÌÂ·¾¶
+	// è°ƒç”¨ ShortestPath å‡½æ•°ï¼Œå¯»æ‰¾ä» sourceId åˆ° sinkId çš„æœ€çŸ­è·¯å¾„
 	if (ShortestPath(sourceId,sinkId,nodeList,linkList))
 	{
 		m_vAllDemands[demandId].InitRelayPath(nodeList,linkList);
 	}
-	// Í¨¹ı±éÀú linkList£¬½«µ±Ç°ĞèÇóID (demandId) Ìí¼Óµ½Ã¿ÌõÂ·¾¶Á´Â· m_lCarriedDemands ÁĞ±íÖĞ£¬±íÊ¾ÕâĞ©Á´Â·½«³ĞÔØ¸ÃĞèÇóµÄÊı¾İ´«Êä
+	// é€šè¿‡éå† linkListï¼Œå°†å½“å‰éœ€æ±‚ID (demandId) æ·»åŠ åˆ°æ¯æ¡è·¯å¾„é“¾è·¯ m_lCarriedDemands åˆ—è¡¨ä¸­ï¼Œè¡¨ç¤ºè¿™äº›é“¾è·¯å°†æ‰¿è½½è¯¥éœ€æ±‚çš„æ•°æ®ä¼ è¾“
 	list<LINKID>::iterator linkIter;
 	linkIter=linkList.begin();
 	for (;linkIter!=linkList.end();linkIter++)
@@ -164,7 +164,7 @@ void CNetwork::InitRelayPath(DEMANDID demandId)
 		m_vAllLinks[*linkIter].m_lCarriedDemands.push_back(demandId);
 	}
 }
-// ÎªËùÓĞĞèÇó³õÊ¼»¯ÖĞ¼ÌÂ·¾¶
+// ä¸ºæ‰€æœ‰éœ€æ±‚åˆå§‹åŒ–ä¸­ç»§è·¯å¾„
 void CNetwork::InitRelayPath()
 {
 	vector<CDemand>::iterator demandIter;
@@ -174,13 +174,13 @@ void CNetwork::InitRelayPath()
 		InitRelayPath(demandIter->GetDemandId());
 	}
 }
-// ¼ÆËã¸ø¶¨½Úµã nodeId ÉÏ×îĞ¡Ê£ÓàÊ±¼äÓÅÏÈµÄĞèÇó×ª·¢Ê±¼ä£¬²¢¼ÇÂ¼½«Òª×ª·¢µÄĞèÇóºÍÊı¾İÁ¿
+// è®¡ç®—ç»™å®šèŠ‚ç‚¹ nodeId ä¸Šæœ€å°å‰©ä½™æ—¶é—´ä¼˜å…ˆçš„éœ€æ±‚è½¬å‘æ—¶é—´ï¼Œå¹¶è®°å½•å°†è¦è½¬å‘çš„éœ€æ±‚å’Œæ•°æ®é‡
 TIME CNetwork::MinimumRemainingTimeFirst(NODEID nodeId, map<DEMANDID,VOLUME>& relayDemands)
 {
-	TIME executeTime=INF;	// ±íÊ¾µ±Ç°µÄ×îĞ¡Ö´ĞĞÊ±¼ä
-	map<LINKID,DEMANDID> scheduledDemand;	// ¼ÇÂ¼Ã¿ÌõÁ´Â·ÉÏ¼Æ»®Òª×ª·¢µÄĞèÇó
+	TIME executeTime=INF;	// è¡¨ç¤ºå½“å‰çš„æœ€å°æ‰§è¡Œæ—¶é—´
+	map<LINKID,DEMANDID> scheduledDemand;	// è®°å½•æ¯æ¡é“¾è·¯ä¸Šè®¡åˆ’è¦è½¬å‘çš„éœ€æ±‚
 	multimap<TIME,DEMANDID,less<VOLUME>> remainTime;
-	// ±éÀúµ±Ç°½Úµã nodeId ÉÏµÄËùÓĞĞèÇó£¨¼ÇÂ¼ÔÚ m_mRelayVolume ÖĞ£©£¬Ìø¹ıÉĞÎ´µ½´ïµÄĞèÇó£¨Í¨¹ıµ½´ïÊ±¼äÅĞ¶Ï£©
+	// éå†å½“å‰èŠ‚ç‚¹ nodeId ä¸Šçš„æ‰€æœ‰éœ€æ±‚ï¼ˆè®°å½•åœ¨ m_mRelayVolume ä¸­ï¼‰ï¼Œè·³è¿‡å°šæœªåˆ°è¾¾çš„éœ€æ±‚ï¼ˆé€šè¿‡åˆ°è¾¾æ—¶é—´åˆ¤æ–­ï¼‰
 	map<DEMANDID,RATE>::iterator demandIter;
 	demandIter=m_vAllNodes[nodeId].m_mRelayVolume.begin();
 	for (;demandIter!=m_vAllNodes[nodeId].m_mRelayVolume.end();demandIter++)
@@ -190,7 +190,7 @@ TIME CNetwork::MinimumRemainingTimeFirst(NODEID nodeId, map<DEMANDID,VOLUME>& re
 		{//this demand has not arrived yet
 			continue;
 		}
-		// ¸ù¾İÁ´Â·µÄ´ø¿í bandwidth ºÍĞèÇóµÄÊ£ÓàÊı¾İÁ¿ demandIter->second£¬¼ÆËãĞèÇóµÄÖ´ĞĞÊ±¼ä£¬²¢¸üĞÂ×îĞ¡Ö´ĞĞÊ±¼ä executeTime
+		// æ ¹æ®é“¾è·¯çš„å¸¦å®½ bandwidth å’Œéœ€æ±‚çš„å‰©ä½™æ•°æ®é‡ demandIter->secondï¼Œè®¡ç®—éœ€æ±‚çš„æ‰§è¡Œæ—¶é—´ï¼Œå¹¶æ›´æ–°æœ€å°æ‰§è¡Œæ—¶é—´ executeTime
 		NODEID nextNode=m_vAllDemands[selectedDemand].m_Path.m_mNextNode[nodeId];
 		LINKID midLink=m_mNodePairToLink[make_pair(nodeId,nextNode)];
 		RATE bandwidth=m_vAllLinks[midLink].GetBandwidth();
@@ -198,12 +198,12 @@ TIME CNetwork::MinimumRemainingTimeFirst(NODEID nodeId, map<DEMANDID,VOLUME>& re
 		{
 			executeTime=demandIter->second/bandwidth;
 		}
-		// Èç¹û¸ÃÁ´Â·ÉÏ»¹Ã»ÓĞ±»µ÷¶ÈµÄĞèÇó£¬½«µ±Ç°ĞèÇó selectedDemand ÉèÖÃÎª¸ÃÁ´Â·µÄµ÷¶ÈĞèÇó¡£
+		// å¦‚æœè¯¥é“¾è·¯ä¸Šè¿˜æ²¡æœ‰è¢«è°ƒåº¦çš„éœ€æ±‚ï¼Œå°†å½“å‰éœ€æ±‚ selectedDemand è®¾ç½®ä¸ºè¯¥é“¾è·¯çš„è°ƒåº¦éœ€æ±‚ã€‚
 		if (scheduledDemand.find(midLink)==scheduledDemand.end())
 		{
 			scheduledDemand[midLink]=selectedDemand;
 		}
-		else	// Èç¹û¸ÃÁ´Â·ÒÑ¾­ÓĞÒ»¸öĞèÇó±»µ÷¶È£¬ÄÇÃ´±È½ÏĞÂĞèÇóºÍÒÑµ÷¶ÈĞèÇóµÄÊ£ÓàÊı¾İÁ¿£¬Ñ¡ÔñÊı¾İÁ¿½ÏÉÙµÄĞèÇó×÷Îªµ÷¶È¶ÔÏó£¨×îĞ¡Ê£ÓàÊ±¼äÓÅÏÈ£©
+		else	// å¦‚æœè¯¥é“¾è·¯å·²ç»æœ‰ä¸€ä¸ªéœ€æ±‚è¢«è°ƒåº¦ï¼Œé‚£ä¹ˆæ¯”è¾ƒæ–°éœ€æ±‚å’Œå·²è°ƒåº¦éœ€æ±‚çš„å‰©ä½™æ•°æ®é‡ï¼Œé€‰æ‹©æ•°æ®é‡è¾ƒå°‘çš„éœ€æ±‚ä½œä¸ºè°ƒåº¦å¯¹è±¡ï¼ˆæœ€å°å‰©ä½™æ—¶é—´ä¼˜å…ˆï¼‰
 		{
 			DEMANDID preDemand=scheduledDemand[midLink];
 			if (m_vAllNodes[nodeId].m_mRelayVolume[preDemand]>m_vAllNodes[nodeId].m_mRelayVolume[selectedDemand])
@@ -213,7 +213,7 @@ TIME CNetwork::MinimumRemainingTimeFirst(NODEID nodeId, map<DEMANDID,VOLUME>& re
 		}
 	}
 	
-	// ±éÀúËùÓĞ±»µ÷¶ÈµÄĞèÇó£¬¼ÆËãËüÃÇÔÚÖ´ĞĞÊ±¼äÄÚµÄ×ª·¢Êı¾İÁ¿£¨´ø¿í³ËÒÔÖ´ĞĞÊ±¼ä£©£¬²¢½«ÕâĞ©Êı¾İÁ¿¼ÇÂ¼ÔÚ relayDemands ÖĞ
+	// éå†æ‰€æœ‰è¢«è°ƒåº¦çš„éœ€æ±‚ï¼Œè®¡ç®—å®ƒä»¬åœ¨æ‰§è¡Œæ—¶é—´å†…çš„è½¬å‘æ•°æ®é‡ï¼ˆå¸¦å®½ä¹˜ä»¥æ‰§è¡Œæ—¶é—´ï¼‰ï¼Œå¹¶å°†è¿™äº›æ•°æ®é‡è®°å½•åœ¨ relayDemands ä¸­
 	map<LINKID,DEMANDID>::iterator scheduledIter;
 	scheduledIter=scheduledDemand.begin();
 	for (;scheduledIter!=scheduledDemand.end();scheduledIter++)
@@ -223,38 +223,38 @@ TIME CNetwork::MinimumRemainingTimeFirst(NODEID nodeId, map<DEMANDID,VOLUME>& re
 	}
 	return executeTime;
 }
-// ÎªÖ¸¶¨½Úµã nodeId ÕÒµ½ĞèÒª×ª·¢µÄĞèÇó£¬²¢¼ÆËãËùĞèÊ±¼ä
+// ä¸ºæŒ‡å®šèŠ‚ç‚¹ nodeId æ‰¾åˆ°éœ€è¦è½¬å‘çš„éœ€æ±‚ï¼Œå¹¶è®¡ç®—æ‰€éœ€æ—¶é—´
 TIME CNetwork::FindDemandToRelay(NODEID nodeId, map<DEMANDID,RATE>& relayDemand)
 {
 	return MinimumRemainingTimeFirst(nodeId,relayDemand);
 }
-// ÎªËùÓĞ½ÚµãÕÒµ½ĞèÒª×ª·¢µÄĞèÇó£¬²¢¼ÆËãÖ´ĞĞÊ±¼ä
+// ä¸ºæ‰€æœ‰èŠ‚ç‚¹æ‰¾åˆ°éœ€è¦è½¬å‘çš„éœ€æ±‚ï¼Œå¹¶è®¡ç®—æ‰§è¡Œæ—¶é—´
 TIME CNetwork::FindDemandToRelay(map<NODEID,map<DEMANDID,VOLUME>>& relayDemand)
 {
 	map<NODEID,map<DEMANDID,VOLUME>> nodeRelayDemand;
 	map<NODEID,TIME> nodeRelayTime;
 	TIME minExecuteTime=INF;
-	// ±éÀúËùÓĞ½Úµã (nodeId)£¬¶ÔÃ¿¸ö½Úµãµ÷ÓÃ FindDemandToRelay£¬¼ÆËã¸Ã½ÚµãµÄĞèÇó×ª·¢Ê±¼äºÍĞèÒª×ª·¢µÄĞèÇóÁ¿ tempRelayDemand
+	// éå†æ‰€æœ‰èŠ‚ç‚¹ (nodeId)ï¼Œå¯¹æ¯ä¸ªèŠ‚ç‚¹è°ƒç”¨ FindDemandToRelayï¼Œè®¡ç®—è¯¥èŠ‚ç‚¹çš„éœ€æ±‚è½¬å‘æ—¶é—´å’Œéœ€è¦è½¬å‘çš„éœ€æ±‚é‡ tempRelayDemand
 	for (NODEID nodeId=0;nodeId<m_uiNodeNum;nodeId++)
 	{
 		map<DEMANDID,VOLUME> tempRelayDemand;
 		TIME executeTime=FindDemandToRelay(nodeId,tempRelayDemand);
-		// ½«Ã¿¸ö½ÚµãµÄ×ª·¢Ê±¼ä´æ´¢ÔÚ nodeRelayTime ÖĞ£¬²¢¸üĞÂ minExecuteTime ÒÔ¼ÇÂ¼È«ÍøÂçµÄ×îĞ¡×ª·¢Ê±¼ä
+		// å°†æ¯ä¸ªèŠ‚ç‚¹çš„è½¬å‘æ—¶é—´å­˜å‚¨åœ¨ nodeRelayTime ä¸­ï¼Œå¹¶æ›´æ–° minExecuteTime ä»¥è®°å½•å…¨ç½‘ç»œçš„æœ€å°è½¬å‘æ—¶é—´
 		nodeRelayTime[nodeId]=executeTime;
 		if (executeTime<minExecuteTime)
 		{
 			minExecuteTime=executeTime;
 		}
 		nodeRelayTime[nodeId]=executeTime;
-		// ½«Ã¿¸ö½ÚµãµÄ×ª·¢ĞèÇóÁ¿´æ´¢ÔÚ nodeRelayDemand ÖĞ
+		// å°†æ¯ä¸ªèŠ‚ç‚¹çš„è½¬å‘éœ€æ±‚é‡å­˜å‚¨åœ¨ nodeRelayDemand ä¸­
 		nodeRelayDemand[nodeId]=tempRelayDemand;
 	}
-	// ÅĞ¶ÏÊÇ·ñÔÚµ±Ç°×îĞ¡×ª·¢Ê±¼ä minExecuteTime ÄÚÓĞĞÂµÄĞèÇóµ½´ï¡£Èç¹ûÊÇ£¬Ôò½« minExecuteTime ¸üĞÂÎªÏÂÒ»¸öĞèÇóµ½´ïÊ±¼äÓëµ±Ç°Ä£ÄâÊ±¼äµÄ²îÖµ
+	// åˆ¤æ–­æ˜¯å¦åœ¨å½“å‰æœ€å°è½¬å‘æ—¶é—´ minExecuteTime å†…æœ‰æ–°çš„éœ€æ±‚åˆ°è¾¾ã€‚å¦‚æœæ˜¯ï¼Œåˆ™å°† minExecuteTime æ›´æ–°ä¸ºä¸‹ä¸€ä¸ªéœ€æ±‚åˆ°è¾¾æ—¶é—´ä¸å½“å‰æ¨¡æ‹Ÿæ—¶é—´çš„å·®å€¼
 	if (m_dSimTime+minExecuteTime+SMALLNUM<m_mUncompltedEvent.begin()->first)
 	{
 		minExecuteTime=m_mDemandArriveTime.begin()->first-m_dSimTime;
 	}
-	// ¶ÔÃ¿¸ö½Úµã£¬½«ĞèÇóµÄ×ª·¢Á¿°´×îĞ¡Ö´ĞĞÊ±¼ä±ÈÀıËõ·Å£¬²¢¼ÇÂ¼ÔÚ relayDemand ÖĞ
+	// å¯¹æ¯ä¸ªèŠ‚ç‚¹ï¼Œå°†éœ€æ±‚çš„è½¬å‘é‡æŒ‰æœ€å°æ‰§è¡Œæ—¶é—´æ¯”ä¾‹ç¼©æ”¾ï¼Œå¹¶è®°å½•åœ¨ relayDemand ä¸­
 	map<NODEID,map<DEMANDID,VOLUME>>::iterator nodeIter;
 	map<DEMANDID,VOLUME>::iterator demandIter;
 	nodeIter=nodeRelayDemand.begin();
@@ -270,7 +270,7 @@ TIME CNetwork::FindDemandToRelay(map<NODEID,map<DEMANDID,VOLUME>>& relayDemand)
 	}
 	return minExecuteTime;
 }
-// Ö´ĞĞÒ»´Îµ¥ÌøµÄĞèÇó×ª·¢²Ù×÷£¬¸üĞÂ¸÷½ÚµãºÍÁ´Â·ÉÏµÄÊı¾İÁ¿ºÍÃÜÔ¿
+// æ‰§è¡Œä¸€æ¬¡å•è·³çš„éœ€æ±‚è½¬å‘æ“ä½œï¼Œæ›´æ–°å„èŠ‚ç‚¹å’Œé“¾è·¯ä¸Šçš„æ•°æ®é‡å’Œå¯†é’¥
 void CNetwork::RelayForOneHop(TIME executeTime, map<NODEID,map<DEMANDID,VOLUME>>& relayDemands)
 {
 	map<NODEID,map<DEMANDID,VOLUME>>::iterator nodeIter;
@@ -281,18 +281,18 @@ void CNetwork::RelayForOneHop(TIME executeTime, map<NODEID,map<DEMANDID,VOLUME>>
 		demandIter=nodeIter->second.begin();
 		for (;demandIter!=nodeIter->second.end();demandIter++)
 		{
-			// ¶ÔÓÚÃ¿¸öĞèÇó£¬´ÓÆäÂ·¾¶ÖĞÕÒµ½ÏÂÒ»¸öÒªÖĞ¼Ìµ½µÄ½Úµã nextNode
+			// å¯¹äºæ¯ä¸ªéœ€æ±‚ï¼Œä»å…¶è·¯å¾„ä¸­æ‰¾åˆ°ä¸‹ä¸€ä¸ªè¦ä¸­ç»§åˆ°çš„èŠ‚ç‚¹ nextNode
 			NODEID nextNode=m_vAllDemands[demandIter->first].m_Path.m_mNextNode[nodeIter->first];
-			// ´Óµ±Ç°½ÚµãÉÏÒÆ³ıÒÑ¾­×ª·¢µÄĞèÇóÊı¾İÁ¿ (demandIter->second)¡£Èç¹ûµ±Ç°½ÚµãÊÇ¸ÃĞèÇóµÄÔ´½Úµã£¬µ÷ÓÃ ReduceVolume ¼õÉÙĞèÇóµÄÊ£ÓàÊı¾İÁ¿
+			// ä»å½“å‰èŠ‚ç‚¹ä¸Šç§»é™¤å·²ç»è½¬å‘çš„éœ€æ±‚æ•°æ®é‡ (demandIter->second)ã€‚å¦‚æœå½“å‰èŠ‚ç‚¹æ˜¯è¯¥éœ€æ±‚çš„æºèŠ‚ç‚¹ï¼Œè°ƒç”¨ ReduceVolume å‡å°‘éœ€æ±‚çš„å‰©ä½™æ•°æ®é‡
 			m_vAllNodes[nodeIter->first].m_mRelayVolume[demandIter->first]-=demandIter->second;
 			if (nodeIter->first==m_vAllDemands[demandIter->first].GetSourceId())
 			{
 				m_vAllDemands[demandIter->first].ReduceVolume(demandIter->second);
 			}
-			// ÕÒµ½µ±Ç°½ÚµãºÍÏÂÒ»¸ö½ÚµãÖ®¼äµÄÁ´Â· minLink£¬²¢ÔÚ¸ÃÁ´Â·ÉÏÏûºÄÏàÓ¦µÄÃÜÔ¿ÊıÁ¿£¨µÈÓÚ×ª·¢µÄÊı¾İÁ¿£©
+			// æ‰¾åˆ°å½“å‰èŠ‚ç‚¹å’Œä¸‹ä¸€ä¸ªèŠ‚ç‚¹ä¹‹é—´çš„é“¾è·¯ minLinkï¼Œå¹¶åœ¨è¯¥é“¾è·¯ä¸Šæ¶ˆè€—ç›¸åº”çš„å¯†é’¥æ•°é‡ï¼ˆç­‰äºè½¬å‘çš„æ•°æ®é‡ï¼‰
 			LINKID minLink=m_mNodePairToLink[make_pair(nodeIter->first,nextNode)];
 			m_vAllLinks[minLink].ConsumeKeys(demandIter->second);
-			// Èç¹û nextNode ÊÇĞèÇóµÄÄ¿±ê½Úµã£¨»ã½Úµã£©£¬Ôòµ÷ÓÃ UpdateDeliveredVolume ¸üĞÂÒÑ´«ÊäµÄÊı¾İÁ¿£¬²¢½áÊø±¾´ÎÖĞ¼Ì²Ù×÷¡£Èç¹û nextNode ²»ÊÇ»ã½Úµã£¬Ôò½«ĞèÇóÊı¾İÁ¿Ìí¼Óµ½ÏÂÒ»¸ö½ÚµãµÄÖĞ¼ÌÁĞ±íÖĞ
+			// å¦‚æœ nextNode æ˜¯éœ€æ±‚çš„ç›®æ ‡èŠ‚ç‚¹ï¼ˆæ±‡èŠ‚ç‚¹ï¼‰ï¼Œåˆ™è°ƒç”¨ UpdateDeliveredVolume æ›´æ–°å·²ä¼ è¾“çš„æ•°æ®é‡ï¼Œå¹¶ç»“æŸæœ¬æ¬¡ä¸­ç»§æ“ä½œã€‚å¦‚æœ nextNode ä¸æ˜¯æ±‡èŠ‚ç‚¹ï¼Œåˆ™å°†éœ€æ±‚æ•°æ®é‡æ·»åŠ åˆ°ä¸‹ä¸€ä¸ªèŠ‚ç‚¹çš„ä¸­ç»§åˆ—è¡¨ä¸­
 			if (nextNode==m_vAllDemands[demandIter->first].GetSinkId())
 			{
 				m_vAllDemands[demandIter->first].UpdateDeliveredVolume(demandIter->second,m_dSimTime);
@@ -301,10 +301,10 @@ void CNetwork::RelayForOneHop(TIME executeTime, map<NODEID,map<DEMANDID,VOLUME>>
 			m_vAllNodes[nextNode].m_mRelayVolume[demandIter->first]+=demandIter->second;
 		}
 	}
-	// µ÷ÓÃ UpdateRemainingKeys£¬¸ù¾İÖ´ĞĞÊ±¼ä executeTime ¸üĞÂËùÓĞÁ´Â·ÉÏµÄÊ£ÓàÃÜÔ¿ÊıÁ¿
+	// è°ƒç”¨ UpdateRemainingKeysï¼Œæ ¹æ®æ‰§è¡Œæ—¶é—´ executeTime æ›´æ–°æ‰€æœ‰é“¾è·¯ä¸Šçš„å‰©ä½™å¯†é’¥æ•°é‡
 	UpdateRemainingKeys(executeTime);
 }
-// ¸üĞÂËùÓĞÁ´Â·ÉÏµÄÊ£ÓàÃÜÔ¿ÊıÁ¿
+// æ›´æ–°æ‰€æœ‰é“¾è·¯ä¸Šçš„å‰©ä½™å¯†é’¥æ•°é‡
 void CNetwork::UpdateRemainingKeys(TIME executionTime)
 {
 	vector<CLink>::iterator linkIter;
@@ -330,7 +330,7 @@ void CNetwork::SimTimeForward(TIME executeTime)
 		}
 	}
 }
-// ¼ì²éÊÇ·ñËùÓĞĞèÇó¶¼ÒÑÍê³É´«Êä£¬Èç¹ûÓĞÎ´Íê³ÉµÄĞèÇó·µ»Ø false£¬·ñÔò·µ»Ø true
+// æ£€æŸ¥æ˜¯å¦æ‰€æœ‰éœ€æ±‚éƒ½å·²å®Œæˆä¼ è¾“ï¼Œå¦‚æœæœ‰æœªå®Œæˆçš„éœ€æ±‚è¿”å› falseï¼Œå¦åˆ™è¿”å› true
 bool CNetwork::AllDemandsDelivered()
 {
 	vector<CDemand>::iterator demandIter;
@@ -344,7 +344,7 @@ bool CNetwork::AllDemandsDelivered()
 	}
 	return true;
 }
-// Ö´ĞĞÒ»´Î×ª·¢²Ù×÷£¬²¢ÍÆ½øÄ£ÄâÊ±¼ä
+// æ‰§è¡Œä¸€æ¬¡è½¬å‘æ“ä½œï¼Œå¹¶æ¨è¿›æ¨¡æ‹Ÿæ—¶é—´
 TIME CNetwork::OneTimeRelay()
 {
 	map<NODEID,map<DEMANDID,VOLUME>> nodeRelay;
@@ -352,7 +352,7 @@ TIME CNetwork::OneTimeRelay()
 	RelayForOneHop(executeTime,nodeRelay);
 	return executeTime;
 }
-// ÍøÂçÄ£ÄâµÄÖ÷Á÷³Ì£¬³õÊ¼»¯Â·¾¶£¬Öğ²½Ö´ĞĞĞèÇó×ª·¢£¬Ö±µ½ËùÓĞĞèÇóÍê³É
+// ç½‘ç»œæ¨¡æ‹Ÿçš„ä¸»æµç¨‹ï¼Œåˆå§‹åŒ–è·¯å¾„ï¼Œé€æ­¥æ‰§è¡Œéœ€æ±‚è½¬å‘ï¼Œç›´åˆ°æ‰€æœ‰éœ€æ±‚å®Œæˆ
 void CNetwork::MainProcess()
 {
 	InitRelayPath();

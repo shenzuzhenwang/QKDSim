@@ -1,4 +1,4 @@
-#include "StdAfx.h"
+ï»¿#include "StdAfx.h"
 #include "InputOutput.h"
 
 
@@ -19,7 +19,7 @@ CInputOutput::CInputOutput(CNetwork* Network)
 
 void CInputOutput::InitNodes(UINT nodeNum)
 {
-	// ¸ù¾İ´«ÈëµÄ½ÚµãÊıÁ¿ nodeNum£¬Öğ¸ö´´½¨½Úµã¶ÔÏó CNode ²¢ÉèÖÃÆä nodeId£¬È»ºó½«ÕâĞ©½ÚµãÌí¼Óµ½ÍøÂç¶ÔÏó m_pNetwork µÄ½ÚµãÁĞ±í m_vAllNodes ÖĞ
+	// æ ¹æ®ä¼ å…¥çš„èŠ‚ç‚¹æ•°é‡ nodeNumï¼Œé€ä¸ªåˆ›å»ºèŠ‚ç‚¹å¯¹è±¡ CNode å¹¶è®¾ç½®å…¶ nodeIdï¼Œç„¶åå°†è¿™äº›èŠ‚ç‚¹æ·»åŠ åˆ°ç½‘ç»œå¯¹è±¡ m_pNetwork çš„èŠ‚ç‚¹åˆ—è¡¨ m_vAllNodes ä¸­
 	for (NODEID nodeId=0;nodeId<nodeNum;nodeId++)
 	{
 		CNode newNode;
@@ -40,7 +40,7 @@ void CInputOutput::InputNetworkInfo(string fileName)
 	NODEID sourceId, sinkId;
 	RATE keyRate;
 	TIME proDelay;
-	// ÖğĞĞ¶ÁÈ¡Á´Â·ĞÅÏ¢£¬°üÀ¨Á´Â·ID¡¢Ô´½ÚµãID¡¢Ä¿±ê½ÚµãID¡¢Á¿×ÓÃÜÔ¿ËÙÂÊ (keyRate) ºÍÁ´Â·ÑÓ³Ù (proDelay)
+	// é€è¡Œè¯»å–é“¾è·¯ä¿¡æ¯ï¼ŒåŒ…æ‹¬é“¾è·¯IDã€æºèŠ‚ç‚¹IDã€ç›®æ ‡èŠ‚ç‚¹IDã€é‡å­å¯†é’¥é€Ÿç‡ (keyRate) å’Œé“¾è·¯å»¶è¿Ÿ (proDelay)
 	while (fin>>linkId>>sourceId>>sinkId>>keyRate>>proDelay)
 	{
 		CLink newLink;
@@ -66,7 +66,7 @@ void CInputOutput::InputDemandInfo(string fileName)
 	NODEID sourceId, sinkId;
 	VOLUME demandVolume;
 	TIME arriveTime;
-	// ÖğĞĞ¶ÁÈ¡ĞèÇóID¡¢Ô´½ÚµãID¡¢Ä¿±ê½ÚµãID¡¢ĞèÇóÊı¾İÁ¿ºÍĞèÇóµ½´ïÊ±¼ä
+	// é€è¡Œè¯»å–éœ€æ±‚IDã€æºèŠ‚ç‚¹IDã€ç›®æ ‡èŠ‚ç‚¹IDã€éœ€æ±‚æ•°æ®é‡å’Œéœ€æ±‚åˆ°è¾¾æ—¶é—´
 	while (fin>>demandId>>sourceId>>sinkId>>demandVolume>>arriveTime)
 	{
 		CDemand newDemand;

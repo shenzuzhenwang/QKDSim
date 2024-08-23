@@ -1,0 +1,55 @@
+﻿#pragma once
+#include "KeyManager.h"
+class CLink
+{
+public:
+	CLink(void);
+	~CLink(void);
+	CLink(const CLink& Link);
+	void operator=(const CLink& Link);
+
+
+private:
+	LINKID m_uiLinkId;	// 链路的唯一标识符
+	NODEID m_uiSourceId;	// 链路的源节点ID
+	NODEID m_uiSinkId;	// 链路的目的节点ID（汇节点）
+	RATE m_dQKDRate;	// 链路的量子密钥分发（QKD）速率
+	TIME m_dDelay;	// 链路的传输延迟
+	RATE m_dBandwidth;	// 链路的带宽
+	CKeyManager m_KeyManager;	// 与链路相关联的密钥管理器，用于管理链路上的密钥分发和消耗
+
+
+private://data structure for algorithms
+	WEIGHT m_dWeight;	// 链路的权重，用于路径选择算法中
+
+public:
+	list<DEMANDID> m_lCarriedDemands;	// 一个需求ID的列表，表示当前链路上正在传输的所有需求
+
+
+	void SetLinkId(LINKID linkId);
+	LINKID GetLinkId();
+
+	void SetSourceId(NODEID sourceId);
+	NODEID GetSourceId();
+
+	void SetSinkId(NODEID sinkId);
+	NODEID GetSinkId();
+
+	void SetQKDRate(RATE QKDRate);
+	RATE GetQKDRate();
+
+	void SetLinkDelay(TIME delay);
+	TIME GetLinkDelay();
+
+	void SetBandwidth(RATE bandwidth);
+	RATE GetBandwidth();
+
+	void SetWeight(WEIGHT linkWeight);
+	WEIGHT GetWeight();
+
+	//key manager operations
+	void ConsumeKeys(VOLUME keys);	// 消耗链路上指定数量的密钥
+	VOLUME GetAvaialbeKeys();	// 获取链路上可用的密钥数量
+	void UpdateRemainingKeys(TIME executionTime);	// 根据执行时间更新链路上剩余的密钥量
+};
+

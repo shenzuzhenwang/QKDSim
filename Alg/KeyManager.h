@@ -1,4 +1,4 @@
-#pragma once
+ï»¿#pragma once
 class CKeyManager
 {
 public:
@@ -8,12 +8,12 @@ public:
 	void operator=(const CKeyManager& keyManager);
 
 private:
-	KEYID m_uiKeyManagerId;	// ÃÜÔ¿¹ÜÀíÆ÷µÄÎ¨Ò»±êÊ¶·û
-	NODEID m_uiAssociatedNode;	// Óë´ËÃÜÔ¿¹ÜÀíÆ÷¹ØÁªµÄ½ÚµãID
-	NODEID m_uiPairedNode;	// ÓëÖ®Åä¶ÔµÄÁíÒ»¸ö½ÚµãµÄID
-	LINKID m_uiAssociatedLink;	// ´ËÃÜÔ¿¹ÜÀíÆ÷¹ÜÀíµÄÁ´Â·ID
-	VOLUME m_dAvailableKeys;	// µ±Ç°¿ÉÓÃµÄÃÜÔ¿ÊıÁ¿
-	RATE m_dKeyRate;	// ÃÜÔ¿Éú³ÉËÙÂÊ
+	KEYID m_uiKeyManagerId;	// å¯†é’¥ç®¡ç†å™¨çš„å”¯ä¸€æ ‡è¯†ç¬¦
+	NODEID m_uiAssociatedNode;	// ä¸æ­¤å¯†é’¥ç®¡ç†å™¨å…³è”çš„èŠ‚ç‚¹ID
+	NODEID m_uiPairedNode;	// ä¸ä¹‹é…å¯¹çš„å¦ä¸€ä¸ªèŠ‚ç‚¹çš„ID
+	LINKID m_uiAssociatedLink;	// æ­¤å¯†é’¥ç®¡ç†å™¨ç®¡ç†çš„é“¾è·¯ID
+	VOLUME m_dAvailableKeys;	// å½“å‰å¯ç”¨çš„å¯†é’¥æ•°é‡
+	RATE m_dKeyRate;	// å¯†é’¥ç”Ÿæˆé€Ÿç‡
 
 public:
 	void SetKeyManagerId(KEYID keyId);
@@ -35,7 +35,7 @@ public:
 	RATE GetKeyRate();
 
 
-	void ConsumeKeys(VOLUME keys);	// ÏûºÄÖ¸¶¨ÊıÁ¿µÄÃÜÔ¿
-	void CollectKeys(VOLUME keys);	// Ôö¼ÓÖ¸¶¨ÊıÁ¿µÄÃÜÔ¿£¨Í¨³£ÓÃÓÚ¸ù¾İÊ±¼äÉú³ÉĞÂµÄÃÜÔ¿£©
+	void ConsumeKeys(VOLUME keys);	// æ¶ˆè€—æŒ‡å®šæ•°é‡çš„å¯†é’¥
+	void CollectKeys(VOLUME keys);	// å¢åŠ æŒ‡å®šæ•°é‡çš„å¯†é’¥ï¼ˆé€šå¸¸ç”¨äºæ ¹æ®æ—¶é—´ç”Ÿæˆæ–°çš„å¯†é’¥ï¼‰
 };
 
