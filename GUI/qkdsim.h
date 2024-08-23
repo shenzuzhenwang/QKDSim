@@ -2,6 +2,8 @@
 #ifndef QKDSIM_H
 #define QKDSIM_H
 
+#include "Alg/Network.h"
+
 #include <QMainWindow>
 #include <QTableWidgetItem>
 #include <QFile>
@@ -34,10 +36,14 @@ private slots:
     void save_net();
     void save_dem();
 
+
+    void on_bt_start_clicked();
+
 private:
     Ui::QKDSim *ui;
 
     int nodeNum;
+    CNetwork* net;
 
     enum Kind
     {
@@ -45,7 +51,8 @@ private:
         Demand
     };
     void loadCSV(const QString &fileName, Kind kind, const QStringList &headers);
-
+    void readNetTable();
+    void readDemTable();
 };
 
 #endif // QKDSIM_H

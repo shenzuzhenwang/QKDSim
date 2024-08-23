@@ -12,10 +12,13 @@ QKDSim::QKDSim(QWidget *parent)
     ui->tableWidget_dem->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);  // 表格列宽自动伸缩
 
     Connections();
+
+    net = new CNetwork();
 }
 
 QKDSim::~QKDSim()
 {
+    delete net;
     delete ui;
 }
 
@@ -92,7 +95,7 @@ void QKDSim::open_net()
 {
     // 加载文件至接收内容显示框
     QString filename = QFileDialog::getOpenFileName(this, tr("打开网络拓扑文件"));
-    QStringList headers = {"linkId", "sourceId", "sinkId", "keyRate", "proDelay", "bandwidth", "weight"};
+    QStringList headers = {"linkId", "sourceId", "sinkId", "keyRate", "proDelay", "bandWidth", "weight"};
     loadCSV(filename, Network, headers);
     ui->tabWidget->setCurrentIndex(0);
 }
@@ -157,58 +160,117 @@ void QKDSim::save_dem()
     ui->statusbar->showMessage("Successfully save demand", 5000);
 }
 
-//void readTableData(QTableWidget *tableWidget)
-//{
-//    // 读取节点信息
-//    UINT nodeNum = static_cast<UINT>(rowCount); // 假设 nodeNum 与行数一致
-//    InitNodes(nodeNum);
+void QKDSim::readNetTable()
+{
+    // 读取节点信息
+    net->InitNodes(nodeNum);
 
-//    // 逐行读取链路信息
-//    for (int row = 0; row < tableWidget->rowCount(); ++row)
-//    {
-//        LINKID linkId;
-//        NODEID sourceId, sinkId;
-//        RATE keyRate;
-//        TIME proDelay;
+    // 逐行读取链路信息
+    for (int row = 0; row < ui->tableWidget_net->rowCount(); ++row)
+    {
+        LINKID linkId;
+        NODEID sourceId, sinkId;
+        RATE keyRate, bandWidth;
+        TIME proDelay;
+        WEIGHT weight;
 
-//        // 从表格的每一列读取数据
-//        QTableWidgetItem *linkIdItem = ui->tableWidget_net->item(row, 0);
-//        QTableWidgetItem *sourceIdItem = ui->tableWidget_net->item(row, 1);
-//        QTableWidgetItem *sinkIdItem = ui->tableWidget_net->item(row, 2);
-//        QTableWidgetItem *keyRateItem = ui->tableWidget_net->item(row, 3);
-//        QTableWidgetItem *proDelayItem = ui->tableWidget_net->item(row, 4);
+        // 从表格的每一列读取数据
+        QTableWidgetItem *linkIdItem = ui->tableWidget_net->item(row, 0);
+        QTableWidgetItem *sourceIdItem = ui->tableWidget_net->item(row, 1);
+        QTableWidgetItem *sinkIdItem = ui->tableWidget_net->item(row, 2);
+        QTableWidgetItem *keyRateItem = ui->tableWidget_net->item(row, 3);
+        QTableWidgetItem *proDelayItem = ui->tableWidget_net->item(row, 4);
+        QTableWidgetItem *bandWidthItem = ui->tableWidget_net->item(row, 5);
+        QTableWidgetItem *weightItem = ui->tableWidget_net->item(row, 6);
 
-//        if (linkIdItem && sourceIdItem && sinkIdItem && keyRateItem && proDelayItem)
-//        {
-//            // 转换为相应的数据类型
-//            linkId = linkIdItem->text().toUInt();
-//            sourceId = sourceIdItem->text().toUInt();
-//            sinkId = sinkIdItem->text().toUInt();
-//            keyRate = keyRateItem->text().toDouble();  // 假设 keyRate 是一个双精度浮点数
-//            proDelay = proDelayItem->text().toDouble(); // 假设 proDelay 是一个双精度浮点数
+        if (linkIdItem && sourceIdItem && sinkIdItem && keyRateItem && proDelayItem)
+        {
+            // 转换为相应的数据类型
+            linkId = linkIdItem->text().toUInt();
+            sourceId = sourceIdItem->text().toUInt();
+            sinkId = sinkIdItem->text().toUInt();
+            keyRate = keyRateItem->text().toDouble();  // 假设 keyRate 是一个双精度浮点数
+            proDelay = proDelayItem->text().toDouble(); // 假设 proDelay 是一个双精度浮点数
+            bandWidth = bandWidthItem->text().toDouble();
+            weight = weightItem->text().toDouble();
 
-//            // 处理链路信息
-//            CLink newLink;
-//            newLink.SetLinkId(linkId);
-//            newLink.SetSourceId(sourceId);
-//            newLink.SetSinkId(sinkId);
-//            newLink.SetQKDRate(keyRate);
-//            newLink.SetLinkDelay(proDelay);
-//            m_pNetwork->m_vAllLinks.push_back(newLink);
-//            m_pNetwork->m_mNodePairToLink[make_pair(sourceId, sinkId)] = linkId;
-//            m_pNetwork->m_mNodePairToLink[make_pair(sinkId, sourceId)] = linkId;
-//            m_pNetwork->InitKeyManagerOverLink(linkId);
-//        }
-//        else
-//        {
-//            ui->statusbar->showMessage("Error: Missing data in table", 5000);
-//        }
-//    }
+            // 处理链路信息
+            CLink newLink;
+            newLink.SetLinkId(linkId);
+            newLink.SetSourceId(sourceId);
+            newLink.SetSinkId(sinkId);
+            newLink.SetQKDRate(keyRate);
+            newLink.SetLinkDelay(proDelay);
+            newLink.SetBandwidth(bandWidth);
+            newLink.SetWeight(weight);
 
-//    m_pNetwork->SetLinkNum(nodeNum);  // 假设链路数等于节点数
-//    ui->statusbar->showMessage("Network data processed successfully", 5000);
-//}
+            net->m_vAllLinks.push_back(newLink);
+            net->m_mNodePairToLink[make_pair(sourceId, sinkId)] = linkId;
+            net->m_mNodePairToLink[make_pair(sinkId, sourceId)] = linkId;
+            net->InitKeyManagerOverLink(linkId);
+        }
+        else
+        {
+            ui->statusbar->showMessage("Error: Missing data in network table", 5000);
+        }
+    }
+    net->SetLinkNum(nodeNum);
+    ui->statusbar->showMessage("Network data processed successfully", 5000);
+}
+
+void QKDSim::readDemTable()
+{
+    // 逐行读取需求信息
+    for (int row = 0; row < ui->tableWidget_dem->rowCount(); ++row)
+    {
+        DEMANDID demandId;
+        NODEID sourceId, sinkId;
+        VOLUME demandVolume;
+        TIME arriveTime;
+
+        // 从表格的每一列读取数据
+        QTableWidgetItem *demandIdItem = ui->tableWidget_dem->item(row, 0);
+        QTableWidgetItem *sourceIdItem = ui->tableWidget_dem->item(row, 1);
+        QTableWidgetItem *sinkIdItem = ui->tableWidget_dem->item(row, 2);
+        QTableWidgetItem *demandVolumeItem = ui->tableWidget_dem->item(row, 3);
+        QTableWidgetItem *arriveTimeItem = ui->tableWidget_dem->item(row, 4);
+
+        if (demandIdItem && sourceIdItem && sinkIdItem && demandVolumeItem && arriveTimeItem)
+        {
+            // 转换为相应的数据类型
+            demandId = demandIdItem->text().toUInt();
+            sourceId = sourceIdItem->text().toUInt();
+            sinkId = sinkIdItem->text().toUInt();
+            demandVolume = demandVolumeItem->text().toDouble();  // 假设 demandVolume 是一个双精度浮点数
+            arriveTime = arriveTimeItem->text().toDouble();  // 假设 arriveTime 是一个双精度浮点数
+
+            // 处理需求信息
+            CDemand newDemand;
+            newDemand.SetDemandId(demandId);
+            newDemand.SetSourceId(sourceId);
+            newDemand.SetSinkId(sinkId);
+            newDemand.SetDemandVolume(demandVolume);
+            newDemand.SetRemainingVolume(demandVolume);
+            newDemand.SetArriveTime(arriveTime);
+            newDemand.SetCompleteTime(INF); // 假设 INF 是一个定义好的常量，表示无限大
+            net->m_vAllDemands.push_back(newDemand);
+            net->m_vAllNodes[sourceId].m_mRelayVolume[demandId] = demandVolume;
+        }
+        else
+        {
+            ui->statusbar->showMessage("Error: Missing data in demand table", 5000);
+        }
+    }
+    ui->statusbar->showMessage("Demand data processed successfully", 5000);
+}
 
 
 
+void QKDSim::on_bt_start_clicked()
+{
+    readNetTable();
+    readDemTable();
+
+    net->MainProcess();
+}
 

@@ -58,6 +58,24 @@
         </item>
        </layout>
       </widget>
+      <widget class="QWidget" name="tab_3">
+       <attribute name="title">
+        <string>使用</string>
+       </attribute>
+       <widget class="QPushButton" name="bt_start">
+        <property name="geometry">
+         <rect>
+          <x>80</x>
+          <y>30</y>
+          <width>111</width>
+          <height>51</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>启动</string>
+        </property>
+       </widget>
+      </widget>
      </widget>
     </item>
    </layout>
