@@ -11,6 +11,10 @@ QKDSim::QKDSim(QWidget *parent)
     ui->tableWidget_net->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
     ui->tableWidget_dem->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);  // 表格列宽自动伸缩
 
+    // 读取csv文件
+    loadCSV("../Input/network.csv", Network, {"linkId", "sourceId", "sinkId", "keyRate", "proDelay", "bandWidth", "weight"});
+    loadCSV("../Input/demand.csv", Demand, {"demandId", "sourceId", "sinkId", "demandVolume", "arriveTime"});
+
     Connections();
 
     net = new CNetwork();
