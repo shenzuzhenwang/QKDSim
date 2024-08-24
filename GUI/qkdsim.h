@@ -39,6 +39,8 @@ private slots:
 
     void on_bt_start_clicked();
 
+    void on_bt_next_clicked();
+
 private:
     Ui::QKDSim *ui;
 

@@ -275,6 +275,22 @@ void QKDSim::on_bt_start_clicked()
     readNetTable();
     readDemTable();
 
-    net->MainProcess();
+//    net->MainProcess();
+    net->InitRelayPath();
+}
+
+
+void QKDSim::on_bt_next_clicked()
+{
+    if (!net->AllDemandsDelivered())
+    {
+        TIME executeTime = net->OneTimeRelay();
+        net->MoveSimTime(executeTime);
+        /**********************************显示每一步的结果******************************/
+    }
+    else
+    {
+        ui->statusbar->showMessage("All demand has benn delivered", 5000);
+    }
 }
 
