@@ -41,6 +41,10 @@ private slots:
 
     void on_bt_next_clicked();
 
+    void on_tableWidget_net_cellChanged(int row, int column);
+
+    void on_tableWidget_dem_cellChanged(int row, int column);
+
 private:
     Ui::QKDSim *ui;
 

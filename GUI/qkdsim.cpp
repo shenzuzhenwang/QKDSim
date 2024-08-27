@@ -268,7 +268,46 @@ void QKDSim::readDemTable()
     ui->statusbar->showMessage("Demand data processed successfully", 5000);
 }
 
+void tableWidget_cellChanged(int row, int column, QTableWidget* tableWidget)
+{
+    // 最后一行添加数据，则再加一个空行
+    int rowCount = tableWidget->rowCount();
+    if (row == rowCount - 1)
+    {
+        tableWidget->insertRow(rowCount);
+    }
 
+    // 某一行删除数据，查看此行是否为空行，并删除
+    QTableWidgetItem* item = tableWidget->item(row, column);
+    if (item != nullptr && item->text().isEmpty())
+    {
+        // 如果单元格为空，检查整行是否也为空
+        bool isRowEmpty = true;
+        for (int j = 0; j < tableWidget->columnCount(); ++j)
+        {
+            QTableWidgetItem* cell = tableWidget->item(row, j);
+            if (cell != nullptr && !cell->text().isEmpty())
+            {
+                isRowEmpty = false;
+                break;
+            }
+        }
+        if (isRowEmpty)
+        {
+            tableWidget->removeRow(row);  // 如果整行为空，则删除该行
+        }
+    }
+}
+
+void QKDSim::on_tableWidget_net_cellChanged(int row, int column)
+{
+    tableWidget_cellChanged(row, column, ui->tableWidget_net);
+}
+
+void QKDSim::on_tableWidget_dem_cellChanged(int row, int column)
+{
+    tableWidget_cellChanged(row, column, ui->tableWidget_dem);
+}
 
 void QKDSim::on_bt_start_clicked()
 {
@@ -293,4 +332,10 @@ void QKDSim::on_bt_next_clicked()
         ui->statusbar->showMessage("All demand has benn delivered", 5000);
     }
 }
+
+
+
+
+
+
 
