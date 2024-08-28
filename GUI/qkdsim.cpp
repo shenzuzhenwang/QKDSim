@@ -337,11 +337,11 @@ void QKDSim::on_bt_next_clicked()
         /**********************************显示每一步的结果******************************/
         ui->edit_time->setText(QString::number(net->CurrentTime(), 'f', 2));
 //        ui->tableWidget_out
-        for
+//        for
     }
-else
-{
-    ui->statusbar->showMessage("All demand has benn delivered", 5000);
+    else
+    {
+        ui->statusbar->showMessage("All demand has benn delivered", 5000);
     }
 }
 
