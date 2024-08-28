@@ -15,12 +15,12 @@ public:
     vector<CLink> m_vAllLinks;	// 存储网络中所有链路的列表
     vector<CDemand> m_vAllDemands;	// 存储网络中所有需求的列表
     map<pair<NODEID, NODEID>, LINKID> m_mNodePairToLink;	// 用于根据节点对查找对应链路的映射表
-    vector<CNetEvent> m_vAllExistingEvent;	// 存储网络中的所有事件
+    vector<CNetEvent> m_vAllExistingEvent;	// 存储网络中的所有事件   保留，未使用
 
     //data structure for simulation
-    multimap<TIME, EVENTID> m_mUncompltedEvent;	// 存储未完成事件的时间和事件ID的映射表
+    multimap<TIME, EVENTID> m_mUncompltedEvent;	// 存储未完成事件的时间和事件ID的映射表  保留，未使用
     vector<CKeyManager> m_vAllKeyManager;	// 存储网络中所有密钥管理器的列表
-    multimap<TIME, DEMANDID> m_mDemandArriveTime;	// 存储需求到达时间和需求ID的映射表
+    multimap<TIME, DEMANDID> m_mDemandArriveTime;	// 存储需求到达时间和需求ID的映射表    ？？m_mDemandArriveTime没有赋值
 
 private:
     UINT m_uiNodeNum;	// 网络中的节点数量

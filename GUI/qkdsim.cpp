@@ -8,8 +8,9 @@ QKDSim::QKDSim(QWidget *parent)
     , ui(new Ui::QKDSim)
 {
     ui->setupUi(this);
-    ui->tableWidget_net->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
-    ui->tableWidget_dem->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);  // 表格列宽自动伸缩
+    ui->tableWidget_net->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);  // 表格列宽自动伸缩
+    ui->tableWidget_dem->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+    ui->tableWidget_out->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
 
     // 读取csv文件
     loadCSV("../Input/network.csv", Network, {"linkId", "sourceId", "sinkId", "keyRate", "proDelay", "bandWidth", "weight"});
@@ -73,8 +74,10 @@ void QKDSim::loadCSV(const QString &fileName, Kind kind, const QStringList &head
         break;
     }
 
+    // 清空表格
     tableWidget->clear();
     tableWidget->setRowCount(0);
+
     tableWidget->setColumnCount(headers.size());
     tableWidget->setHorizontalHeaderLabels(headers);
 
@@ -316,6 +319,12 @@ void QKDSim::on_bt_start_clicked()
 
 //    net->MainProcess();
     net->InitRelayPath();
+
+    // 输出表格
+    ui->tableWidget_out->setRowCount(net->m_vAllDemands.size());
+    QStringList headers = {"demandId", "sourceId", "sinkId", "demandVolume", "arriveTime"};
+    ui->tableWidget_out->setColumnCount(headers.size());
+    ui->tableWidget_out->setHorizontalHeaderLabels(headers);
 }
 
 
@@ -326,10 +335,13 @@ void QKDSim::on_bt_next_clicked()
         TIME executeTime = net->OneTimeRelay();
         net->MoveSimTime(executeTime);
         /**********************************显示每一步的结果******************************/
+        ui->edit_time->setText(QString::number(net->CurrentTime(), 'f', 2));
+//        ui->tableWidget_out
+        for
     }
-    else
-    {
-        ui->statusbar->showMessage("All demand has benn delivered", 5000);
+else
+{
+    ui->statusbar->showMessage("All demand has benn delivered", 5000);
     }
 }
 

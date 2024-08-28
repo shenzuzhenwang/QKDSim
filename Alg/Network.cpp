@@ -191,7 +191,7 @@ TIME CNetwork::MinimumRemainingTimeFirst(NODEID nodeId, map<DEMANDID, VOLUME>& r
     map<LINKID, DEMANDID> scheduledDemand;	// 记录每条链路上计划要转发的需求
     multimap<TIME, DEMANDID, less<VOLUME>> remainTime;
     // 遍历当前节点 nodeId 上的所有需求（记录在 m_mRelayVolume 中），跳过尚未到达的需求（通过到达时间判断）
-    map<DEMANDID, RATE>::iterator demandIter;
+    map<DEMANDID, VOLUME>::iterator demandIter;
     demandIter = m_vAllNodes[nodeId].m_mRelayVolume.begin();
     for (; demandIter != m_vAllNodes[nodeId].m_mRelayVolume.end(); demandIter++)
     {
@@ -230,7 +230,7 @@ TIME CNetwork::MinimumRemainingTimeFirst(NODEID nodeId, map<DEMANDID, VOLUME>& r
     for (; scheduledIter != scheduledDemand.end(); scheduledIter++)
     {
         RATE bandwidth = m_vAllLinks[scheduledIter->first].GetBandwidth();
-        relayDemands[scheduledIter->second] = bandwidth*executeTime;
+        relayDemands[scheduledIter->second] = bandwidth * executeTime;
     }
     return executeTime;
 }
@@ -242,28 +242,28 @@ TIME CNetwork::FindDemandToRelay(NODEID nodeId, map<DEMANDID, RATE>& relayDemand
 // 为所有节点找到需要转发的需求，并计算执行时间
 TIME CNetwork::FindDemandToRelay(map<NODEID, map<DEMANDID, VOLUME>>& relayDemand)
 {
-    map<NODEID, map<DEMANDID, VOLUME>> nodeRelayDemand;
-    map<NODEID, TIME> nodeRelayTime;
+    map<NODEID, map<DEMANDID, VOLUME>> nodeRelayDemand; // 表示对应NODEID在nodeRelayTime时间中，每个需求发送的数据量
+    map<NODEID, TIME> nodeRelayTime;    // NODEID节点上的需求执行一跳的最短时间
     TIME minExecuteTime = INF;
     // 遍历所有节点 (nodeId)，对每个节点调用 FindDemandToRelay，计算该节点的需求转发时间和需要转发的需求量 tempRelayDemand
     for (NODEID nodeId = 0; nodeId < m_uiNodeNum; nodeId++)
     {
         map<DEMANDID, VOLUME> tempRelayDemand;
         TIME executeTime = FindDemandToRelay(nodeId, tempRelayDemand);
-        // 将每个节点的转发时间存储在 nodeRelayTime 中，并更新 minExecuteTime 以记录全网络的最小转发时间
+        // 将每个节点的最小转发时间存储在 nodeRelayTime 中，并更新 minExecuteTime 以记录全网络的最小转发时间
         nodeRelayTime[nodeId] = executeTime;
         if (executeTime < minExecuteTime)
         {
             minExecuteTime = executeTime;
         }
-        nodeRelayTime[nodeId] = executeTime;
+//        nodeRelayTime[nodeId] = executeTime;
         // 将每个节点的转发需求量存储在 nodeRelayDemand 中
         nodeRelayDemand[nodeId] = tempRelayDemand;
     }
     // 判断是否在当前最小转发时间 minExecuteTime 内有新的需求到达。如果是，则将 minExecuteTime 更新为下一个需求到达时间与当前模拟时间的差值
-    if (m_dSimTime + minExecuteTime + SMALLNUM < m_mUncompltedEvent.begin()->first)
+    if (m_dSimTime + minExecuteTime + SMALLNUM < m_mUncompltedEvent.begin()->first) // ？？逻辑有问题，m_mUncompltedEvent未使用
     {
-        minExecuteTime = m_mDemandArriveTime.begin()->first - m_dSimTime;
+        minExecuteTime = m_mDemandArriveTime.begin()->first - m_dSimTime;   // ？？m_mDemandArriveTime没有赋值
     }
     // 对每个节点，将需求的转发量按最小执行时间比例缩放，并记录在 relayDemand 中
     map<NODEID, map<DEMANDID, VOLUME>>::iterator nodeIter;
@@ -275,7 +275,7 @@ TIME CNetwork::FindDemandToRelay(map<NODEID, map<DEMANDID, VOLUME>>& relayDemand
         demandIter = nodeIter->second.begin();
         for (; demandIter != nodeIter->second.end(); demandIter++)
         {
-            VOLUME newVolume = demandIter->second*minExecuteTime / relayTime;
+            VOLUME newVolume = demandIter->second * minExecuteTime / relayTime;   // minExecuteTime内每个demand传的数据量
             relayDemand[nodeIter->first][demandIter->first] = newVolume;
         }
     }
@@ -326,21 +326,21 @@ void CNetwork::UpdateRemainingKeys(TIME executionTime)
     }
 }
 
-void CNetwork::SimTimeForward(TIME executeTime)
-{
-    m_dSimTime += executeTime;
-    //erase all arrived demands
-    multimap<TIME, DEMANDID>::iterator demandIter;
-    demandIter = m_mDemandArriveTime.begin();
-    while (demandIter->first <= m_dSimTime + SMALLNUM)
-    {
-        demandIter = m_mDemandArriveTime.erase(demandIter);
-        if (demandIter == m_mDemandArriveTime.end())
-        {
-            break;
-        }
-    }
-}
+//void CNetwork::SimTimeForward(TIME executeTime)
+//{
+//    m_dSimTime += executeTime;
+//    //erase all arrived demands
+//    multimap<TIME, DEMANDID>::iterator demandIter;
+//    demandIter = m_mDemandArriveTime.begin();
+//    while (demandIter->first <= m_dSimTime + SMALLNUM)
+//    {
+//        demandIter = m_mDemandArriveTime.erase(demandIter);
+//        if (demandIter == m_mDemandArriveTime.end())
+//        {
+//            break;
+//        }
+//    }
+//}
 // 检查是否所有需求都已完成传输，如果有未完成的需求返回 false，否则返回 true
 bool CNetwork::AllDemandsDelivered()
 {
