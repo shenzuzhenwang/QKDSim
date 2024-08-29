@@ -296,6 +296,15 @@ void CNetwork::RelayForOneHop(TIME executeTime, map<NODEID, map<DEMANDID, VOLUME
             NODEID nextNode = m_vAllDemands[demandIter->first].m_Path.m_mNextNode[nodeIter->first];
             // 从当前节点上移除已经转发的需求数据量 (demandIter->second)。如果当前节点是该需求的源节点，调用 ReduceVolume 减少需求的剩余数据量
             m_vAllNodes[nodeIter->first].m_mRelayVolume[demandIter->first] -= demandIter->second;
+
+            /********************逻辑更改*************************/
+            // 当需求从此节点完全传输，则删除此节点上m_mRelayVolume对应的需求
+            if (m_vAllNodes[nodeIter->first].m_mRelayVolume[demandIter->first] <= INFSMALL)
+            {
+                m_vAllNodes[nodeIter->first].m_mRelayVolume.erase(demandIter->first);
+            }
+            /******************************************************/
+
             if (nodeIter->first == m_vAllDemands[demandIter->first].GetSourceId())
             {
                 m_vAllDemands[demandIter->first].ReduceVolume(demandIter->second);      // ？？仅在需求在源节点被传输后，才减少数据量，中间节点没有这个操作，不知道是否符合逻辑
