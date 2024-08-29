@@ -347,6 +347,7 @@ void QKDSim::showOutput()
             ui->tableWidget_out->setItem(newRow, 6, isDeliveredItem);
         }
     }
+    // TODO: 没有显示的需求就是已经传输完的需求，需要进一步显示
 }
 
 void QKDSim::on_bt_next_clicked()

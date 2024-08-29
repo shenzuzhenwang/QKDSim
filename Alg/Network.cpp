@@ -19,6 +19,8 @@ void CNetwork::MoveSimTime(TIME executionTime)
 {
     m_dSimTime += executionTime;
     //erase all arrived demands
+    if (m_mDemandArriveTime.empty())
+        return;
     multimap<TIME, DEMANDID>::iterator demandIter;
     demandIter = m_mDemandArriveTime.begin();
     while (demandIter->first <= m_dSimTime + SMALLNUM)
@@ -198,7 +200,7 @@ TIME CNetwork::MinimumRemainingTimeFirst(NODEID nodeId, map<DEMANDID, VOLUME>& r
         DEMANDID selectedDemand = demandIter->first;
         if (m_vAllDemands[selectedDemand].GetArriveTime() > m_dSimTime + SMALLNUM)
         {
-            //this demand has not arrived yet
+            // this demand has not arrived yet
             continue;
         }
         // 根据链路的带宽 bandwidth 和需求的剩余数据量 demandIter->second，计算需求的执行时间，并更新最小执行时间 executeTime
@@ -261,9 +263,9 @@ TIME CNetwork::FindDemandToRelay(map<NODEID, map<DEMANDID, VOLUME>>& relayDemand
         nodeRelayDemand[nodeId] = tempRelayDemand;
     }
     // 判断是否在当前最小转发时间 minExecuteTime 内有新的需求到达。如果是，则将 minExecuteTime 更新为下一个需求到达时间与当前模拟时间的差值
-    if (m_dSimTime + minExecuteTime + SMALLNUM > m_mDemandArriveTime.begin()->first)
+    if (!m_mDemandArriveTime.empty() && m_dSimTime + minExecuteTime + SMALLNUM > m_mDemandArriveTime.begin()->first)
     {
-        minExecuteTime = m_mDemandArriveTime.begin()->first - m_dSimTime;   // ？？m_mDemandArriveTime没有赋值（暂时解决）
+        minExecuteTime = m_mDemandArriveTime.begin()->first - m_dSimTime;
     }
     // 对每个节点，将需求的转发量按最小执行时间比例缩放，并记录在 relayDemand 中
     map<NODEID, map<DEMANDID, VOLUME>>::iterator nodeIter;
