@@ -48,7 +48,7 @@ private slots:
 private:
     Ui::QKDSim *ui;
 
-    int nodeNum;
+//    int nodeNum;
     CNetwork* net;
 
     enum Kind
@@ -59,6 +59,7 @@ private:
     void loadCSV(const QString &fileName, Kind kind, const QStringList &headers);
     void readNetTable();
     void readDemTable();
+    void showOutput();
 };
 
 #endif // QKDSIM_H

@@ -171,7 +171,7 @@ void CNetwork::InitRelayPath(DEMANDID demandId)
     linkIter = linkList.begin();
     for (; linkIter != linkList.end(); linkIter++)
     {
-        m_vAllLinks[*linkIter].m_lCarriedDemands.push_back(demandId);
+        m_vAllLinks[*linkIter].m_lCarriedDemands.push_back(demandId);   // ？？m_lCarriedDemands仅在此做了赋值，之后未使用，感觉不对
     }
 }
 // 为所有需求初始化中继路径
@@ -261,9 +261,9 @@ TIME CNetwork::FindDemandToRelay(map<NODEID, map<DEMANDID, VOLUME>>& relayDemand
         nodeRelayDemand[nodeId] = tempRelayDemand;
     }
     // 判断是否在当前最小转发时间 minExecuteTime 内有新的需求到达。如果是，则将 minExecuteTime 更新为下一个需求到达时间与当前模拟时间的差值
-    if (m_dSimTime + minExecuteTime + SMALLNUM < m_mUncompltedEvent.begin()->first) // ？？逻辑有问题，m_mUncompltedEvent未使用
+    if (m_dSimTime + minExecuteTime + SMALLNUM < m_mDemandArriveTime.begin()->first)
     {
-        minExecuteTime = m_mDemandArriveTime.begin()->first - m_dSimTime;   // ？？m_mDemandArriveTime没有赋值
+        minExecuteTime = m_mDemandArriveTime.begin()->first - m_dSimTime;   // ？？m_mDemandArriveTime没有赋值（暂时解决）
     }
     // 对每个节点，将需求的转发量按最小执行时间比例缩放，并记录在 relayDemand 中
     map<NODEID, map<DEMANDID, VOLUME>>::iterator nodeIter;
@@ -298,7 +298,7 @@ void CNetwork::RelayForOneHop(TIME executeTime, map<NODEID, map<DEMANDID, VOLUME
             m_vAllNodes[nodeIter->first].m_mRelayVolume[demandIter->first] -= demandIter->second;
             if (nodeIter->first == m_vAllDemands[demandIter->first].GetSourceId())
             {
-                m_vAllDemands[demandIter->first].ReduceVolume(demandIter->second);
+                m_vAllDemands[demandIter->first].ReduceVolume(demandIter->second);      // ？？仅在需求在源节点被传输后，才减少数据量，中间节点没有这个操作，不知道是否符合逻辑
             }
             // 找到当前节点和下一个节点之间的链路 minLink，并在该链路上消耗相应的密钥数量（等于转发的数据量）
             LINKID minLink = m_mNodePairToLink[make_pair(nodeIter->first, nextNode)];

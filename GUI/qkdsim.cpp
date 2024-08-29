@@ -62,7 +62,9 @@ void QKDSim::loadCSV(const QString &fileName, Kind kind, const QStringList &head
     case Network:
         tableWidget = ui->tableWidget_net;
         /********* 读取node个数 ************/
+        int nodeNum;
         in >> nodeNum;
+        ui->edit_node_num->setText(QString::number(nodeNum));   // 将显示的nodeNum也更改
         in.readLine();  // 略过第一行的换行符
         break;
 
@@ -127,7 +129,7 @@ void QKDSim::save_net()
     }
 
     QTextStream out(&file);
-    out << nodeNum << "\n"; // 第一行存nodenum
+    out << net->GetNodeNum() << "\n"; // 第一行存nodenum
     for (int row = 0; row < ui->tableWidget_net->rowCount(); ++row)
     {
         QStringList rowData;
@@ -170,6 +172,14 @@ void QKDSim::save_dem()
 void QKDSim::readNetTable()
 {
     // 读取节点信息
+    QString nodeNumString = ui->edit_node_num->text();
+    if (nodeNumString.isEmpty())
+    {
+        ui->statusbar->showMessage("Error: Missing data in node number", 5000);
+        return;
+    }
+    int nodeNum = nodeNumString.toInt();
+    net->SetNodeNum(nodeNum);
     net->InitNodes(nodeNum);
 
     // 逐行读取链路信息
@@ -262,6 +272,7 @@ void QKDSim::readDemTable()
             newDemand.SetCompleteTime(INF); // 假设 INF 是一个定义好的常量，表示无限大
             net->m_vAllDemands.push_back(newDemand);
             net->m_vAllNodes[sourceId].m_mRelayVolume[demandId] = demandVolume;
+            net->m_mDemandArriveTime.insert(make_pair(arriveTime, demandId));   // 增加m_mDemandArriveTime
         }
         else
         {
@@ -271,6 +282,85 @@ void QKDSim::readDemTable()
     ui->statusbar->showMessage("Demand data processed successfully", 5000);
 }
 
+void QKDSim::on_bt_start_clicked()
+{
+    readNetTable();
+    readDemTable();
+
+//    net->MainProcess();
+    net->InitRelayPath();
+
+    // 输出表格
+    showOutput();
+//    ui->tableWidget_out->setRowCount(net->m_vAllNodes.size());
+//    QStringList headers = {"demandId", "sourceId", "sinkId", "demandVolume", "arriveTime"};
+//    ui->tableWidget_out->setColumnCount(headers.size());
+//    ui->tableWidget_out->setHorizontalHeaderLabels(headers);
+}
+
+void QKDSim::showOutput()
+{
+    ui->edit_time->setText(QString::number(net->CurrentTime(), 'f', 2));
+
+    ui->tableWidget_out->clear();
+    ui->tableWidget_out->setRowCount(0);    // 清空表格
+    QStringList headers = {"nodeId", "nextNode", "minLink", "avaiableKeys", "demandId", "relayVolume", "isDelivered"};     // 尚未确定
+    ui->tableWidget_out->setColumnCount(headers.size());
+    ui->tableWidget_out->setHorizontalHeaderLabels(headers);
+
+    for (NODEID nodeId = 0; nodeId < net->GetNodeNum(); nodeId++)
+    {
+        // 遍历每个节点上正在传输的数据量
+        for (auto demandIter = net->m_vAllNodes[nodeId].m_mRelayVolume.begin(); demandIter != net->m_vAllNodes[nodeId].m_mRelayVolume.end(); demandIter++)
+        {
+            DEMANDID demandId = demandIter->first;
+            VOLUME relayVolume = demandIter->second;
+            bool isDelivered = net->m_vAllDemands[demandId].GetAllDelivered();
+            // 对于每个需求，从其路径中找到下一个要中继到的节点 nextNode
+            NODEID nextNode = net->m_vAllDemands[demandId].m_Path.m_mNextNode[nodeId];
+            // 找到当前节点和下一个节点之间的链路 minLink
+            LINKID minLink = net->m_mNodePairToLink[make_pair(nodeId, nextNode)];
+            VOLUME avaiableKeys = net->m_vAllLinks[minLink].GetAvaialbeKeys();
+
+            int newRow = ui->tableWidget_out->rowCount();
+            ui->tableWidget_out->insertRow(newRow);    // 末尾增加一行
+
+            QTableWidgetItem* nodeIdItem = new QTableWidgetItem(QString::number(nodeId));
+            QTableWidgetItem* nextNodeItem = new QTableWidgetItem(QString::number(nextNode));
+            QTableWidgetItem* minLinkItem = new QTableWidgetItem(QString::number(minLink));
+            QTableWidgetItem* avaiableKeysItem = new QTableWidgetItem(QString::number(avaiableKeys, 'f', 2));
+            QTableWidgetItem* demandIdItem = new QTableWidgetItem(QString::number(demandId));
+            QTableWidgetItem* relayVolumeItem = new QTableWidgetItem(QString::number(relayVolume, 'f', 2));
+            QTableWidgetItem* isDeliveredItem = new QTableWidgetItem(isDelivered ? "True" : "False");   // 第一次用这种方法
+
+            ui->tableWidget_out->setItem(newRow, 0, nodeIdItem);
+            ui->tableWidget_out->setItem(newRow, 1, nextNodeItem);
+            ui->tableWidget_out->setItem(newRow, 2, minLinkItem);
+            ui->tableWidget_out->setItem(newRow, 3, avaiableKeysItem);
+            ui->tableWidget_out->setItem(newRow, 4, demandIdItem);
+            ui->tableWidget_out->setItem(newRow, 5, relayVolumeItem);
+            ui->tableWidget_out->setItem(newRow, 6, isDeliveredItem);
+        }
+    }
+}
+
+void QKDSim::on_bt_next_clicked()
+{
+    if (!net->AllDemandsDelivered())
+    {
+        TIME executeTime = net->OneTimeRelay();
+        net->MoveSimTime(executeTime);
+
+        /**********************************显示每一步的结果******************************/
+        showOutput();
+    }
+    else
+    {
+        ui->statusbar->showMessage("All demand has benn delivered", 5000);
+    }
+}
+
+// 自动加减行
 void tableWidget_cellChanged(int row, int column, QTableWidget* tableWidget)
 {
     // 最后一行添加数据，则再加一个空行
@@ -311,42 +401,6 @@ void QKDSim::on_tableWidget_dem_cellChanged(int row, int column)
 {
     tableWidget_cellChanged(row, column, ui->tableWidget_dem);
 }
-
-void QKDSim::on_bt_start_clicked()
-{
-    readNetTable();
-    readDemTable();
-
-//    net->MainProcess();
-    net->InitRelayPath();
-
-    // 输出表格
-    ui->tableWidget_out->setRowCount(net->m_vAllDemands.size());
-    QStringList headers = {"demandId", "sourceId", "sinkId", "demandVolume", "arriveTime"};
-    ui->tableWidget_out->setColumnCount(headers.size());
-    ui->tableWidget_out->setHorizontalHeaderLabels(headers);
-}
-
-
-void QKDSim::on_bt_next_clicked()
-{
-    if (!net->AllDemandsDelivered())
-    {
-        TIME executeTime = net->OneTimeRelay();
-        net->MoveSimTime(executeTime);
-        /**********************************显示每一步的结果******************************/
-        ui->edit_time->setText(QString::number(net->CurrentTime(), 'f', 2));
-//        ui->tableWidget_out
-//        for
-    }
-    else
-    {
-        ui->statusbar->showMessage("All demand has benn delivered", 5000);
-    }
-}
-
-
-
 
 
 
