@@ -225,6 +225,9 @@ void QKDSim::readNetTable()
             net->m_mNodePairToLink[make_pair(sourceId, sinkId)] = linkId;
             net->m_mNodePairToLink[make_pair(sinkId, sourceId)] = linkId;
             net->InitKeyManagerOverLink(linkId);
+
+            net->m_vAllNodes[sourceId].m_lAdjNodes.push_back(sinkId);
+            net->m_vAllNodes[sinkId].m_lAdjNodes.push_back(sourceId);
         }
         else
         {
