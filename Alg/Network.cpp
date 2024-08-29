@@ -183,13 +183,6 @@ void CNetwork::InitRelayPath()
     {
         InitRelayPath(demandIter->GetDemandId());
     }
-
-    // 增加功能，将起始时间变为第一个需求到达的时间
-    TIME firstArriveTime = m_mDemandArriveTime.begin()->first;
-    if (firstArriveTime > m_dSimTime)
-    {
-        m_dSimTime = firstArriveTime;
-    }
 }
 // 计算给定节点 nodeId 上最小剩余时间优先的需求转发时间，并记录将要转发的需求和数据量
 TIME CNetwork::MinimumRemainingTimeFirst(NODEID nodeId, map<DEMANDID, VOLUME>& relayDemands)
@@ -268,7 +261,7 @@ TIME CNetwork::FindDemandToRelay(map<NODEID, map<DEMANDID, VOLUME>>& relayDemand
         nodeRelayDemand[nodeId] = tempRelayDemand;
     }
     // 判断是否在当前最小转发时间 minExecuteTime 内有新的需求到达。如果是，则将 minExecuteTime 更新为下一个需求到达时间与当前模拟时间的差值
-    if (m_dSimTime + minExecuteTime + SMALLNUM < m_mDemandArriveTime.begin()->first)
+    if (m_dSimTime + minExecuteTime + SMALLNUM > m_mDemandArriveTime.begin()->first)
     {
         minExecuteTime = m_mDemandArriveTime.begin()->first - m_dSimTime;   // ？？m_mDemandArriveTime没有赋值（暂时解决）
     }
@@ -333,21 +326,6 @@ void CNetwork::UpdateRemainingKeys(TIME executionTime)
     }
 }
 
-//void CNetwork::SimTimeForward(TIME executeTime)
-//{
-//    m_dSimTime += executeTime;
-//    //erase all arrived demands
-//    multimap<TIME, DEMANDID>::iterator demandIter;
-//    demandIter = m_mDemandArriveTime.begin();
-//    while (demandIter->first <= m_dSimTime + SMALLNUM)
-//    {
-//        demandIter = m_mDemandArriveTime.erase(demandIter);
-//        if (demandIter == m_mDemandArriveTime.end())
-//        {
-//            break;
-//        }
-//    }
-//}
 // 检查是否所有需求都已完成传输，如果有未完成的需求返回 false，否则返回 true
 bool CNetwork::AllDemandsDelivered()
 {
