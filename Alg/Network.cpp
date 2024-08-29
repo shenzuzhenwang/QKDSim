@@ -183,6 +183,13 @@ void CNetwork::InitRelayPath()
     {
         InitRelayPath(demandIter->GetDemandId());
     }
+
+    // 增加功能，将起始时间变为第一个需求到达的时间
+    TIME firstArriveTime = m_mDemandArriveTime.begin()->first;
+    if (firstArriveTime > m_dSimTime)
+    {
+        m_dSimTime = firstArriveTime;
+    }
 }
 // 计算给定节点 nodeId 上最小剩余时间优先的需求转发时间，并记录将要转发的需求和数据量
 TIME CNetwork::MinimumRemainingTimeFirst(NODEID nodeId, map<DEMANDID, VOLUME>& relayDemands)

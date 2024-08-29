@@ -231,7 +231,7 @@ void QKDSim::readNetTable()
             ui->statusbar->showMessage("Error: Missing data in network table", 5000);
         }
     }
-    net->SetLinkNum(nodeNum);
+    net->SetLinkNum(ui->tableWidget_net->rowCount());
     ui->statusbar->showMessage("Network data processed successfully", 5000);
 }
 
@@ -279,6 +279,7 @@ void QKDSim::readDemTable()
             ui->statusbar->showMessage("Error: Missing data in demand table", 5000);
         }
     }
+    net->SetDemandNum(ui->tableWidget_dem->rowCount());
     ui->statusbar->showMessage("Demand data processed successfully", 5000);
 }
 
@@ -289,6 +290,7 @@ void QKDSim::on_bt_start_clicked()
 
 //    net->MainProcess();
     net->InitRelayPath();
+
 
     // 输出表格
     showOutput();
