@@ -25,6 +25,7 @@ CDemand::CDemand(const CDemand& Demand)
     m_Path = Demand.m_Path;
     m_bRouted = Demand.m_bRouted;
     m_bAllDelivered = Demand.m_bAllDelivered;
+    m_dDeliveredVolume = Demand.m_dDeliveredVolume;
 }
 
 void CDemand::operator=(const CDemand& Demand)
@@ -39,6 +40,7 @@ void CDemand::operator=(const CDemand& Demand)
     m_Path = Demand.m_Path;
     m_bRouted = Demand.m_bRouted;
     m_bAllDelivered = Demand.m_bAllDelivered;
+    m_dDeliveredVolume = Demand.m_dDeliveredVolume;
 }
 
 void CDemand::SetDemandId(DEMANDID demandId)
