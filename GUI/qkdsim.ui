@@ -159,7 +159,7 @@
           <x>440</x>
           <y>50</y>
           <width>215</width>
-          <height>29</height>
+          <height>35</height>
          </rect>
         </property>
         <layout class="QHBoxLayout" name="horizontalLayout_4">
@@ -175,6 +175,20 @@
          </item>
         </layout>
        </widget>
+      </widget>
+      <widget class="QWidget" name="tab_4">
+       <attribute name="title">
+        <string>最短路径</string>
+       </attribute>
+       <layout class="QFormLayout" name="formLayout_4">
+        <item row="0" column="0" colspan="2">
+         <widget class="QTableWidget" name="tableWidget_path">
+          <attribute name="verticalHeaderVisible">
+           <bool>false</bool>
+          </attribute>
+         </widget>
+        </item>
+       </layout>
       </widget>
       <widget class="QWidget" name="tab_5">
        <attribute name="title">
@@ -233,11 +247,6 @@
         </item>
        </layout>
       </widget>
-      <widget class="QWidget" name="tab_4">
-       <attribute name="title">
-        <string>使用</string>
-       </attribute>
-      </widget>
      </widget>
     </item>
    </layout>
@@ -248,7 +257,7 @@
      <x>0</x>
      <y>0</y>
      <width>884</width>
-     <height>25</height>
+     <height>31</height>
     </rect>
    </property>
    <widget class="QMenu" name="menu">
