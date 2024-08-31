@@ -56,7 +56,7 @@ private:
         Network,
         Demand
     };
-    void loadCSV(const QString &fileName, Kind kind, const QStringList &headers);
+    void loadCSV(const QString &fileName, Kind kind);
     void readNetTable();
     void readDemTable();
     void showOutput();

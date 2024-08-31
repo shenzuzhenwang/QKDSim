@@ -13,8 +13,8 @@ QKDSim::QKDSim(QWidget *parent)
     ui->tableWidget_out->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
 
     // 读取csv文件
-    loadCSV("../Input/network.csv", Network, {"linkId", "sourceId", "sinkId", "keyRate", "proDelay", "bandWidth", "weight"});
-    loadCSV("../Input/demand.csv", Demand, {"demandId", "sourceId", "sinkId", "demandVolume", "arriveTime"});
+    loadCSV("../Input/network.csv", Network);
+    loadCSV("../Input/demand.csv", Demand);
 
     Connections();
 
@@ -45,7 +45,7 @@ void QKDSim::Connections()
     connect(ui->action_save_dem, &QAction::triggered, this, &QKDSim::save_dem);
 }
 
-void QKDSim::loadCSV(const QString &fileName, Kind kind, const QStringList &headers)
+void QKDSim::loadCSV(const QString &fileName, Kind kind)
 {
     QFile file(fileName);
     if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
@@ -57,6 +57,8 @@ void QKDSim::loadCSV(const QString &fileName, Kind kind, const QStringList &head
 
     QTableWidget *tableWidget;
 
+    QStringList headers;
+
     switch (kind)
     {
     case Network:
@@ -66,10 +68,14 @@ void QKDSim::loadCSV(const QString &fileName, Kind kind, const QStringList &head
         in >> nodeNum;
         ui->edit_node_num->setText(QString::number(nodeNum));   // 将显示的nodeNum也更改
         in.readLine();  // 略过第一行的换行符
+
+        headers = {"linkId", "sourceId", "sinkId", "keyRate", "proDelay", "bandWidth", "weight", "faultTime"};
         break;
 
     case Demand:
         tableWidget = ui->tableWidget_dem;
+
+        headers = {"demandId", "sourceId", "sinkId", "demandVolume", "arriveTime"};
         break;
 
     default:
@@ -104,8 +110,7 @@ void QKDSim::open_net()
 {
     // 加载文件至接收内容显示框
     QString filename = QFileDialog::getOpenFileName(this, tr("打开网络拓扑文件"));
-    QStringList headers = {"linkId", "sourceId", "sinkId", "keyRate", "proDelay", "bandWidth", "weight"};
-    loadCSV(filename, Network, headers);
+    loadCSV(filename, Network);
     ui->tabWidget->setCurrentIndex(0);
 }
 
@@ -113,8 +118,7 @@ void QKDSim::open_dem()
 {
     // 加载文件至接收内容显示框
     QString filename = QFileDialog::getOpenFileName(this, tr("打开需求文件"));
-    QStringList headers = {"demandId", "sourceId", "sinkId", "demandVolume", "arriveTime"};
-    loadCSV(filename, Demand, headers);
+    loadCSV(filename, Demand);
     ui->tabWidget->setCurrentIndex(1);
 }
 
@@ -129,7 +133,7 @@ void QKDSim::save_net()
     }
 
     QTextStream out(&file);
-    out << net->GetNodeNum() << "\n"; // 第一行存nodenum
+    out << ui->edit_node_num->text().toInt() << "\n"; // 第一行存nodenum
     for (int row = 0; row < ui->tableWidget_net->rowCount(); ++row)
     {
         QStringList rowData;
@@ -188,7 +192,7 @@ void QKDSim::readNetTable()
         LINKID linkId;
         NODEID sourceId, sinkId;
         RATE keyRate, bandWidth;
-        TIME proDelay;
+        TIME proDelay, faultTime;
         WEIGHT weight;
 
         // 从表格的每一列读取数据
@@ -199,8 +203,9 @@ void QKDSim::readNetTable()
         QTableWidgetItem *proDelayItem = ui->tableWidget_net->item(row, 4);
         QTableWidgetItem *bandWidthItem = ui->tableWidget_net->item(row, 5);
         QTableWidgetItem *weightItem = ui->tableWidget_net->item(row, 6);
+        QTableWidgetItem *faultTimeItem = ui->tableWidget_net->item(row, 7);
 
-        if (linkIdItem && sourceIdItem && sinkIdItem && keyRateItem && proDelayItem)
+        if (linkIdItem && sourceIdItem && sinkIdItem && keyRateItem && proDelayItem && bandWidthItem && weightItem)
         {
             // 转换为相应的数据类型
             linkId = linkIdItem->text().toUInt();
@@ -210,6 +215,7 @@ void QKDSim::readNetTable()
             proDelay = proDelayItem->text().toDouble(); // 假设 proDelay 是一个双精度浮点数
             bandWidth = bandWidthItem->text().toDouble();
             weight = weightItem->text().toDouble();
+            faultTime = faultTimeItem->text() == "" ? -1 : faultTimeItem->text().toDouble();    // 没有故障，则为-1
 
             // 处理链路信息
             CLink newLink;
@@ -224,10 +230,13 @@ void QKDSim::readNetTable()
             net->m_vAllLinks.push_back(newLink);
             net->m_mNodePairToLink[make_pair(sourceId, sinkId)] = linkId;
             net->m_mNodePairToLink[make_pair(sinkId, sourceId)] = linkId;
-            net->InitKeyManagerOverLink(linkId);
+
 
             net->m_vAllNodes[sourceId].m_lAdjNodes.push_back(sinkId);
             net->m_vAllNodes[sinkId].m_lAdjNodes.push_back(sourceId);
+
+            /**********如何赋值**************/
+//            net->m_mDemandArriveTime.insert(make_pair(arriveTime, demandId));   // 增加m_mDemandArriveTime视为增加故障点
         }
         else
         {
