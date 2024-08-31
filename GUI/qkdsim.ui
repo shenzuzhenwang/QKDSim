@@ -226,6 +226,9 @@
             <height>0</height>
            </size>
           </property>
+          <attribute name="verticalHeaderVisible">
+           <bool>false</bool>
+          </attribute>
          </widget>
         </item>
        </layout>

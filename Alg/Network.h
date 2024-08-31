@@ -20,7 +20,7 @@ public:
     //data structure for simulation
     multimap<TIME, EVENTID> m_mUncompltedEvent;	// 存储未完成事件的时间和事件ID的映射表  保留，未使用
     vector<CKeyManager> m_vAllKeyManager;	// 存储网络中所有密钥管理器的列表
-    multimap<TIME, DEMANDID> m_mDemandArriveTime;	// 存储需求到达时间和需求ID的映射表    ？？m_mDemandArriveTime没有赋值
+    multimap<TIME, DEMANDID> m_mDemandArriveTime;	// 存储需求到达时间和需求ID的映射表
 
 private:
     UINT m_uiNodeNum;	// 网络中的节点数量

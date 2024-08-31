@@ -286,30 +286,13 @@ void QKDSim::readDemTable()
     ui->statusbar->showMessage("Demand data processed successfully", 5000);
 }
 
-void QKDSim::on_bt_start_clicked()
-{
-    readNetTable();
-    readDemTable();
-
-//    net->MainProcess();
-    net->InitRelayPath();
-
-
-    // 输出表格
-    showOutput();
-//    ui->tableWidget_out->setRowCount(net->m_vAllNodes.size());
-//    QStringList headers = {"demandId", "sourceId", "sinkId", "demandVolume", "arriveTime"};
-//    ui->tableWidget_out->setColumnCount(headers.size());
-//    ui->tableWidget_out->setHorizontalHeaderLabels(headers);
-}
-
 void QKDSim::showOutput()
 {
     ui->edit_time->setText(QString::number(net->CurrentTime(), 'f', 2));
 
     ui->tableWidget_out->clear();
     ui->tableWidget_out->setRowCount(0);    // 清空表格
-    QStringList headers = {"nodeId", "nextNode", "minLink", "avaiableKeys", "demandId", "relayVolume", "isDelivered"};     // 尚未确定
+    QStringList headers = {"demandId", "nodeId", "nextNode", "minLink", "avaiableKeys", "relayVolume", "isDelivered"};     // 尚未确定
     ui->tableWidget_out->setColumnCount(headers.size());
     ui->tableWidget_out->setHorizontalHeaderLabels(headers);
 
@@ -330,24 +313,68 @@ void QKDSim::showOutput()
             int newRow = ui->tableWidget_out->rowCount();
             ui->tableWidget_out->insertRow(newRow);    // 末尾增加一行
 
+            QTableWidgetItem* demandIdItem = new QTableWidgetItem(QString::number(demandId));
             QTableWidgetItem* nodeIdItem = new QTableWidgetItem(QString::number(nodeId));
             QTableWidgetItem* nextNodeItem = new QTableWidgetItem(QString::number(nextNode));
             QTableWidgetItem* minLinkItem = new QTableWidgetItem(QString::number(minLink));
             QTableWidgetItem* avaiableKeysItem = new QTableWidgetItem(QString::number(avaiableKeys, 'f', 2));
-            QTableWidgetItem* demandIdItem = new QTableWidgetItem(QString::number(demandId));
             QTableWidgetItem* relayVolumeItem = new QTableWidgetItem(QString::number(relayVolume, 'f', 2));
-            QTableWidgetItem* isDeliveredItem = new QTableWidgetItem(isDelivered ? "True" : "False");   // 第一次用这种方法
+            QTableWidgetItem* isDeliveredItem = new QTableWidgetItem(isDelivered ? "True" : "False");
 
-            ui->tableWidget_out->setItem(newRow, 0, nodeIdItem);
-            ui->tableWidget_out->setItem(newRow, 1, nextNodeItem);
-            ui->tableWidget_out->setItem(newRow, 2, minLinkItem);
-            ui->tableWidget_out->setItem(newRow, 3, avaiableKeysItem);
-            ui->tableWidget_out->setItem(newRow, 4, demandIdItem);
+            ui->tableWidget_out->setItem(newRow, 0, demandIdItem);
+            ui->tableWidget_out->setItem(newRow, 1, nodeIdItem);
+            ui->tableWidget_out->setItem(newRow, 2, nextNodeItem);
+            ui->tableWidget_out->setItem(newRow, 3, minLinkItem);
+            ui->tableWidget_out->setItem(newRow, 4, avaiableKeysItem);
             ui->tableWidget_out->setItem(newRow, 5, relayVolumeItem);
             ui->tableWidget_out->setItem(newRow, 6, isDeliveredItem);
         }
     }
     // TODO: 没有显示的需求就是已经传输完的需求，需要进一步显示
+    for (auto demandIter = net->m_vAllDemands.begin(); demandIter != net->m_vAllDemands.end(); demandIter++)
+    {
+        if (demandIter->GetAllDelivered())
+        {
+            NODEID nodeId = demandIter->GetSinkId();
+            DEMANDID demandId = demandIter->GetDemandId();
+            VOLUME relayVolume = 0;
+            bool isDelivered = demandIter->GetAllDelivered();
+//            NODEID nextNode = demandIter->GetSinkId();
+//            LINKID minLink = net->m_mNodePairToLink[make_pair(nodeId, nextNode)];
+//            VOLUME avaiableKeys = net->m_vAllLinks[minLink].GetAvaialbeKeys();
+
+            int newRow = ui->tableWidget_out->rowCount();
+            ui->tableWidget_out->insertRow(newRow);    // 末尾增加一行
+
+            QTableWidgetItem* demandIdItem = new QTableWidgetItem(QString::number(demandId));
+            QTableWidgetItem* nodeIdItem = new QTableWidgetItem(QString::number(nodeId));
+            QTableWidgetItem* nextNodeItem = new QTableWidgetItem();
+            QTableWidgetItem* minLinkItem = new QTableWidgetItem();
+            QTableWidgetItem* avaiableKeysItem = new QTableWidgetItem();
+            QTableWidgetItem* relayVolumeItem = new QTableWidgetItem(QString::number(relayVolume, 'f', 2));
+            QTableWidgetItem* isDeliveredItem = new QTableWidgetItem(isDelivered ? "True" : "False");
+
+            ui->tableWidget_out->setItem(newRow, 0, demandIdItem);
+            ui->tableWidget_out->setItem(newRow, 1, nodeIdItem);
+            ui->tableWidget_out->setItem(newRow, 2, nextNodeItem);
+            ui->tableWidget_out->setItem(newRow, 3, minLinkItem);
+            ui->tableWidget_out->setItem(newRow, 4, avaiableKeysItem);
+            ui->tableWidget_out->setItem(newRow, 5, relayVolumeItem);
+            ui->tableWidget_out->setItem(newRow, 6, isDeliveredItem);
+        }
+    }
+}
+
+void QKDSim::on_bt_start_clicked()
+{
+    readNetTable();
+    readDemTable();
+
+//    net->MainProcess();
+    net->InitRelayPath();
+
+    // 输出表格
+    showOutput();
 }
 
 void QKDSim::on_bt_next_clicked()
@@ -357,7 +384,6 @@ void QKDSim::on_bt_next_clicked()
         TIME executeTime = net->OneTimeRelay();
         net->MoveSimTime(executeTime);
 
-        /**********************************显示每一步的结果******************************/
         showOutput();
     }
     else
@@ -368,6 +394,7 @@ void QKDSim::on_bt_next_clicked()
 
 // 自动加减行
 void tableWidget_cellChanged(int row, int column, QTableWidget* tableWidget)
+
 {
     // 最后一行添加数据，则再加一个空行
     int rowCount = tableWidget->rowCount();
