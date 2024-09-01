@@ -10,6 +10,7 @@ QKDSim::QKDSim(QWidget *parent)
     ui->setupUi(this);
     ui->tableWidget_net->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);  // 表格列宽自动伸缩
     ui->tableWidget_dem->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+    ui->tableWidget_path->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
     ui->tableWidget_out->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
 
     // 读取csv文件
@@ -305,9 +306,9 @@ void QKDSim::showOutput()
     ui->tableWidget_out->setColumnCount(headers.size());
     ui->tableWidget_out->setHorizontalHeaderLabels(headers);
 
+    // 遍历每个节点上正在传输的数据量
     for (NODEID nodeId = 0; nodeId < net->GetNodeNum(); nodeId++)
     {
-        // 遍历每个节点上正在传输的数据量
         for (auto demandIter = net->m_vAllNodes[nodeId].m_mRelayVolume.begin(); demandIter != net->m_vAllNodes[nodeId].m_mRelayVolume.end(); demandIter++)
         {
             DEMANDID demandId = demandIter->first;
@@ -339,7 +340,7 @@ void QKDSim::showOutput()
             ui->tableWidget_out->setItem(newRow, 6, isDeliveredItem);
         }
     }
-    // TODO: 没有显示的需求就是已经传输完的需求，需要进一步显示
+    // 显示已传输完毕的数据
     for (auto demandIter = net->m_vAllDemands.begin(); demandIter != net->m_vAllDemands.end(); demandIter++)
     {
         if (demandIter->GetAllDelivered())
@@ -370,6 +371,44 @@ void QKDSim::showOutput()
             ui->tableWidget_out->setItem(newRow, 4, avaiableKeysItem);
             ui->tableWidget_out->setItem(newRow, 5, relayVolumeItem);
             ui->tableWidget_out->setItem(newRow, 6, isDeliveredItem);
+        }
+    }
+
+    ui->tableWidget_path->clear();
+    ui->tableWidget_path->setRowCount(0);    // 清空表格
+    QStringList headers_path = {"demandId", "Node1", "Node2"};     // 尚未确定
+    ui->tableWidget_path->setColumnCount(headers_path.size());
+    ui->tableWidget_path->setHorizontalHeaderLabels(headers_path);
+    // 显示每个需求的路由的最短路径
+    for (auto demandIter = net->m_vAllDemands.begin(); demandIter != net->m_vAllDemands.end(); demandIter++)
+    {
+        if (demandIter->GetRouted())
+        {
+            DEMANDID demandId = demandIter->GetDemandId();
+            list<NODEID> node_path = net->m_vAllDemands[demandId].m_Path.m_lTraversedNodes;
+
+            // 如果当前行需要的列数大于表格当前列数，则扩展表格的列数
+            int currentColCount = node_path.size() + 1; // 因为第一列是demandId
+            if (currentColCount > ui->tableWidget_path->columnCount())
+            {
+                int oldColCount = ui->tableWidget_path->columnCount();
+                ui->tableWidget_path->setColumnCount(currentColCount);
+                // 设置新的列头
+                for (int col = oldColCount; col < currentColCount; ++col)
+                {
+                    ui->tableWidget_path->setHorizontalHeaderItem(col, new QTableWidgetItem(QString("Node%1").arg(col)));
+                }
+            }
+
+            int newRow = ui->tableWidget_path->rowCount();
+            ui->tableWidget_path->insertRow(newRow);    // 末尾增加一行
+            // 填充当前行的数据
+            ui->tableWidget_path->setItem(newRow, 0, new QTableWidgetItem(QString::number(demandId)));
+            int col = 1;  // 索引变量
+            for (auto it = node_path.begin(); it != node_path.end(); ++it, ++col)
+            {
+                ui->tableWidget_path->setItem(newRow, col, new QTableWidgetItem(QString::number(*it)));
+            }
         }
     }
 }
