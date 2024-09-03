@@ -128,31 +128,31 @@ VOLUME CLink::GetAvaialbeKeys()
 {
     return m_KeyManager.GetAvailableKeys();
 }
-// void CLink::UpdateRemainingKeys(TIME executionTime)
-// {
-//     m_KeyManager.CollectKeys(executionTime*m_KeyManager.GetKeyRate());
-// }
-// 修改后的 UpdateRemainingKeys 方法
-void CLink::UpdateRemainingKeys(TIME executionTime, TIME m_dSimTime)
+void CLink::UpdateRemainingKeys(TIME executionTime)
 {
-    // 获取当前的关键速率
-    double m_dKeyRate = m_KeyManager.GetKeyRate();
-    // 将当前仿真时间转换为种子
-    unsigned int seed = static_cast<unsigned int>(m_dSimTime);
-    std::default_random_engine generator(seed);
-    // 创建一个正态分布器，以 m_dKeyRate 为均值，以 0.1 * m_dKeyRate 为标准差
-    std::normal_distribution<double> distribution(m_dKeyRate, 0.1 * m_dKeyRate);
-    // 生成一个随机值，表示新增加的密钥数量
-    double random_value = distribution(generator) * executionTime;
-    // 确保随机值不能小于零
-    if (random_value < 0.0) {
-        random_value = 0.0;
-    }
-    // 使用计算出的随机值更新剩余的键
-    m_KeyManager.CollectKeys(random_value);
-    // 根据时间差和失效概率失效部分密钥
-    double failureProbabilityPerUnitTime = 0.1; // 示意性失效概率
-    for (TIME t = 0; t < executionTime; ++t) {
-        m_KeyManager.InvalidateKeys(failureProbabilityPerUnitTime, generator);
-    }
+    m_KeyManager.CollectKeys(executionTime*m_KeyManager.GetKeyRate());
 }
+//修改后的 UpdateRemainingKeys 方法
+// void CLink::UpdateRemainingKeys(TIME executionTime, TIME m_dSimTime)
+// {
+//     // 获取当前的关键速率
+//     double m_dKeyRate = m_KeyManager.GetKeyRate();
+//     // 将当前仿真时间转换为种子
+//     unsigned int seed = static_cast<unsigned int>(m_dSimTime);
+//     std::default_random_engine generator(seed);
+//     // 创建一个正态分布器，以 m_dKeyRate 为均值，以 0.1 * m_dKeyRate 为标准差
+//     std::normal_distribution<double> distribution(m_dKeyRate, int(0.1 * m_dKeyRate));
+//     // 生成一个随机值，表示新增加的密钥数量
+//     double random_value = distribution(generator) * executionTime;
+//     // 确保随机值不能小于零
+//     if (random_value < 0.0) {
+//         random_value = 0.0;
+//     }
+//     // 使用计算出的随机值更新剩余的键
+//     m_KeyManager.CollectKeys(random_value);
+//     // 根据时间差和失效概率失效部分密钥
+//     double failureProbabilityPerUnitTime = 0.1; // 示意性失效概率
+//     for (TIME t = 0; t < executionTime; ++t) {
+//         m_KeyManager.InvalidateKeys(failureProbabilityPerUnitTime, generator);
+//     }
+// }

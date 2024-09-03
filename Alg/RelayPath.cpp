@@ -58,3 +58,11 @@ NODEID CRelayPath::GetAssocaiteDemand()
 {
     return m_uiAssociateDemand;
 }
+
+// 实现 Clear 方法
+void CRelayPath::Clear()
+{
+    m_lTraversedNodes.clear();
+    m_lTraversedLinks.clear();
+    m_mNextNode.clear();
+}

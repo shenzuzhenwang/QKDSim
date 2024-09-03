@@ -68,7 +68,8 @@ public:
     TIME FindDemandToRelay(NODEID nodeId, map<DEMANDID, VOLUME>& relayDemand);	// 确定应转发的需求，并计算所需的时间
     TIME FindDemandToRelay(map<NODEID, map<DEMANDID, VOLUME>>& relayDemand);
     void RelayForOneHop(TIME executeTime, map<NODEID, map<DEMANDID, VOLUME>>& relayDemands); // 执行一次需求转发操作，中继到下一跳
-    void UpdateRemainingKeys(TIME executionTime, TIME m_dSimTime);	// 更新链路上剩余的密钥量
+    void UpdateRemainingKeys(TIME executionTime);	// 更新链路上剩余的密钥量
+    //void UpdateRemainingKeys(TIME executionTime, TIME m_dSimTime);	// 更新链路上剩余的密钥量
     void SimTimeForward(TIME executionTime);	// 将模拟时间推进指定的执行时间
 
     //main process
