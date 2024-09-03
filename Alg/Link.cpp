@@ -110,6 +110,7 @@ WEIGHT CLink::GetWeight()
     return m_dWeight;
 }
 
+
 void CLink::SetFaultTime(TIME faultTime)
 {
     m_dFaultTime = faultTime;
@@ -125,7 +126,6 @@ void CLink::SetKeyManager(const CKeyManager& keyManager)
 {
     m_KeyManager = keyManager;
 }
-
 
 void CLink::ConsumeKeys(VOLUME keys)
 {

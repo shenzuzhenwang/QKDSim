@@ -239,9 +239,11 @@ void QKDSim::readNetTable()
 
             net->m_vAllNodes[sourceId].m_lAdjNodes.push_back(sinkId);
             net->m_vAllNodes[sinkId].m_lAdjNodes.push_back(sourceId);
+            net->InitKeyManagerOverLink(linkId);
 
             /**********如何赋值**************/
             net->m_mDemandArriveTime.insert(make_pair(faultTime, id_faultTime));   // 增加m_mDemandArriveTime视为增加故障点
+
         }
         else
         {
