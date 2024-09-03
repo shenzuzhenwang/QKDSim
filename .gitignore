@@ -42,3 +42,4 @@ release
 # Qt
 *.user
 Debug
+build

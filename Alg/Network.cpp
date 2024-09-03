@@ -25,7 +25,7 @@ void CNetwork::MoveSimTime(TIME executionTime)
     demandIter = m_mDemandArriveTime.begin();
     while (demandIter->first <= m_dSimTime + SMALLNUM)
     {
-        demandIter = m_mDemandArriveTime.erase(demandIter);
+        demandIter = m_mDemandArriveTime.erase(demandIter);//erase 方法删除当前迭代器所指向的元素，并返回一个指向下一个元素的迭代器。
         if (demandIter == m_mDemandArriveTime.end())
         {
             break;
@@ -155,7 +155,7 @@ bool CNetwork::ShortestPath(NODEID sourceId, NODEID sinkId, list<NODEID>& nodeLi
 // 为指定需求 demandId 初始化中继路径。如果需求已经被路由，则跳过此操作
 void CNetwork::InitRelayPath(DEMANDID demandId)
 {
-    if (m_vAllDemands[demandId].GetRouted())
+    if (m_vAllDemands[demandId].GetRouted()) //某个demand是否已经被路由用变量m_bRouted（false/routed）记录
     {
         return;
     }
@@ -166,14 +166,14 @@ void CNetwork::InitRelayPath(DEMANDID demandId)
     // 调用 ShortestPath 函数，寻找从 sourceId 到 sinkId 的最短路径
     if (ShortestPath(sourceId, sinkId, nodeList, linkList))
     {
-        m_vAllDemands[demandId].InitRelayPath(nodeList, linkList);
+        m_vAllDemands[demandId].InitRelayPath(nodeList, linkList); //完成指定demand和中继路径的各种信息的匹配（尤其是node上和指定demand相关的下一条的确定操作   ）
     }
     // 通过遍历 linkList，将当前需求ID (demandId) 添加到每条路径链路 m_lCarriedDemands 列表中，表示这些链路将承载该需求的数据传输
     list<LINKID>::iterator linkIter;
     linkIter = linkList.begin();
     for (; linkIter != linkList.end(); linkIter++)
     {
-        m_vAllLinks[*linkIter].m_lCarriedDemands.push_back(demandId);   // ？？m_lCarriedDemands仅在此做了赋值，之后未使用，感觉不对
+        m_vAllLinks[*linkIter].m_lCarriedDemands.push_back(demandId);   // ？？m_lCarriedDemands仅在此做了赋值，之后未使用，感觉不对（被（node,nextnode）的方式代替了）
     }
 }
 // 为所有需求初始化中继路径
@@ -186,6 +186,11 @@ void CNetwork::InitRelayPath()
         InitRelayPath(demandIter->GetDemandId());
     }
 }
+
+
+
+
+
 // 计算给定节点 nodeId 上最小剩余时间优先的需求转发时间，并记录将要转发的需求和数据量
 TIME CNetwork::MinimumRemainingTimeFirst(NODEID nodeId, map<DEMANDID, VOLUME>& relayDemands)
 {
@@ -207,6 +212,19 @@ TIME CNetwork::MinimumRemainingTimeFirst(NODEID nodeId, map<DEMANDID, VOLUME>& r
         NODEID nextNode = m_vAllDemands[selectedDemand].m_Path.m_mNextNode[nodeId];
         LINKID midLink = m_mNodePairToLink[make_pair(nodeId, nextNode)];
         RATE bandwidth = m_vAllLinks[midLink].GetBandwidth();
+
+        // // 获取该链路上的可用密钥量
+        // VOLUME availableKeyVolume = m_vAllLinks[midLink].GetAvaialbeKeys();
+        // // 实际可以传输的数据量取决于带宽和可用密钥量中的较小值
+        // VOLUME actualTransmittableVolume = min(demandIter->second, availableKeyVolume);
+
+        // // 根据链路的带宽和实际可传输的数据量，计算需求的执行时间，并更新最小执行时间 executeTime
+        // TIME demandExecuteTime = actualTransmittableVolume / bandwidth;
+        // if (demandExecuteTime < executeTime)
+        // {
+        //     executeTime = demandExecuteTime;
+        // }
+
         if (demandIter->second / bandwidth < executeTime)
         {
             executeTime = demandIter->second / bandwidth;
@@ -274,7 +292,7 @@ TIME CNetwork::FindDemandToRelay(map<NODEID, map<DEMANDID, VOLUME>>& relayDemand
     for (; nodeIter != nodeRelayDemand.end(); nodeIter++)
     {
         TIME relayTime = nodeRelayTime[nodeIter->first];
-        demandIter = nodeIter->second.begin();
+        demandIter = nodeIter->second.begin(); //second表示该元素的value值
         for (; demandIter != nodeIter->second.end(); demandIter++)
         {
             VOLUME newVolume = demandIter->second * minExecuteTime / relayTime;   // minExecuteTime内每个demand传的数据量
@@ -324,16 +342,16 @@ void CNetwork::RelayForOneHop(TIME executeTime, map<NODEID, map<DEMANDID, VOLUME
         }
     }
     // 调用 UpdateRemainingKeys，根据执行时间 executeTime 更新所有链路上的剩余密钥数量
-    UpdateRemainingKeys(executeTime);
+    UpdateRemainingKeys(executeTime, m_dSimTime);
 }
 // 更新所有链路上的剩余密钥数量
-void CNetwork::UpdateRemainingKeys(TIME executionTime)
+void CNetwork::UpdateRemainingKeys(TIME executionTime, TIME m_dSimTime)
 {
     vector<CLink>::iterator linkIter;
     linkIter = m_vAllLinks.begin();
     for (; linkIter != m_vAllLinks.end(); linkIter++)
     {
-        linkIter->UpdateRemainingKeys(executionTime);
+        linkIter->UpdateRemainingKeys(executionTime, m_dSimTime);
     }
 }
 
@@ -355,6 +373,11 @@ bool CNetwork::AllDemandsDelivered()
 TIME CNetwork::OneTimeRelay()
 {
     map<NODEID, map<DEMANDID, VOLUME>> nodeRelay;
+
+    if (CheckFault())
+    {
+        Rerouting();
+    }
     TIME executeTime = FindDemandToRelay(nodeRelay);
     RelayForOneHop(executeTime, nodeRelay);
     return executeTime;
@@ -367,5 +390,93 @@ void CNetwork::MainProcess()
     {
         TIME executeTime = OneTimeRelay();
         MoveSimTime(executeTime);
+    }
+}
+
+
+// 在 find函数之前检查m_mDemandArriveTime，是否存在没有起点终点的demand，如果有，检查所有link，如果faultTime匹配，修改对应link的weight
+//故障节点检查（是否是源节点or目的节点,如果是源节点or目的节点，需要将对应的demand删除，并显示）
+
+//检查是否产生了fault（检查整个m_vAllDemands），并修改相应的link的weight
+bool CNetwork::CheckFault()
+{
+    multimap<TIME, DEMANDID>::iterator demandIter;
+    demandIter = m_mDemandArriveTime.begin();
+    for (; demandIter != m_mDemandArriveTime.end(); demandIter++)
+    {
+        if (demandIter->second > 1000000)//说明是作为fault信息插入的demand
+        {
+            //遍历m_vAllLinks，修改相应的link的weight
+            vector<CLink>::iterator linkIter;
+            linkIter = m_vAllLinks.begin();
+            for (; linkIter != m_vAllLinks.end(); linkIter++)
+            {
+                if (linkIter->GetFaultTime() == demandIter->first)
+                {
+                    linkIter->SetWeight(INF);
+                    return true;
+                    // vector<CDemand>::iterator demandIter;
+                    // demandIter = m_vAllDemands.begin();
+                    // for (; demandIter != m_vAllDemands.end(); demandIter++)
+                    // {
+                    //     //备用于故障link/node特殊性（是否是源节点、目的节点）的检查
+                    // }
+                }
+            }
+        }
+    }
+    return false;
+}
+
+//重路由函数
+void CNetwork::Rerouting()
+{
+    //重新执行CNetwork::InitRelayPath()（修改后的，确保每一个demand的路径都完成更新）
+    ReInitRelayPath();
+
+    //检查是否存在无法通信的源目的节点对（即无法算出连接源节点和目的节点的路径），并显示相应的源目的节点对
+
+    //遍历全部demand，对于每个demand，比较旧relaypath和新relaypath，将不在新relaypath中的node上和上link上的待发送需求清空
+}
+
+//为指定需求重新初始化中继路径
+void CNetwork::ReInitRelayPath(DEMANDID demandId)
+{
+    // if (m_vAllDemands[demandId].GetRouted()) //某个demand是否已经被路由用变量m_bRouted（false/routed）记录
+    // {
+    //     return;
+    // }
+    NODEID sourceId = m_vAllDemands[demandId].GetSourceId();
+    NODEID sinkId = m_vAllDemands[demandId].GetSinkId();
+    list<NODEID> nodeList;
+    list<LINKID> linkList;
+    // //重新计算指定需求对应的新中继路径之前，先保存一下旧路径用于比较
+    // CRelayPath oldPath;
+    // m_vAllDemands[demandId].m_Path.m_lTraversedNodes
+    //（是否需要比较？？？？）（如果不通过比较来进行清空，一些已经不在新路径上的node&link还会继续转发之前到达的需求）
+    // 读取旧路径
+    // 新变量存储旧路径
+    // 更新路径（保证旧路径被删除）
+    // 调用 ShortestPath 函数，寻找从 sourceId 到 sinkId 的最短路径
+    if (ShortestPath(sourceId, sinkId, nodeList, linkList))
+    {
+        m_vAllDemands[demandId].InitRelayPath(nodeList, linkList);//这里 CDemand::InitRelayPath(nodeList, linkList)的调用有问题，好像没有完成更新
+    }
+    // 通过遍历 linkList，将当前需求ID (demandId) 添加到每条路径链路 m_lCarriedDemands 列表中，表示这些链路将承载该需求的数据传输
+    list<LINKID>::iterator linkIter;
+    linkIter = linkList.begin();
+    for (; linkIter != linkList.end(); linkIter++)
+    {
+        m_vAllLinks[*linkIter].m_lCarriedDemands.push_back(demandId);   // ？？m_lCarriedDemands仅在此做了赋值，之后未使用，感觉不对（被（node,nextnode）的方式代替了）
+    }
+}
+// 为所有需求重新初始化中继路径
+void CNetwork::ReInitRelayPath()
+{
+    vector<CDemand>::iterator demandIter;
+    demandIter = m_vAllDemands.begin();
+    for (; demandIter != m_vAllDemands.end(); demandIter++)
+    {
+        ReInitRelayPath(demandIter->GetDemandId());
     }
 }

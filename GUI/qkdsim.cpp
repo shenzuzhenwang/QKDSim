@@ -196,6 +196,8 @@ void QKDSim::readNetTable()
         TIME proDelay, faultTime;
         WEIGHT weight;
 
+        int id_faultTime = 1000000+row;
+
         // 从表格的每一列读取数据
         QTableWidgetItem *linkIdItem = ui->tableWidget_net->item(row, 0);
         QTableWidgetItem *sourceIdItem = ui->tableWidget_net->item(row, 1);
@@ -227,6 +229,7 @@ void QKDSim::readNetTable()
             newLink.SetLinkDelay(proDelay);
             newLink.SetBandwidth(bandWidth);
             newLink.SetWeight(weight);
+            newLink.SetFaultTime(faultTime);
 
             net->m_vAllLinks.push_back(newLink);
             net->m_mNodePairToLink[make_pair(sourceId, sinkId)] = linkId;
@@ -237,7 +240,7 @@ void QKDSim::readNetTable()
             net->m_vAllNodes[sinkId].m_lAdjNodes.push_back(sourceId);
 
             /**********如何赋值**************/
-//            net->m_mDemandArriveTime.insert(make_pair(arriveTime, demandId));   // 增加m_mDemandArriveTime视为增加故障点
+            net->m_mDemandArriveTime.insert(make_pair(faultTime, id_faultTime));   // 增加m_mDemandArriveTime视为增加故障点
         }
         else
         {
@@ -284,7 +287,7 @@ void QKDSim::readDemTable()
             newDemand.SetArriveTime(arriveTime);
             newDemand.SetCompleteTime(INF); // 假设 INF 是一个定义好的常量，表示无限大
             net->m_vAllDemands.push_back(newDemand);
-            net->m_vAllNodes[sourceId].m_mRelayVolume[demandId] = demandVolume;
+            net->m_vAllNodes[sourceId].m_mRelayVolume[demandId] = demandVolume;   //对m_mRelayVolume做初始化
             net->m_mDemandArriveTime.insert(make_pair(arriveTime, demandId));   // 增加m_mDemandArriveTime
         }
         else
@@ -292,6 +295,8 @@ void QKDSim::readDemTable()
             ui->statusbar->showMessage("Error: Missing data in demand table", 5000);
         }
     }
+
+
     net->SetDemandNum(ui->tableWidget_dem->rowCount());
     ui->statusbar->showMessage("Demand data processed successfully", 5000);
 }

@@ -116,11 +116,19 @@ VOLUME CDemand::GetRemainingVolume()
 
 void CDemand::ReduceVolume(VOLUME consumeVolume)
 {
+    // 减少剩余的数据量
     m_dRemainingVolume -= consumeVolume;
+
+    // 检查剩余的数据量是否小于一个非常小的负值（表示近似为负数）
     if (m_dRemainingVolume < NEGSMALLVALUE)
     {
+        // 输出错误信息，指出哪个需求的剩余数据量变成了负值
         cout << "check why the volume of DEMAND " << m_uiDemandID << " become a negative value." << endl;
+
+        // 暂停程序，让用户看到错误信息
         getchar();
+
+        // 退出程序
         exit(0);
     }
 }
@@ -156,7 +164,7 @@ void CDemand::UpdateDeliveredVolume(VOLUME moreDelivered, TIME simTime)
 }
 
 
-void CDemand::InitRelayPath(list<NODEID>& nodeList, list<LINKID>& linkList)
+void CDemand::InitRelayPath(list<NODEID>& nodeList, list<LINKID>& linkList) //在CNetwork::InitRelayPath()中被调用
 {
     m_bRouted = true;
     m_Path.SetAssociateDemand(m_uiDemandID);
