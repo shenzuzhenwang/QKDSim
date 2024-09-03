@@ -72,7 +72,7 @@ void CNetwork::InitKeyManagerOverLink(LINKID linkId)
     newKeyManager.SetKeyManagerId(linkId);
     newKeyManager.SetKeyRate(m_vAllLinks[linkId].GetQKDRate());
     newKeyManager.SetAvailableKeys(0);
-    m_vAllKeyManager.push_back(newKeyManager);
+   //m_vAllKeyManager.push_back(newKeyManager);
 }
 
 void CNetwork::InitNodes(UINT nodeNum)
