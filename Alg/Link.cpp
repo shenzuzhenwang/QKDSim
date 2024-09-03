@@ -107,6 +107,11 @@ WEIGHT CLink::GetWeight()
     return m_dWeight;
 }
 
+void CLink::SetKeyManager(const CKeyManager& keyManager)
+{
+    m_KeyManager = keyManager;
+}
+
 void CLink::ConsumeKeys(VOLUME keys)
 {
     m_KeyManager.ConsumeKeys(keys);
