@@ -121,6 +121,12 @@ TIME CLink::GetFaultTime()
 }
 
 //密钥相关
+void CLink::SetKeyManager(const CKeyManager& keyManager)
+{
+    m_KeyManager = keyManager;
+}
+
+
 void CLink::ConsumeKeys(VOLUME keys)
 {
     m_KeyManager.ConsumeKeys(keys);

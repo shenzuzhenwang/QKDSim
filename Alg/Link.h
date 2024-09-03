@@ -57,6 +57,8 @@ public:
     void SetFaultTime(TIME faultTime);
     TIME GetFaultTime();
 
+    void SetKeyManager(const CKeyManager& keyManager);
+
     //key manager operations
     void ConsumeKeys(VOLUME keys);	// 消耗链路上指定数量的密钥
     VOLUME GetAvaialbeKeys();	// 获取链路上可用的密钥数量
