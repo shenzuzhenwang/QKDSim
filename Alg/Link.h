@@ -61,6 +61,6 @@ public:
     void ConsumeKeys(VOLUME keys);	// 消耗链路上指定数量的密钥
     VOLUME GetAvaialbeKeys();	// 获取链路上可用的密钥数量
     void UpdateRemainingKeys(TIME executionTime);	// 根据执行时间更新链路上剩余的密钥量
-    // void UpdateRemainingKeys(TIME executionTime, TIME m_dSimTime);	// 根据执行时间更新链路上剩余的密钥量
+    void UpdateRemainingKeys(TIME executionTime, TIME m_dSimTime);	// 根据执行时间更新链路上剩余的密钥量
 };
 

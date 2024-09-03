@@ -342,8 +342,8 @@ void CNetwork::RelayForOneHop(TIME executeTime, map<NODEID, map<DEMANDID, VOLUME
         }
     }
     // 调用 UpdateRemainingKeys，根据执行时间 executeTime 更新所有链路上的剩余密钥数量
-    //UpdateRemainingKeys(executeTime, m_dSimTime);
-    UpdateRemainingKeys(executeTime);
+    UpdateRemainingKeys(executeTime, m_dSimTime);
+    // UpdateRemainingKeys(executeTime);
 }
 // 更新所有链路上的剩余密钥数量
 void CNetwork::UpdateRemainingKeys(TIME executionTime)
@@ -355,16 +355,16 @@ void CNetwork::UpdateRemainingKeys(TIME executionTime)
         linkIter->UpdateRemainingKeys(executionTime);
     }
 }
-// // 更新所有链路上的剩余密钥数量
-// void CNetwork::UpdateRemainingKeys(TIME executionTime, TIME m_dSimTime)
-// {
-//     vector<CLink>::iterator linkIter;
-//     linkIter = m_vAllLinks.begin();
-//     for (; linkIter != m_vAllLinks.end(); linkIter++)
-//     {
-//         linkIter->UpdateRemainingKeys(executionTime, m_dSimTime);
-//     }
-// }
+// 更新所有链路上的剩余密钥数量
+void CNetwork::UpdateRemainingKeys(TIME executionTime, TIME m_dSimTime)
+{
+    vector<CLink>::iterator linkIter;
+    linkIter = m_vAllLinks.begin();
+    for (; linkIter != m_vAllLinks.end(); linkIter++)
+    {
+        linkIter->UpdateRemainingKeys(executionTime, m_dSimTime);
+    }
+}
 
 // 检查是否所有需求都已完成传输，如果有未完成的需求返回 false，否则返回 true
 bool CNetwork::AllDemandsDelivered()
@@ -448,7 +448,7 @@ void CNetwork::Rerouting()
     //检查是否存在无法通信的源目的节点对（即无法算出连接源节点和目的节点的路径），并显示相应的源目的节点对
 
     //遍历全部demand，对于每个demand，比较旧relaypath和新relaypath，将不在新relaypath中的node上和上link上的待发送需求清空
-    //（是否需要比较？？？？）（如果不通过比较来进行清空，一些已经不在新路径上的node&link还会继续转发之前到达的需求）}
+
 }
 
 //为指定需求重新初始化中继路径

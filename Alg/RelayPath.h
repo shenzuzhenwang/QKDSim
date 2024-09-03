@@ -27,5 +27,8 @@ public:
 
     void SetAssociateDemand(DEMANDID demandId);
     DEMANDID GetAssocaiteDemand();
+
+    // 添加清空路径的方法
+    void Clear();
 };
 

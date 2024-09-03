@@ -14,7 +14,7 @@ public:
     vector<CNode> m_vAllNodes;	// 存储网络中所有节点的列表
     vector<CLink> m_vAllLinks;	// 存储网络中所有链路的列表
     vector<CDemand> m_vAllDemands;	// 存储网络中所有需求的列表
-    vector<CRelayPath> m_vAllRelayPaths;	// 存储网络中所有需求的列表
+    vector<CRelayPath> m_vAllRelayPaths;	// 存储网络中所有中继路径的列表
     map<pair<NODEID, NODEID>, LINKID> m_mNodePairToLink;	// 用于根据节点对查找对应链路的映射表
     vector<CNetEvent> m_vAllExistingEvent;	// 存储网络中的所有事件   保留，未使用
 
@@ -69,7 +69,7 @@ public:
     TIME FindDemandToRelay(map<NODEID, map<DEMANDID, VOLUME>>& relayDemand);
     void RelayForOneHop(TIME executeTime, map<NODEID, map<DEMANDID, VOLUME>>& relayDemands); // 执行一次需求转发操作，中继到下一跳
     void UpdateRemainingKeys(TIME executionTime);	// 更新链路上剩余的密钥量
-    //void UpdateRemainingKeys(TIME executionTime, TIME m_dSimTime);	// 更新链路上剩余的密钥量
+    void UpdateRemainingKeys(TIME executionTime, TIME m_dSimTime);	// 更新链路上剩余的密钥量
     void SimTimeForward(TIME executionTime);	// 将模拟时间推进指定的执行时间
 
     //main process
