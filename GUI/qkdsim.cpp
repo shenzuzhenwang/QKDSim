@@ -14,8 +14,8 @@ QKDSim::QKDSim(QWidget *parent)
     ui->tableWidget_out->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
 
     // 读取csv文件
-    loadCSV("../Input/network.csv", Network);
-    loadCSV("../Input/demand.csv", Demand);
+    loadCSV("../../Input/network.csv", Network);
+    loadCSV("../../Input/demand.csv", Demand);
 
     Connections();
 

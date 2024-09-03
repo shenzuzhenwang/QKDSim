@@ -179,6 +179,7 @@ void CNetwork::InitRelayPath(DEMANDID demandId)
 // 为所有需求初始化中继路径
 void CNetwork::InitRelayPath()
 {
+    cout<<"初始化中继路径"<<endl;
     vector<CDemand>::iterator demandIter;
     demandIter = m_vAllDemands.begin();
     for (; demandIter != m_vAllDemands.end(); demandIter++)
@@ -213,17 +214,17 @@ TIME CNetwork::MinimumRemainingTimeFirst(NODEID nodeId, map<DEMANDID, VOLUME>& r
         LINKID midLink = m_mNodePairToLink[make_pair(nodeId, nextNode)];
         RATE bandwidth = m_vAllLinks[midLink].GetBandwidth();
 
-        // // 获取该链路上的可用密钥量
-        // VOLUME availableKeyVolume = m_vAllLinks[midLink].GetAvaialbeKeys();
-        // // 实际可以传输的数据量取决于带宽和可用密钥量中的较小值
-        // VOLUME actualTransmittableVolume = min(demandIter->second, availableKeyVolume);
+        // 获取该链路上的可用密钥量
+        VOLUME availableKeyVolume = m_vAllLinks[midLink].GetAvaialbeKeys();
+        // 实际可以传输的数据量取决于带宽和可用密钥量中的较小值
+        VOLUME actualTransmittableVolume = min(demandIter->second, availableKeyVolume);
 
-        // // 根据链路的带宽和实际可传输的数据量，计算需求的执行时间，并更新最小执行时间 executeTime
-        // TIME demandExecuteTime = actualTransmittableVolume / bandwidth;
-        // if (demandExecuteTime < executeTime)
-        // {
-        //     executeTime = demandExecuteTime;
-        // }
+        // 根据链路的带宽和实际可传输的数据量，计算需求的执行时间，并更新最小执行时间 executeTime
+        TIME demandExecuteTime = actualTransmittableVolume / bandwidth;
+        if (demandExecuteTime < executeTime)
+        {
+            executeTime = demandExecuteTime;
+        }
 
         if (demandIter->second / bandwidth < executeTime)
         {
@@ -250,7 +251,8 @@ TIME CNetwork::MinimumRemainingTimeFirst(NODEID nodeId, map<DEMANDID, VOLUME>& r
     for (; scheduledIter != scheduledDemand.end(); scheduledIter++)
     {
         RATE bandwidth = m_vAllLinks[scheduledIter->first].GetBandwidth();
-        relayDemands[scheduledIter->second] = bandwidth * executeTime;
+        // relayDemands[scheduledIter->second] = bandwidth * executeTime;
+        relayDemands[scheduledIter->first] = bandwidth * executeTime;
     }
     return executeTime;
 }
@@ -295,7 +297,11 @@ TIME CNetwork::FindDemandToRelay(map<NODEID, map<DEMANDID, VOLUME>>& relayDemand
         demandIter = nodeIter->second.begin(); //second表示该元素的value值
         for (; demandIter != nodeIter->second.end(); demandIter++)
         {
-            VOLUME newVolume = demandIter->second * minExecuteTime / relayTime;   // minExecuteTime内每个demand传的数据量
+            VOLUME newVolume = demandIter->second;
+            if (relayTime)
+                newVolume = demandIter->second * minExecuteTime / relayTime;   // minExecuteTime内每个demand传的数据量
+            else
+                newVolume = demandIter->second;
             relayDemand[nodeIter->first][demandIter->first] = newVolume;
         }
     }
