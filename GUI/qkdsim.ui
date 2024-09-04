@@ -28,7 +28,7 @@
        </font>
       </property>
       <property name="currentIndex">
-       <number>2</number>
+       <number>5</number>
       </property>
       <widget class="QWidget" name="tab">
        <attribute name="title">
@@ -244,6 +244,16 @@
            <bool>false</bool>
           </attribute>
          </widget>
+        </item>
+       </layout>
+      </widget>
+      <widget class="QWidget" name="tab_6">
+       <attribute name="title">
+        <string>页</string>
+       </attribute>
+       <layout class="QFormLayout" name="formLayout_5">
+        <item row="0" column="0" colspan="2">
+         <widget class="QGraphicsView" name="graph_node"/>
         </item>
        </layout>
       </widget>

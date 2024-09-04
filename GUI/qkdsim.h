@@ -10,6 +10,8 @@
 #include <QFileDialog>
 #include <QTextStream>
 #include <QMessageBox>
+#include <QGraphicsScene>
+#include <QGraphicsTextItem>
 
 
 QT_BEGIN_NAMESPACE
@@ -47,6 +49,7 @@ private slots:
 
 private:
     Ui::QKDSim *ui;
+    QGraphicsScene *scene;  // 将scene作为成员变量
 
 //    int nodeNum;
     CNetwork* net;
@@ -60,6 +63,7 @@ private:
     void readNetTable();
     void readDemTable();
     void showOutput();
+    void showNodeGraph(NODEID nodeId);
 };
 
 #endif // QKDSIM_H

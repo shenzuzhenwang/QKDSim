@@ -20,6 +20,9 @@ QKDSim::QKDSim(QWidget *parent)
     Connections();
 
     net = nullptr;
+
+    scene = new QGraphicsScene(this);
+    ui->graph_node->setScene(scene);
 }
 
 QKDSim::~QKDSim()
@@ -412,6 +415,7 @@ void QKDSim::showOutput()
             }
         }
     }
+    showNodeGraph(0);
 }
 
 void QKDSim::on_bt_start_clicked()
@@ -429,6 +433,7 @@ void QKDSim::on_bt_start_clicked()
 
     // 输出表格
     showOutput();
+
 }
 
 void QKDSim::on_bt_next_clicked()
@@ -477,6 +482,83 @@ void tableWidget_cellChanged(int row, int column, QTableWidget* tableWidget)
             tableWidget->removeRow(row);  // 如果整行为空，则删除该行
         }
     }
+}
+
+void QKDSim::showNodeGraph(NODEID nodeId)
+{
+    int WIDTH = ui->graph_node->size().width() - 20;
+    int HEIGHT = ui->graph_node->size().height() - 20;
+    qreal RADIUS = min(WIDTH, HEIGHT) / 3;
+    int NODE_SIZE = min(WIDTH, HEIGHT) / 10;
+
+    scene->setSceneRect(0, 0, WIDTH, HEIGHT);  // 场景大小
+
+    // 中心节点
+    QGraphicsEllipseItem* centerNode = scene->addEllipse(WIDTH / 2 - NODE_SIZE / 2, HEIGHT / 2 - NODE_SIZE / 2, NODE_SIZE, NODE_SIZE, QPen(), QBrush(Qt::red));
+    QGraphicsTextItem* centerNodeText = scene->addText("0", QFont("Arial", 24));
+    centerNodeText->setPos(WIDTH / 2 - centerNodeText->boundingRect().width() / 2, HEIGHT / 2 - centerNodeText->boundingRect().height() / 2);
+    // 周围的节点数量
+    int numPeripheralNodes = 5;
+
+    // 为每个周围的节点计算位置
+    for (int i = 0; i < numPeripheralNodes; ++i)
+    {
+        qreal angle = 2 * M_PI * i / numPeripheralNodes;  // 分割圆周
+        qreal x = WIDTH / 2 + RADIUS * cos(angle);
+        qreal y = HEIGHT / 2 + RADIUS * sin(angle);
+        QGraphicsEllipseItem* peripheralNode = scene->addEllipse(x - NODE_SIZE / 2, y - NODE_SIZE / 2, NODE_SIZE, NODE_SIZE, QPen(), QBrush(Qt::blue));
+        QGraphicsTextItem* peripheralNodeText = scene->addText(QString::number(i + 1), QFont("Arial", 24)); // 给每个节点一个编号
+        peripheralNodeText->setPos(x - peripheralNodeText->boundingRect().width() / 2, y - peripheralNodeText->boundingRect().height() / 2);
+        // 连接线
+        QGraphicsLineItem* line = scene->addLine(WIDTH / 2, HEIGHT / 2, x, y, QPen(Qt::black));
+        QGraphicsTextItem* lineText = scene->addText(QString::number(i + 1), QFont("Arial", 20)); // 线上也显示编号
+        qreal lineTextX = (WIDTH / 2 + x) / 2;
+        qreal lineTextY = (HEIGHT / 2 + y) / 2;
+        lineText->setPos(lineTextX, lineTextY);
+    }
+
+
+//    map<NODEID, LINKID> perNode1;   // 第一层节点
+//    for (auto linkIter = net->m_vAllLinks.begin(); linkIter != net->m_vAllLinks.end(); linkIter++)
+//    {
+//        if (linkIter->GetSourceId() == nodeId)
+//            perNode1.insert(make_pair(linkIter->GetSinkId(), linkIter->GetLinkId()));
+//    }
+//    map<NODEID, pair<int, int>> loc;
+//    int numPeripheralNodes = perNode1.size();
+//    auto iter = perNode1.begin();
+//    for (int i = 0; i < numPeripheralNodes; i++, iter++)
+//    {
+//        qreal angle = 2 * M_PI * i / numPeripheralNodes;  // 分割圆周
+//        qreal x = WIDTH / 2 + RADIUS * cos(angle);
+//        qreal y = HEIGHT / 2 + RADIUS * sin(angle);
+//        QGraphicsEllipseItem* peripheralNode = scene->addEllipse(x - NODE_SIZE / 2, y - NODE_SIZE / 2, NODE_SIZE, NODE_SIZE, QPen(), QBrush(Qt::blue));
+//        // 链路
+//        scene->addLine(WIDTH / 2, HEIGHT / 2, x, y, QPen(Qt::black));
+//        LINKID link = iter->second;
+
+//        // 位置
+//        loc[iter->first] = make_pair(x, y);
+//    }
+//    // 第一层节点之间的链路
+//    for (auto i = perNode1.begin(); i != perNode1.end(); i++)
+//    {
+//        for(auto j = ++i; j != perNode1.end(); j++)
+//        {
+//            if(net->m_mNodePairToLink.count(make_pair(i->first, j->first)))
+//            {
+//                qreal x1 = loc[i->first].first;
+//                qreal y1 = loc[i->first].second;
+//                qreal x2 = loc[j->first].first;
+//                qreal y2 = loc[j->first].second;
+//                scene->addLine(x1, y1, x2, y2, QPen(Qt::black));
+//                LINKID link = net->m_mNodePairToLink[make_pair(i->first, j->first)];
+
+//            }
+//        }
+//    }
+
+    ui->graph_node->show();
 }
 
 void QKDSim::on_tableWidget_net_cellChanged(int row, int column)
