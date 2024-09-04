@@ -198,6 +198,7 @@ TIME CNetwork::MinimumRemainingTimeFirst(NODEID nodeId, map<DEMANDID, VOLUME>& r
     TIME executeTime = INF;	// 表示当前的最小执行时间
     map<LINKID, DEMANDID> scheduledDemand;	// 记录每条链路上计划要转发的需求
     multimap<TIME, DEMANDID, less<VOLUME>> remainTime;
+    map<DEMANDID, TIME> executeTimeDemand;  // 记录需求的执行时间
     // 遍历当前节点 nodeId 上的所有需求（记录在 m_mRelayVolume 中），跳过尚未到达的需求（通过到达时间判断）
     map<DEMANDID, VOLUME>::iterator demandIter;
     demandIter = m_vAllNodes[nodeId].m_mRelayVolume.begin();
@@ -217,19 +218,37 @@ TIME CNetwork::MinimumRemainingTimeFirst(NODEID nodeId, map<DEMANDID, VOLUME>& r
         // 获取该链路上的可用密钥量
         VOLUME availableKeyVolume = m_vAllLinks[midLink].GetAvaialbeKeys();
         // 实际可以传输的数据量取决于带宽和可用密钥量中的较小值
-        VOLUME actualTransmittableVolume = min(demandIter->second, availableKeyVolume);
+        // VOLUME actualTransmittableVolume = demandIter->second;
+        // if (availableKeyVolume < actualTransmittableVolume)
+        // {
+        //     if (availableKeyVolume != 0)
+        //     {
+        //         actualTransmittableVolume = availableKeyVolume;
+        //     }
+        //     else
+        //     {
+        //         actualTransmittableVolume = 0
+        //     }
 
+        VOLUME actualTransmittableVolume = min(demandIter->second, availableKeyVolume);
+        // }
         // 根据链路的带宽和实际可传输的数据量，计算需求的执行时间，并更新最小执行时间 executeTime
+        
         TIME demandExecuteTime = actualTransmittableVolume / bandwidth;
-        if (demandExecuteTime < executeTime)
+        
+        if (demandExecuteTime < executeTime && demandExecuteTime != 0)
         {
             executeTime = demandExecuteTime;
         }
+
+        // 该需求的执行时间
+        executeTimeDemand[selectedDemand] = demandExecuteTime;
 
         if (demandIter->second / bandwidth < executeTime)
         {
             executeTime = demandIter->second / bandwidth;
         }
+
         // 如果该链路上还没有被调度的需求，将当前需求 selectedDemand 设置为该链路的调度需求。
         if (scheduledDemand.find(midLink) == scheduledDemand.end())
         {
@@ -251,8 +270,15 @@ TIME CNetwork::MinimumRemainingTimeFirst(NODEID nodeId, map<DEMANDID, VOLUME>& r
     for (; scheduledIter != scheduledDemand.end(); scheduledIter++)
     {
         RATE bandwidth = m_vAllLinks[scheduledIter->first].GetBandwidth();
-        // relayDemands[scheduledIter->second] = bandwidth * executeTime;
-        relayDemands[scheduledIter->first] = bandwidth * executeTime;
+        if (executeTimeDemand[scheduledIter->second] != 0)
+        {
+            relayDemands[scheduledIter->second] = bandwidth * executeTime;
+        }
+        else
+        {
+            relayDemands[scheduledIter->second] = 0;
+        }
+        
     }
     return executeTime;
 }
@@ -282,6 +308,9 @@ TIME CNetwork::FindDemandToRelay(map<NODEID, map<DEMANDID, VOLUME>>& relayDemand
         // 将每个节点的转发需求量存储在 nodeRelayDemand 中
         nodeRelayDemand[nodeId] = tempRelayDemand;
     }
+    
+    cout<<"minExecuteTime: "<<minExecuteTime<<endl;
+    
     // 判断是否在当前最小转发时间 minExecuteTime 内有新的需求到达。如果是，则将 minExecuteTime 更新为下一个需求到达时间与当前模拟时间的差值
     if (!m_mDemandArriveTime.empty() && m_dSimTime + minExecuteTime + SMALLNUM > m_mDemandArriveTime.begin()->first)
     {
@@ -297,11 +326,16 @@ TIME CNetwork::FindDemandToRelay(map<NODEID, map<DEMANDID, VOLUME>>& relayDemand
         demandIter = nodeIter->second.begin(); //second表示该元素的value值
         for (; demandIter != nodeIter->second.end(); demandIter++)
         {
-            VOLUME newVolume = demandIter->second;
-            if (relayTime)
-                newVolume = demandIter->second * minExecuteTime / relayTime;   // minExecuteTime内每个demand传的数据量
-            else
-                newVolume = demandIter->second;
+            if (relayDemand[nodeIter->first][demandIter->first] == 0)
+            {
+                continue;
+            }
+            VOLUME newVolume = demandIter->second * minExecuteTime / relayTime;
+            // VOLUME newVolume = demandIter->second;
+            // if (relayTime)
+            //     newVolume = demandIter->second * minExecuteTime / relayTime;   // minExecuteTime内每个demand传的数据量
+            // else
+            //     newVolume = demandIter->second;
             relayDemand[nodeIter->first][demandIter->first] = newVolume;
         }
     }
