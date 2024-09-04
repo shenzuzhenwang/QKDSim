@@ -187,3 +187,9 @@ bool CDemand::GetAllDelivered()
 {
     return m_bAllDelivered;
 }
+
+// CDemand.cpp 文件中实现 ClearPath 方法
+void CDemand::ClearPath()
+{
+    m_Path.Clear();
+}

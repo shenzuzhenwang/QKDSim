@@ -25,7 +25,7 @@ void CNetwork::MoveSimTime(TIME executionTime)
     demandIter = m_mDemandArriveTime.begin();
     while (demandIter->first <= m_dSimTime + SMALLNUM)
     {
-        demandIter = m_mDemandArriveTime.erase(demandIter);//erase 方法删除当前迭代器所指向的元素，并返回一个指向下一个元素的迭代器。
+        demandIter = m_mDemandArriveTime.erase(demandIter);     //erase 方法删除当前迭代器所指向的元素，并返回一个指向下一个元素的迭代器。
         if (demandIter == m_mDemandArriveTime.end())
         {
             break;
@@ -72,7 +72,10 @@ void CNetwork::InitKeyManagerOverLink(LINKID linkId)
     newKeyManager.SetKeyManagerId(linkId);
     newKeyManager.SetKeyRate(m_vAllLinks[linkId].GetQKDRate());
     newKeyManager.SetAvailableKeys(0);
-    m_vAllKeyManager.push_back(newKeyManager);
+
+    m_vAllLinks[linkId].SetKeyManager(newKeyManager);
+//    m_vAllKeyManager.push_back(newKeyManager);
+
 }
 
 void CNetwork::InitNodes(UINT nodeNum)
@@ -383,6 +386,17 @@ void CNetwork::RelayForOneHop(TIME executeTime, map<NODEID, map<DEMANDID, VOLUME
     }
     // 调用 UpdateRemainingKeys，根据执行时间 executeTime 更新所有链路上的剩余密钥数量
     UpdateRemainingKeys(executeTime, m_dSimTime);
+    // UpdateRemainingKeys(executeTime);
+}
+// 更新所有链路上的剩余密钥数量
+void CNetwork::UpdateRemainingKeys(TIME executionTime)
+{
+    vector<CLink>::iterator linkIter;
+    linkIter = m_vAllLinks.begin();
+    for (; linkIter != m_vAllLinks.end(); linkIter++)
+    {
+        linkIter->UpdateRemainingKeys(executionTime);
+    }
 }
 // 更新所有链路上的剩余密钥数量
 void CNetwork::UpdateRemainingKeys(TIME executionTime, TIME m_dSimTime)
@@ -444,25 +458,28 @@ bool CNetwork::CheckFault()
     demandIter = m_mDemandArriveTime.begin();
     for (; demandIter != m_mDemandArriveTime.end(); demandIter++)
     {
-        if (demandIter->second > 1000000)//说明是作为fault信息插入的demand
+        if (demandIter->second >= 1000000)   // 说明是作为fault信息插入的demand
         {
-            //遍历m_vAllLinks，修改相应的link的weight
-            vector<CLink>::iterator linkIter;
-            linkIter = m_vAllLinks.begin();
-            for (; linkIter != m_vAllLinks.end(); linkIter++)
-            {
-                if (linkIter->GetFaultTime() == demandIter->first)
-                {
-                    linkIter->SetWeight(INF);
-                    return true;
-                    // vector<CDemand>::iterator demandIter;
-                    // demandIter = m_vAllDemands.begin();
-                    // for (; demandIter != m_vAllDemands.end(); demandIter++)
-                    // {
-                    //     //备用于故障link/node特殊性（是否是源节点、目的节点）的检查
-                    // }
-                }
-            }
+            LINKID linkId = demandIter->second - 1000000;
+            m_vAllLinks[linkId].SetWeight(INF);
+            return true;
+
+//            vector<CLink>::iterator linkIter;
+//            linkIter = m_vAllLinks.begin();
+//            for (; linkIter != m_vAllLinks.end(); linkIter++)
+//            {
+//                if (linkIter->GetFaultTime() == demandIter->first)
+//                {
+//                    linkIter->SetWeight(INF);
+//                    return true;
+//                    // vector<CDemand>::iterator demandIter;
+//                    // demandIter = m_vAllDemands.begin();
+//                    // for (; demandIter != m_vAllDemands.end(); demandIter++)
+//                    // {
+//                    //     //备用于故障link/node特殊性（是否是源节点、目的节点）的检查
+//                    // }
+//                }
+//            }
         }
     }
     return false;
@@ -477,25 +494,23 @@ void CNetwork::Rerouting()
     //检查是否存在无法通信的源目的节点对（即无法算出连接源节点和目的节点的路径），并显示相应的源目的节点对
 
     //遍历全部demand，对于每个demand，比较旧relaypath和新relaypath，将不在新relaypath中的node上和上link上的待发送需求清空
+
 }
 
 //为指定需求重新初始化中继路径
 void CNetwork::ReInitRelayPath(DEMANDID demandId)
 {
-    // if (m_vAllDemands[demandId].GetRouted()) //某个demand是否已经被路由用变量m_bRouted（false/routed）记录
-    // {
-    //     return;
-    // }
     NODEID sourceId = m_vAllDemands[demandId].GetSourceId();
     NODEID sinkId = m_vAllDemands[demandId].GetSinkId();
     list<NODEID> nodeList;
     list<LINKID> linkList;
     // //重新计算指定需求对应的新中继路径之前，先保存一下旧路径用于比较
-    // CRelayPath oldPath;
-    // m_vAllDemands[demandId].m_Path.m_lTraversedNodes
-    //（是否需要比较？？？？）（如果不通过比较来进行清空，一些已经不在新路径上的node&link还会继续转发之前到达的需求）
-    // 读取旧路径
-    // 新变量存储旧路径
+    CRelayPath oldPath;
+    oldPath = m_vAllDemands[demandId].m_Path;
+
+    // 清空旧路径
+    m_vAllDemands[demandId].ClearPath();
+
     // 更新路径（保证旧路径被删除）
     // 调用 ShortestPath 函数，寻找从 sourceId 到 sinkId 的最短路径
     if (ShortestPath(sourceId, sinkId, nodeList, linkList))

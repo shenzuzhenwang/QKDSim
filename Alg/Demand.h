@@ -56,5 +56,8 @@ public:
     bool GetAllDelivered();
 
     void InitRelayPath(list<NODEID>& nodeList, list<LINKID>& linkList);	// 初始化需求的传输路径，包括路径中的节点和链路
+
+    // 添加一个新方法来清空旧的路径
+    void ClearPath();
 };
 

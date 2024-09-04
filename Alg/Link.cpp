@@ -1,4 +1,5 @@
 ﻿#include "Link.h"
+#include <algorithm>
 
 CLink::CLink(void)
 {
@@ -109,6 +110,7 @@ WEIGHT CLink::GetWeight()
     return m_dWeight;
 }
 
+
 void CLink::SetFaultTime(TIME faultTime)
 {
     m_dFaultTime = faultTime;
@@ -120,6 +122,11 @@ TIME CLink::GetFaultTime()
 }
 
 //密钥相关
+void CLink::SetKeyManager(const CKeyManager& keyManager)
+{
+    m_KeyManager = keyManager;
+}
+
 void CLink::ConsumeKeys(VOLUME keys)
 {
     m_KeyManager.ConsumeKeys(keys);
@@ -128,31 +135,44 @@ VOLUME CLink::GetAvaialbeKeys()
 {
     return m_KeyManager.GetAvailableKeys();
 }
-// void CLink::UpdateRemainingKeys(TIME executionTime)
-// {
-//     m_KeyManager.CollectKeys(executionTime*m_KeyManager.GetKeyRate());
-// }
+void CLink::UpdateRemainingKeys(TIME executionTime)
+{
+    m_KeyManager.CollectKeys(executionTime*m_KeyManager.GetKeyRate());
+}
 // 修改后的 UpdateRemainingKeys 方法
 void CLink::UpdateRemainingKeys(TIME executionTime, TIME m_dSimTime)
 {
     // 获取当前的关键速率
     double m_dKeyRate = m_KeyManager.GetKeyRate();
+
     // 将当前仿真时间转换为种子
     unsigned int seed = static_cast<unsigned int>(m_dSimTime);
     std::default_random_engine generator(seed);
-    // 创建一个正态分布器，以 m_dKeyRate 为均值，以 0.1 * m_dKeyRate 为标准差
-    std::normal_distribution<double> distribution(m_dKeyRate, 0.1 * m_dKeyRate);
+
+    // 计算标准差并确保其为正值
+    double stddev = 0.1 * m_dKeyRate;
+    // stddev = std::max(stddev, 1e-9); // 使用 std::max 来确保最小标准差
+    stddev = max(stddev, 1e-9); // 使用 max 来确保最小标准差
+
+    // 创建一个正态分布器，以 m_dKeyRate 为均值，以经过验证的标准差为标准差
+    std::normal_distribution<double> distribution(m_dKeyRate, stddev);
+
     // 生成一个随机值，表示新增加的密钥数量
     double random_value = distribution(generator) * executionTime;
+
     // 确保随机值不能小于零
     if (random_value < 0.0) {
         random_value = 0.0;
     }
+
     // 使用计算出的随机值更新剩余的键
     m_KeyManager.CollectKeys(random_value);
+
     // 根据时间差和失效概率失效部分密钥
     double failureProbabilityPerUnitTime = 0.1; // 示意性失效概率
     for (TIME t = 0; t < executionTime; ++t) {
         m_KeyManager.InvalidateKeys(failureProbabilityPerUnitTime, generator);
     }
 }
+
+
