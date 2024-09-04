@@ -196,8 +196,6 @@ void QKDSim::readNetTable()
         TIME proDelay, faultTime;
         WEIGHT weight;
 
-        int id_faultTime = 1000000+row;
-
         // 从表格的每一列读取数据
         QTableWidgetItem *linkIdItem = ui->tableWidget_net->item(row, 0);
         QTableWidgetItem *sourceIdItem = ui->tableWidget_net->item(row, 1);
@@ -242,8 +240,9 @@ void QKDSim::readNetTable()
             net->InitKeyManagerOverLink(linkId);
 
             /**********如何赋值**************/
-            net->m_mDemandArriveTime.insert(make_pair(faultTime, id_faultTime));   // 增加m_mDemandArriveTime视为增加故障点
-
+            int id_faultTime = 1000000 + linkId;    // m_mDemandArriveTime插入的value为1000000 + linkId
+            if (faultTime >= 0)
+                net->m_mDemandArriveTime.insert(make_pair(faultTime, id_faultTime));   // 增加m_mDemandArriveTime视为增加故障点
         }
         else
         {

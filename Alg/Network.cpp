@@ -25,7 +25,7 @@ void CNetwork::MoveSimTime(TIME executionTime)
     demandIter = m_mDemandArriveTime.begin();
     while (demandIter->first <= m_dSimTime + SMALLNUM)
     {
-        demandIter = m_mDemandArriveTime.erase(demandIter);//erase 方法删除当前迭代器所指向的元素，并返回一个指向下一个元素的迭代器。
+        demandIter = m_mDemandArriveTime.erase(demandIter);     //erase 方法删除当前迭代器所指向的元素，并返回一个指向下一个元素的迭代器。
         if (demandIter == m_mDemandArriveTime.end())
         {
             break;
@@ -418,25 +418,28 @@ bool CNetwork::CheckFault()
     demandIter = m_mDemandArriveTime.begin();
     for (; demandIter != m_mDemandArriveTime.end(); demandIter++)
     {
-        if (demandIter->second > 1000000)//说明是作为fault信息插入的demand
+        if (demandIter->second >= 1000000)   // 说明是作为fault信息插入的demand
         {
-            //遍历m_vAllLinks，修改相应的link的weight
-            vector<CLink>::iterator linkIter;
-            linkIter = m_vAllLinks.begin();
-            for (; linkIter != m_vAllLinks.end(); linkIter++)
-            {
-                if (linkIter->GetFaultTime() == demandIter->first)
-                {
-                    linkIter->SetWeight(INF);
-                    return true;
-                    // vector<CDemand>::iterator demandIter;
-                    // demandIter = m_vAllDemands.begin();
-                    // for (; demandIter != m_vAllDemands.end(); demandIter++)
-                    // {
-                    //     //备用于故障link/node特殊性（是否是源节点、目的节点）的检查
-                    // }
-                }
-            }
+            LINKID linkId = demandIter->second - 1000000;
+            m_vAllLinks[linkId].SetWeight(INF);
+            return true;
+
+//            vector<CLink>::iterator linkIter;
+//            linkIter = m_vAllLinks.begin();
+//            for (; linkIter != m_vAllLinks.end(); linkIter++)
+//            {
+//                if (linkIter->GetFaultTime() == demandIter->first)
+//                {
+//                    linkIter->SetWeight(INF);
+//                    return true;
+//                    // vector<CDemand>::iterator demandIter;
+//                    // demandIter = m_vAllDemands.begin();
+//                    // for (; demandIter != m_vAllDemands.end(); demandIter++)
+//                    // {
+//                    //     //备用于故障link/node特殊性（是否是源节点、目的节点）的检查
+//                    // }
+//                }
+//            }
         }
     }
     return false;
