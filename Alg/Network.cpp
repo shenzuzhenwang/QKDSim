@@ -765,16 +765,16 @@ void CNetwork::Rerouting()
     ReInitRelayPath();
 
     //检查是否存在无法通信的源目的节点对（即无法算出连接源节点和目的节点的路径），并显示相应的源目的节点对
-    // for (int demandID = 0; demandID < GetDemandNum(); demandID++)
-    // {
-    //     if (m_vAllDemands[demandID].m_Path.m_lTraversedNodes.empty())
-    //     {
-    //         // 打印这个被清空路径的 demand 对象
-    //         std::cout << "Demand"<< demandID <<" cannot be relayed"<<std::endl;
-    //         // 清除（或输出）这个demand
-    //         m_vAllDemands.erase(m_vAllDemands.begin() + demandID);
-    //     }
-    // }
+    for (int demandID = 0; demandID < GetDemandNum(); demandID++)
+    {
+        if (m_vAllDemands[demandID].m_Path.m_lTraversedNodes.empty())
+        {
+            // 打印这个被清空路径的 demand 对象
+            std::cout << "Demand"<< demandID <<" cannot be relayed"<<std::endl;
+            // // 清除（或输出）这个demand
+            // m_vAllDemands.erase(m_vAllDemands.begin() + demandID);
+        }
+    }
     //遍历全部demand，对于每个demand，比较旧relaypath和新relaypath，将不在新relaypath中的node上和上link上的待发送需求清空
 
 }
