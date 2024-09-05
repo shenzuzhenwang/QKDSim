@@ -44,8 +44,4 @@ release
 # Qt
 *.user
 Debug
-<<<<<<< HEAD
 build
-=======
-build
->>>>>>> master
