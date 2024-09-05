@@ -182,7 +182,7 @@ void CNetwork::InitRelayPath(DEMANDID demandId)
 // 为所有需求初始化中继路径
 void CNetwork::InitRelayPath()
 {
-    cout<<"初始化中继路径"<<endl;
+    cout << "初始化中继路径" << endl;
     vector<CDemand>::iterator demandIter;
     demandIter = m_vAllDemands.begin();
     for (; demandIter != m_vAllDemands.end(); demandIter++)
@@ -236,9 +236,9 @@ TIME CNetwork::MinimumRemainingTimeFirst(NODEID nodeId, map<DEMANDID, VOLUME>& r
         VOLUME actualTransmittableVolume = min(demandIter->second, availableKeyVolume);
         // }
         // 根据链路的带宽和实际可传输的数据量，计算需求的执行时间，并更新最小执行时间 executeTime
-        
+
         TIME demandExecuteTime = actualTransmittableVolume / bandwidth;
-        
+
         if (demandExecuteTime < executeTime && demandExecuteTime != 0)
         {
             executeTime = demandExecuteTime;
@@ -281,7 +281,7 @@ TIME CNetwork::MinimumRemainingTimeFirst(NODEID nodeId, map<DEMANDID, VOLUME>& r
         {
             relayDemands[scheduledIter->second] = 0;
         }
-        
+
     }
     return executeTime;
 }
@@ -311,9 +311,9 @@ TIME CNetwork::FindDemandToRelay(map<NODEID, map<DEMANDID, VOLUME>>& relayDemand
         // 将每个节点的转发需求量存储在 nodeRelayDemand 中
         nodeRelayDemand[nodeId] = tempRelayDemand;
     }
-    
-    cout<<"minExecuteTime: "<<minExecuteTime<<endl;
-    
+
+    cout << "minExecuteTime: " << minExecuteTime << endl;
+
     // 判断是否在当前最小转发时间 minExecuteTime 内有新的需求到达。如果是，则将 minExecuteTime 更新为下一个需求到达时间与当前模拟时间的差值
     if (!m_mDemandArriveTime.empty() && m_dSimTime + minExecuteTime + SMALLNUM > m_mDemandArriveTime.begin()->first)
     {
@@ -329,10 +329,10 @@ TIME CNetwork::FindDemandToRelay(map<NODEID, map<DEMANDID, VOLUME>>& relayDemand
         demandIter = nodeIter->second.begin(); //second表示该元素的value值
         for (; demandIter != nodeIter->second.end(); demandIter++)
         {
-            if (relayDemand[nodeIter->first][demandIter->first] == 0)
-            {
-                continue;
-            }
+//            if (relayDemand[nodeIter->first][demandIter->first] == 0)
+//            {
+//                continue;
+//            }
             VOLUME newVolume = demandIter->second * minExecuteTime / relayTime;
             // VOLUME newVolume = demandIter->second;
             // if (relayTime)
