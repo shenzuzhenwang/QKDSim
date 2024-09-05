@@ -249,7 +249,7 @@ void QKDSim::readNetTable()
             ui->statusbar->showMessage("Error: Missing data in network table", 5000);
         }
     }
-    net->SetLinkNum(ui->tableWidget_net->rowCount());
+    net->SetLinkNum(ui->tableWidget_net->rowCount()-1);  //第一行是link数量，需要rowCount()-1
     ui->statusbar->showMessage("Network data processed successfully", 5000);
 }
 
@@ -299,7 +299,7 @@ void QKDSim::readDemTable()
     }
 
 
-    net->SetDemandNum(ui->tableWidget_dem->rowCount());
+    net->SetDemandNum(ui->tableWidget_dem->rowCount()-1);  //第一行是demand数量，需要rowCount()-1
     ui->statusbar->showMessage("Demand data processed successfully", 5000);
 }
 

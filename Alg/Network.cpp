@@ -765,8 +765,10 @@ void CNetwork::Rerouting()
     ReInitRelayPath();
 
     //检查是否存在无法通信的源目的节点对（即无法算出连接源节点和目的节点的路径），并显示相应的源目的节点对
-    for (int demandID = 0; demandID < GetDemandNum(); demandID++)
+    for (int demandID = static_cast<int>(GetDemandNum()) - 1; demandID >= 0; demandID--)  //从后向前遍历，避免因删除元素导致的vector访问越界
     {
+        // std::cout << "GetDemandNum "<< GetDemandNum() << std::endl;
+        // std::cout << "GetLinkNum "<< GetLinkNum() << std::endl;
         if (m_vAllDemands[demandID].m_Path.m_lTraversedNodes.empty())
         {
             // 打印这个被清空路径的 demand 对象
