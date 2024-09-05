@@ -25,6 +25,9 @@ public:
 
     multimap<TIME, DEMANDID> m_mDemandArriveTime;	// 存储需求到达时间和需求ID的映射表
 
+    TIME FaultTime;  //表示当前故障发生的时间
+
+
 private:
     UINT m_uiNodeNum;	// 网络中的节点数量
     UINT m_uiLinkNum;	// 网络中的链路数量
@@ -60,7 +63,7 @@ public:
 
     // functions for relay rerouting  发生故障时的抗毁（重路由）功能
     // void CheckFault(DEMANDID demandId);
-    bool CheckFault();
+    void CheckFault();
     void ReInitRelayPath(DEMANDID demandId);
     void ReInitRelayPath();//for all demands
     void Rerouting();

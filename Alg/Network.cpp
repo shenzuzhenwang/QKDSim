@@ -1,8 +1,10 @@
 ﻿#include "Network.h"
+#include <iostream>
 
 CNetwork::CNetwork(void)
 {
     m_dSimTime = 0;
+    FaultTime = 0;
 }
 
 
@@ -25,6 +27,18 @@ void CNetwork::MoveSimTime(TIME executionTime)
     demandIter = m_mDemandArriveTime.begin();
     while (demandIter->first <= m_dSimTime + SMALLNUM)
     {
+        // if (!(demandIter->second >= 1000000))
+        // {
+        //     demandIter = m_mDemandArriveTime.erase(demandIter);     //erase 方法删除当前迭代器所指向的元素，并返回一个指向下一个元素的迭代器。
+        // }
+
+        // for(; demandIter != m_mDemandArriveTime.end(); demandIter++)
+        // {
+        //    std::cout << "Current demandIter: " << demandIter->first << std::endl;
+        // }
+
+        // std::cout << "Current demandIter: " << demandIter->first << std::endl;
+        // std::cout << "Current Time: " << m_dSimTime << std::endl;
         demandIter = m_mDemandArriveTime.erase(demandIter);     //erase 方法删除当前迭代器所指向的元素，并返回一个指向下一个元素的迭代器。
         if (demandIter == m_mDemandArriveTime.end())
         {
@@ -668,7 +682,13 @@ TIME CNetwork::OneTimeRelay()
 {
     map<NODEID, map<DEMANDID, VOLUME>> nodeRelay;
 
-    if (CheckFault())
+    std::cout << "Current Time: " << m_dSimTime << std::endl;
+    std::cout << "Current FaultTime: " << FaultTime << std::endl;
+
+    // if (CheckFault() && std::abs(m_dSimTime-FaultTime)< SMALLNUM)  //发现fault且时间已经推进到FaultTime
+    // 这里需要注意，故障生成需要按照faultTime逐次进行
+    CheckFault();
+    if (m_dSimTime == FaultTime)  //
     {
         Rerouting();
     }
@@ -692,17 +712,31 @@ void CNetwork::MainProcess()
 //故障节点检查（是否是源节点or目的节点,如果是源节点or目的节点，需要将对应的demand删除，并显示）
 
 //检查是否产生了fault（检查整个m_vAllDemands），并修改相应的link的weight
-bool CNetwork::CheckFault()
+void CNetwork::CheckFault()
 {
     multimap<TIME, DEMANDID>::iterator demandIter;
     demandIter = m_mDemandArriveTime.begin();
+    TIME previousFaultTime = 0;
     for (; demandIter != m_mDemandArriveTime.end(); demandIter++)
     {
-        if (demandIter->second >= 1000000)   // 说明是作为fault信息插入的demand
+        // if (demandIter->second >= 1000000 && std::abs(m_dSimTime-demandIter->first)<SMALLNUM)
+        if (demandIter->second >= 1000000)       // 说明是作为fault信息插入的demand
         {
+            // 记录当前最小的FaultTime，用于后续比较
+            if (previousFaultTime == 0)
+            {
+                previousFaultTime = demandIter->first;
+            }
+            FaultTime = demandIter->first;
+            // 检查faultTime是否发生变化
+            if (FaultTime != previousFaultTime)
+            {
+                FaultTime = previousFaultTime;
+                break;
+            }
             LINKID linkId = demandIter->second - 1000000;
             m_vAllLinks[linkId].SetWeight(INF);
-            return true;
+            // std::cout << "Fault Link: " << linkId << std::endl;
 
 //            vector<CLink>::iterator linkIter;
 //            linkIter = m_vAllLinks.begin();
@@ -722,7 +756,6 @@ bool CNetwork::CheckFault()
 //            }
         }
     }
-    return false;
 }
 
 //重路由函数
@@ -732,7 +765,16 @@ void CNetwork::Rerouting()
     ReInitRelayPath();
 
     //检查是否存在无法通信的源目的节点对（即无法算出连接源节点和目的节点的路径），并显示相应的源目的节点对
-
+    // for (int demandID = 0; demandID < GetDemandNum(); demandID++)
+    // {
+    //     if (m_vAllDemands[demandID].m_Path.m_lTraversedNodes.empty())
+    //     {
+    //         // 打印这个被清空路径的 demand 对象
+    //         std::cout << "Demand"<< demandID <<" cannot be relayed"<<std::endl;
+    //         // 清除（或输出）这个demand
+    //         m_vAllDemands.erase(m_vAllDemands.begin() + demandID);
+    //     }
+    // }
     //遍历全部demand，对于每个demand，比较旧relaypath和新relaypath，将不在新relaypath中的node上和上link上的待发送需求清空
 
 }
