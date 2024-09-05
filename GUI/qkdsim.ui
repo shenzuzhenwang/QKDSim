@@ -28,7 +28,7 @@
        </font>
       </property>
       <property name="currentIndex">
-       <number>3</number>
+       <number>2</number>
       </property>
       <widget class="QWidget" name="tab">
        <attribute name="title">
@@ -65,8 +65,8 @@
        <widget class="QPushButton" name="bt_start">
         <property name="geometry">
          <rect>
-          <x>580</x>
-          <y>170</y>
+          <x>480</x>
+          <y>120</y>
           <width>111</width>
           <height>51</height>
          </rect>

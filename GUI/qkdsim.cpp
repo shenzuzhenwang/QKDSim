@@ -19,7 +19,7 @@ QKDSim::QKDSim(QWidget *parent)
 
     Connections();
 
-    net = new CNetwork();
+    net = nullptr;
 }
 
 QKDSim::~QKDSim()
@@ -422,6 +422,11 @@ void QKDSim::showOutput()
 
 void QKDSim::on_bt_start_clicked()
 {
+    // 清空上一次的数据
+    if (net != nullptr)
+        delete net;
+    net = new CNetwork();
+
     readNetTable();
     readDemTable();
 
