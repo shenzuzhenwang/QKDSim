@@ -5,6 +5,7 @@ CDemand::CDemand(void)
     m_dDeliveredVolume = 0;
     m_bRouted = false;
     m_bAllDelivered = false;
+    m_bRouteFailed = false;
 }
 
 
@@ -26,6 +27,7 @@ CDemand::CDemand(const CDemand& Demand)
     m_bRouted = Demand.m_bRouted;
     m_bAllDelivered = Demand.m_bAllDelivered;
     m_dDeliveredVolume = Demand.m_dDeliveredVolume;
+    m_bRouteFailed = Demand.m_bRouteFailed;
 }
 
 void CDemand::operator=(const CDemand& Demand)
@@ -41,6 +43,7 @@ void CDemand::operator=(const CDemand& Demand)
     m_bRouted = Demand.m_bRouted;
     m_bAllDelivered = Demand.m_bAllDelivered;
     m_dDeliveredVolume = Demand.m_dDeliveredVolume;
+    m_bRouteFailed = Demand.m_bRouteFailed;
 }
 
 void CDemand::SetDemandId(DEMANDID demandId)
@@ -148,6 +151,16 @@ bool CDemand::GetRouted()
     return m_bRouted;
 }
 
+void CDemand::SetRoutedFailed(bool RouteFailed)
+{
+    m_bRouteFailed = RouteFailed;
+}
+
+bool CDemand::GetRoutedFailed()
+{
+    return m_bRouteFailed;
+}
+
 VOLUME CDemand::GetDeliveredVolume()
 {
     return m_dDeliveredVolume;
@@ -163,6 +176,12 @@ void CDemand::UpdateDeliveredVolume(VOLUME moreDelivered, TIME simTime)
     }
 }
 
+void CDemand::CheckRoutedFailed()
+{
+    // SetRoutedFailed(true);
+    m_bRouteFailed = true;
+    m_bAllDelivered = true;
+}
 
 void CDemand::InitRelayPath(list<NODEID>& nodeList, list<LINKID>& linkList) //在CNetwork::InitRelayPath()中被调用
 {
@@ -193,3 +212,4 @@ void CDemand::ClearPath()
 {
     m_Path.Clear();
 }
+

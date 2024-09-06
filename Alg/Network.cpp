@@ -546,7 +546,6 @@ TIME CNetwork::OneTimeRelay()
     // 这里需要注意，故障生成需要按照faultTime逐次进行
     if (m_dSimTime == FaultTime)  //
     {
-        std::cout << "13213213213213213213213213216456546546546" << FaultTime << std::endl;
         Rerouting();
     }
     CheckFault();
@@ -635,10 +634,11 @@ void CNetwork::Rerouting()
             std::cout << "Demand"<< demandID <<" cannot be relayed"<<std::endl;
             // // 清除（或输出）这个demand
             // m_vAllDemands.erase(m_vAllDemands.begin() + demandID);
+            // 结束这个demand的传输并添加标记
+            m_vAllDemands[demandID].CheckRoutedFailed();
         }
     }
     //遍历全部demand，对于每个demand，比较旧relaypath和新relaypath，将不在新relaypath中的node上和上link上的待发送需求清空
-
 }
 
 //为指定需求重新初始化中继路径
