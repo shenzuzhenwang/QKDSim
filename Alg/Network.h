@@ -70,7 +70,7 @@ public:
 
     //function for scheduling
     TIME MinimumRemainingTimeFirst(NODEID nodeId, map<DEMANDID, VOLUME>& relayDemands); // 计算给定节点的需求转发执行时间
-	// TIME AverageKeyScheduling(NODEID nodeId, map<DEMANDID,VOLUME>& relayDemands);// 计算给定节点的需求转发执行时间
+	TIME AverageKeyScheduling(NODEID nodeId, map<DEMANDID,VOLUME>& relayDemands);// 计算给定节点的需求转发执行时间
     TIME FindDemandToRelay(NODEID nodeId, map<DEMANDID, VOLUME>& relayDemand);	// 确定应转发的需求，并计算所需的时间
     TIME FindDemandToRelay(map<NODEID, map<DEMANDID, VOLUME>>& relayDemand);
     void RelayForOneHop(TIME executeTime, map<NODEID, map<DEMANDID, VOLUME>>& relayDemands); // 执行一次需求转发操作，中继到下一跳

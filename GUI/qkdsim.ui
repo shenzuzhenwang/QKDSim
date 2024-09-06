@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>884</width>
-    <height>672</height>
+    <width>810</width>
+    <height>567</height>
    </rect>
   </property>
   <property name="font">
@@ -28,7 +28,7 @@
        </font>
       </property>
       <property name="currentIndex">
-       <number>2</number>
+       <number>4</number>
       </property>
       <widget class="QWidget" name="tab">
        <attribute name="title">
@@ -62,119 +62,123 @@
        <attribute name="title">
         <string>选项</string>
        </attribute>
-       <widget class="QPushButton" name="bt_start">
-        <property name="geometry">
-         <rect>
-          <x>480</x>
-          <y>120</y>
-          <width>111</width>
-          <height>51</height>
-         </rect>
+       <layout class="QGridLayout" name="gridLayout_4">
+        <property name="sizeConstraint">
+         <enum>QLayout::SetDefaultConstraint</enum>
         </property>
-        <property name="text">
-         <string>启动</string>
-        </property>
-       </widget>
-       <widget class="QGroupBox" name="groupBox">
-        <property name="geometry">
-         <rect>
-          <x>40</x>
-          <y>40</y>
-          <width>331</width>
-          <height>91</height>
-         </rect>
-        </property>
-        <property name="title">
-         <string>路由算法</string>
-        </property>
-        <widget class="QWidget" name="layoutWidget">
-         <property name="geometry">
-          <rect>
-           <x>20</x>
-           <y>40</y>
-           <width>296</width>
-           <height>41</height>
-          </rect>
-         </property>
+        <item row="0" column="0">
          <layout class="QHBoxLayout" name="horizontalLayout">
+          <property name="sizeConstraint">
+           <enum>QLayout::SetDefaultConstraint</enum>
+          </property>
           <item>
-           <widget class="QRadioButton" name="radioButton">
-            <property name="text">
-             <string>算法1</string>
+           <layout class="QVBoxLayout" name="verticalLayout">
+            <property name="sizeConstraint">
+             <enum>QLayout::SetDefaultConstraint</enum>
             </property>
-           </widget>
+            <item>
+             <layout class="QHBoxLayout" name="horizontalLayout_4">
+              <property name="sizeConstraint">
+               <enum>QLayout::SetDefaultConstraint</enum>
+              </property>
+              <item>
+               <widget class="QLabel" name="label_2">
+                <property name="text">
+                 <string>节点数量</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QLineEdit" name="edit_node_num">
+                <property name="alignment">
+                 <set>Qt::AlignCenter</set>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+            <item>
+             <widget class="QGroupBox" name="groupBox">
+              <property name="minimumSize">
+               <size>
+                <width>400</width>
+                <height>100</height>
+               </size>
+              </property>
+              <property name="title">
+               <string>路由算法</string>
+              </property>
+              <layout class="QGridLayout" name="gridLayout_3">
+               <property name="sizeConstraint">
+                <enum>QLayout::SetDefaultConstraint</enum>
+               </property>
+               <item row="0" column="0">
+                <widget class="QRadioButton" name="radioButton">
+                 <property name="text">
+                  <string>算法1</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="0" column="1">
+                <widget class="QRadioButton" name="radioButton_2">
+                 <property name="text">
+                  <string>算法2</string>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </widget>
+            </item>
+            <item>
+             <widget class="QGroupBox" name="groupBox_2">
+              <property name="minimumSize">
+               <size>
+                <width>400</width>
+                <height>100</height>
+               </size>
+              </property>
+              <property name="title">
+               <string>调度算法</string>
+              </property>
+              <layout class="QGridLayout" name="gridLayout_2">
+               <property name="sizeConstraint">
+                <enum>QLayout::SetDefaultConstraint</enum>
+               </property>
+               <item row="0" column="1">
+                <widget class="QRadioButton" name="radioButton_6">
+                 <property name="text">
+                  <string>算法2</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="0" column="0">
+                <widget class="QRadioButton" name="radioButton_5">
+                 <property name="text">
+                  <string>算法1</string>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </widget>
+            </item>
+           </layout>
           </item>
           <item>
-           <widget class="QRadioButton" name="radioButton_2">
+           <widget class="QPushButton" name="bt_start">
+            <property name="minimumSize">
+             <size>
+              <width>200</width>
+              <height>100</height>
+             </size>
+            </property>
             <property name="text">
-             <string>算法2</string>
+             <string>启动</string>
             </property>
            </widget>
           </item>
          </layout>
-        </widget>
-       </widget>
-       <widget class="QGroupBox" name="groupBox_2">
-        <property name="geometry">
-         <rect>
-          <x>40</x>
-          <y>210</y>
-          <width>331</width>
-          <height>91</height>
-         </rect>
-        </property>
-        <property name="title">
-         <string>调度算法</string>
-        </property>
-        <widget class="QWidget" name="layoutWidget_2">
-         <property name="geometry">
-          <rect>
-           <x>20</x>
-           <y>40</y>
-           <width>296</width>
-           <height>41</height>
-          </rect>
-         </property>
-         <layout class="QHBoxLayout" name="horizontalLayout_3">
-          <item>
-           <widget class="QRadioButton" name="radioButton_5">
-            <property name="text">
-             <string>算法1</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QRadioButton" name="radioButton_6">
-            <property name="text">
-             <string>算法2</string>
-            </property>
-           </widget>
-          </item>
-         </layout>
-        </widget>
-       </widget>
-       <widget class="QWidget" name="layoutWidget_3">
-        <property name="geometry">
-         <rect>
-          <x>440</x>
-          <y>50</y>
-          <width>215</width>
-          <height>35</height>
-         </rect>
-        </property>
-        <layout class="QHBoxLayout" name="horizontalLayout_4">
-         <item>
-          <widget class="QLabel" name="label_2">
-           <property name="text">
-            <string>节点数量</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QLineEdit" name="edit_node_num"/>
-         </item>
-        </layout>
-       </widget>
+        </item>
+       </layout>
       </widget>
       <widget class="QWidget" name="tab_4">
        <attribute name="title">
@@ -226,11 +230,36 @@
          </layout>
         </item>
         <item row="0" column="1">
-         <widget class="QPushButton" name="bt_next">
-          <property name="text">
-           <string>下一步</string>
-          </property>
-         </widget>
+         <layout class="QHBoxLayout" name="horizontalLayout_3">
+          <item>
+           <widget class="QPushButton" name="bt_begin">
+            <property name="text">
+             <string>开始</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="bt_next">
+            <property name="text">
+             <string>后一步</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="bt_next10">
+            <property name="text">
+             <string>后十步</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="bt_next100">
+            <property name="text">
+             <string>后百步</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
         </item>
         <item row="1" column="0" colspan="2">
          <widget class="QTableWidget" name="tableWidget_out">
@@ -247,6 +276,16 @@
         </item>
        </layout>
       </widget>
+      <widget class="QWidget" name="tab_6">
+       <attribute name="title">
+        <string>点拓扑</string>
+       </attribute>
+       <layout class="QFormLayout" name="formLayout_5">
+        <item row="0" column="0" colspan="2">
+         <widget class="QGraphicsView" name="graph_node"/>
+        </item>
+       </layout>
+      </widget>
      </widget>
     </item>
    </layout>
@@ -256,7 +295,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>884</width>
+     <width>810</width>
      <height>31</height>
     </rect>
    </property>
