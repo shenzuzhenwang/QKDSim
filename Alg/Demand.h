@@ -18,18 +18,15 @@ private:
     VOLUME m_dVolume;	// 需求的总数据量
     VOLUME m_dRemainingVolume;	// 需求剩余未传输的数据量
     VOLUME m_dDeliveredVolume;	// 需求已成功传输的数据量
-    bool m_bRouted;	// 标志需求是否已被路由
+//    bool m_bRouted;	// 标志需求是否已被路由   无用
     bool m_bAllDelivered;	// 标志需求是否已全部传输完成
 
     bool m_bRouteFailed; //标志需求是否无法被路由
 
 
 
-    void SetRouted(bool routed);	// 设置需求是否已被路由
+//    void SetRouted(bool routed);	// 设置需求是否已被路由
     void SetAllDelivered(bool delivered);	// 设置需求是否已全部传输完成
-
-    void SetRoutedFailed(bool m_bRouteFailed);
-
 
 public:
     CRelayPath m_Path;	// 表示需求的传输路径，包括经过的节点和链路
@@ -59,15 +56,12 @@ public:
     VOLUME GetDeliveredVolume();
     void UpdateDeliveredVolume(VOLUME moreDelivered, TIME simTime);	// 更新需求的已传输量，并在传输完成时标记需求为已完成
 
-    bool GetRouted();
+//    bool GetRouted();
     bool GetAllDelivered();
 
     bool GetRoutedFailed();
 
     void InitRelayPath(list<NODEID>& nodeList, list<LINKID>& linkList);	// 初始化需求的传输路径，包括路径中的节点和链路
     void CheckRoutedFailed();  // 检查因故障而无法完成传输的demand并添加标记
-
-    // 添加一个新方法来清空旧的路径
-    void ClearPath();
 };
 

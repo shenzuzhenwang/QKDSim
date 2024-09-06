@@ -3,7 +3,8 @@
 CDemand::CDemand(void)
 {
     m_dDeliveredVolume = 0;
-    m_bRouted = false;
+//    m_bRouted = false;
+    m_bRouteFailed = false;
     m_bAllDelivered = false;
     m_bRouteFailed = false;
 }
@@ -24,7 +25,8 @@ CDemand::CDemand(const CDemand& Demand)
     m_dVolume = Demand.m_dVolume;
     m_dRemainingVolume = Demand.m_dRemainingVolume;
     m_Path = Demand.m_Path;
-    m_bRouted = Demand.m_bRouted;
+//    m_bRouted = Demand.m_bRouted;
+    m_bRouteFailed = Demand.m_bRouteFailed;
     m_bAllDelivered = Demand.m_bAllDelivered;
     m_dDeliveredVolume = Demand.m_dDeliveredVolume;
     m_bRouteFailed = Demand.m_bRouteFailed;
@@ -40,7 +42,8 @@ void CDemand::operator=(const CDemand& Demand)
     m_dVolume = Demand.m_dVolume;
     m_dRemainingVolume = Demand.m_dRemainingVolume;
     m_Path = Demand.m_Path;
-    m_bRouted = Demand.m_bRouted;
+//    m_bRouted = Demand.m_bRouted;
+    m_bRouteFailed = Demand.m_bRouteFailed;
     m_bAllDelivered = Demand.m_bAllDelivered;
     m_dDeliveredVolume = Demand.m_dDeliveredVolume;
     m_bRouteFailed = Demand.m_bRouteFailed;
@@ -136,25 +139,20 @@ void CDemand::ReduceVolume(VOLUME consumeVolume)
     }
 }
 
-void CDemand::SetRouted(bool routed)
-{
-    m_bRouted = routed;
-}
+//void CDemand::SetRouted(bool routed)
+//{
+//    m_bRouted = routed;
+//}
 
 void CDemand::SetAllDelivered(bool delivered)
 {
     m_bAllDelivered = delivered;
 }
 
-bool CDemand::GetRouted()
-{
-    return m_bRouted;
-}
-
-void CDemand::SetRoutedFailed(bool RouteFailed)
-{
-    m_bRouteFailed = RouteFailed;
-}
+//bool CDemand::GetRouted()
+//{
+//    return m_bRouted;
+//}
 
 bool CDemand::GetRoutedFailed()
 {
@@ -178,14 +176,13 @@ void CDemand::UpdateDeliveredVolume(VOLUME moreDelivered, TIME simTime)
 
 void CDemand::CheckRoutedFailed()
 {
-    // SetRoutedFailed(true);
     m_bRouteFailed = true;
     m_bAllDelivered = true;
 }
 
 void CDemand::InitRelayPath(list<NODEID>& nodeList, list<LINKID>& linkList) //在CNetwork::InitRelayPath()中被调用
 {
-    m_bRouted = true;
+//    m_bRouted = true;
     m_Path.SetAssociateDemand(m_uiDemandID);
     m_Path.m_lTraversedNodes = nodeList;
     m_Path.m_lTraversedLinks = linkList;
@@ -207,9 +204,4 @@ bool CDemand::GetAllDelivered()
     return m_bAllDelivered;
 }
 
-// CDemand.cpp 文件中实现 ClearPath 方法
-void CDemand::ClearPath()
-{
-    m_Path.Clear();
-}
 
