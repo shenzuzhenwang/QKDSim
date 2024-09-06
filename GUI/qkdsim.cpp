@@ -458,9 +458,15 @@ void QKDSim::next_step()
 void QKDSim::on_bt_begin_clicked()
 {
     if (timer->isActive())
+    {
+        ui->bt_begin->setText("开始");
         timer->stop();
+    }
     else
+    {
+        ui->bt_begin->setText("暂停");
         timer->start(1000);
+    }
 }
 
 void QKDSim::on_bt_next_clicked()

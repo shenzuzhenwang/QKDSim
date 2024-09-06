@@ -234,7 +234,7 @@
           <item>
            <widget class="QPushButton" name="bt_begin">
             <property name="text">
-             <string>开始/暂停</string>
+             <string>开始</string>
             </property>
            </widget>
           </item>
