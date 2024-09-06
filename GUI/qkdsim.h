@@ -12,7 +12,7 @@
 #include <QMessageBox>
 #include <QGraphicsScene>
 #include <QGraphicsTextItem>
-
+#include <QTimer>
 
 QT_BEGIN_NAMESPACE
 namespace Ui
@@ -30,8 +30,6 @@ public:
     QKDSim(QWidget *parent = nullptr);
     ~QKDSim();
 
-    void Connections();
-
 private slots:
     void open_net();
     void open_dem();
@@ -41,11 +39,17 @@ private slots:
 
     void on_bt_start_clicked();
 
-    void on_bt_next_clicked();
-
     void on_tableWidget_net_cellChanged(int row, int column);
 
     void on_tableWidget_dem_cellChanged(int row, int column);
+
+    void on_bt_begin_clicked();
+
+    void on_bt_next_clicked();
+
+    void on_bt_next10_clicked();
+
+    void on_bt_next100_clicked();
 
 private:
     Ui::QKDSim *ui;
@@ -53,6 +57,8 @@ private:
 
 //    int nodeNum;
     CNetwork* net;
+    QTimer *timer;
+    void Connections();
 
     enum Kind
     {
@@ -64,6 +70,7 @@ private:
     void readDemTable();
     void showOutput();
     void showNodeGraph(NODEID nodeId);
+    void next_step();
 };
 
 #endif // QKDSIM_H
