@@ -3,6 +3,7 @@
 CNetwork::CNetwork(void)
 {
     m_dSimTime = 0;
+    m_step = 0;
 }
 
 
@@ -14,9 +15,16 @@ TIME CNetwork::CurrentTime()
 {
     return m_dSimTime;
 }
+
+UINT CNetwork::CurrentStep()
+{
+    return m_step;
+}
+
 // 推进模拟时间 m_dSimTime，并删除所有已到达的需求
 void CNetwork::MoveSimTime(TIME executionTime)
 {
+    m_step++;
     m_dSimTime += executionTime;
     //erase all arrived demands
     if (m_mDemandArriveTime.empty())
