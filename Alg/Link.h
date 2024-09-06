@@ -1,4 +1,6 @@
 ﻿#pragma once
+#include <random>
+#include <ctime>
 #include "StdAfx.h"
 #include "KeyManager.h"
 class CLink
@@ -9,7 +11,6 @@ public:
     CLink(const CLink& Link);
     void operator=(const CLink& Link);
 
-
 private:
     LINKID m_uiLinkId;	// 链路的唯一标识符
     NODEID m_uiSourceId;	// 链路的源节点ID
@@ -17,7 +18,12 @@ private:
     RATE m_dQKDRate;	// 链路的量子密钥分发（QKD）速率
     TIME m_dDelay;	// 链路的传输延迟
     RATE m_dBandwidth;	// 链路的带宽
+
+    TIME m_dFaultTime;	// 链路故障的时间
+
+
     CKeyManager m_KeyManager;	// 与链路相关联的密钥管理器，用于管理链路上的密钥分发和消耗
+    //TIME m_dLastSimTime = 0; // 用于记录上一次密钥更新的时间，初始化为0或其它适当初值
 
 
 private://data structure for algorithms
@@ -48,11 +54,15 @@ public:
     void SetWeight(WEIGHT linkWeight);
     WEIGHT GetWeight();
 
+    void SetFaultTime(TIME faultTime);
+    TIME GetFaultTime();
+
     void SetKeyManager(const CKeyManager& keyManager);
 
     //key manager operations
     void ConsumeKeys(VOLUME keys);	// 消耗链路上指定数量的密钥
     VOLUME GetAvaialbeKeys();	// 获取链路上可用的密钥数量
     void UpdateRemainingKeys(TIME executionTime);	// 根据执行时间更新链路上剩余的密钥量
+    void UpdateRemainingKeys(TIME executionTime, TIME m_dSimTime);	// 根据执行时间更新链路上剩余的密钥量
 };
 

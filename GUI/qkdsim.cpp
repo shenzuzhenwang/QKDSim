@@ -25,7 +25,6 @@ QKDSim::QKDSim(QWidget *parent)
     Connections();
 
     net = nullptr;
-    step = 0;
 
     scene = new QGraphicsScene(this);
     ui->graph_node->setScene(scene);
@@ -239,25 +238,29 @@ void QKDSim::readNetTable()
             newLink.SetLinkDelay(proDelay);
             newLink.SetBandwidth(bandWidth);
             newLink.SetWeight(weight);
+            newLink.SetFaultTime(faultTime);
 
             net->m_vAllLinks.push_back(newLink);
             net->m_mNodePairToLink[make_pair(sourceId, sinkId)] = linkId;
             net->m_mNodePairToLink[make_pair(sinkId, sourceId)] = linkId;
+            net->InitKeyManagerOverLink(linkId);
 
 
             net->m_vAllNodes[sourceId].m_lAdjNodes.push_back(sinkId);
             net->m_vAllNodes[sinkId].m_lAdjNodes.push_back(sourceId);
             net->InitKeyManagerOverLink(linkId);
 
-            /**********如何赋值故障时间**************/
-//            net->m_mDemandArriveTime.insert(make_pair(arriveTime, demandId));   // 增加m_mDemandArriveTime视为增加故障点
+            /**********如何赋值**************/
+            int id_faultTime = 1000000 + linkId;    // m_mDemandArriveTime插入的value为1000000 + linkId
+            if (faultTime >= 0)
+                net->m_mDemandArriveTime.insert(make_pair(faultTime, id_faultTime));   // 增加m_mDemandArriveTime视为增加故障点
         }
         else
         {
             ui->statusbar->showMessage("Error: Missing data in network table", 5000);
         }
     }
-    net->SetLinkNum(ui->tableWidget_net->rowCount());
+    net->SetLinkNum(ui->tableWidget_net->rowCount() - 1); //第一行是link数量，需要rowCount()-1
     ui->statusbar->showMessage("Network data processed successfully", 5000);
 }
 
@@ -297,7 +300,7 @@ void QKDSim::readDemTable()
             newDemand.SetArriveTime(arriveTime);
             newDemand.SetCompleteTime(INF); // 假设 INF 是一个定义好的常量，表示无限大
             net->m_vAllDemands.push_back(newDemand);
-            net->m_vAllNodes[sourceId].m_mRelayVolume[demandId] = demandVolume;
+            net->m_vAllNodes[sourceId].m_mRelayVolume[demandId] = demandVolume;   //对m_mRelayVolume做初始化
             net->m_mDemandArriveTime.insert(make_pair(arriveTime, demandId));   // 增加m_mDemandArriveTime
         }
         else
@@ -305,7 +308,9 @@ void QKDSim::readDemTable()
             ui->statusbar->showMessage("Error: Missing data in demand table", 5000);
         }
     }
-    net->SetDemandNum(ui->tableWidget_dem->rowCount());
+
+
+    net->SetDemandNum(ui->tableWidget_dem->rowCount() - 1); //第一行是demand数量，需要rowCount()-1
     ui->statusbar->showMessage("Demand data processed successfully", 5000);
 }
 
@@ -315,15 +320,20 @@ void QKDSim::showOutput()
 
     ui->tableWidget_out->clear();
     ui->tableWidget_out->setRowCount(0);    // 清空表格
-    QStringList headers = {"demandId", "nodeId", "nextNode", "minLink", "avaiableKeys", "relayVolume", "isDelivered"};     // 尚未确定
+    QStringList headers = {"demandId", "nodeId", "nextNode", "minLink", "avaiableKeys", "relayVolume", "isDelivered", "isFailed"};     // 尚未确定
     ui->tableWidget_out->setColumnCount(headers.size());
     ui->tableWidget_out->setHorizontalHeaderLabels(headers);
 
     // 遍历每个节点上正在传输的数据量
     for (NODEID nodeId = 0; nodeId < net->GetNodeNum(); nodeId++)
     {
-        for (auto demandIter = net->m_vAllNodes[nodeId].m_mRelayVolume.begin(); demandIter != net->m_vAllNodes[nodeId].m_mRelayVolume.end(); demandIter++)
+        for (auto demandIter = net->m_vAllNodes[nodeId].m_mRelayVolume.begin(); demandIter != net->m_vAllNodes[nodeId].m_mRelayVolume.end();)
         {
+            if (net->m_vAllDemands[demandIter->first].GetRoutedFailed())
+            {
+                demandIter = net->m_vAllNodes[nodeId].m_mRelayVolume.erase(demandIter);
+                continue;
+            }
             DEMANDID demandId = demandIter->first;
             VOLUME relayVolume = demandIter->second;
             bool isDelivered = net->m_vAllDemands[demandId].GetAllDelivered();
@@ -332,6 +342,7 @@ void QKDSim::showOutput()
             // 找到当前节点和下一个节点之间的链路 minLink
             LINKID minLink = net->m_mNodePairToLink[make_pair(nodeId, nextNode)];
             VOLUME avaiableKeys = net->m_vAllLinks[minLink].GetAvaialbeKeys();
+            bool isRouteFailed = net->m_vAllDemands[demandId].GetRoutedFailed();
 
             int newRow = ui->tableWidget_out->rowCount();
             ui->tableWidget_out->insertRow(newRow);    // 末尾增加一行
@@ -343,6 +354,7 @@ void QKDSim::showOutput()
             QTableWidgetItem* avaiableKeysItem = new QTableWidgetItem(QString::number(avaiableKeys, 'f', 2));
             QTableWidgetItem* relayVolumeItem = new QTableWidgetItem(QString::number(relayVolume, 'f', 2));
             QTableWidgetItem* isDeliveredItem = new QTableWidgetItem(isDelivered ? "True" : "False");
+            QTableWidgetItem* isRouteFailedItem = new QTableWidgetItem(isRouteFailed ? "True" : "False");
 
             ui->tableWidget_out->setItem(newRow, 0, demandIdItem);
             ui->tableWidget_out->setItem(newRow, 1, nodeIdItem);
@@ -351,6 +363,9 @@ void QKDSim::showOutput()
             ui->tableWidget_out->setItem(newRow, 4, avaiableKeysItem);
             ui->tableWidget_out->setItem(newRow, 5, relayVolumeItem);
             ui->tableWidget_out->setItem(newRow, 6, isDeliveredItem);
+            ui->tableWidget_out->setItem(newRow, 7, isRouteFailedItem);
+
+            demandIter++;
         }
     }
     // 显示已传输完毕的数据
@@ -365,6 +380,7 @@ void QKDSim::showOutput()
 //            NODEID nextNode = demandIter->GetSinkId();
 //            LINKID minLink = net->m_mNodePairToLink[make_pair(nodeId, nextNode)];
 //            VOLUME avaiableKeys = net->m_vAllLinks[minLink].GetAvaialbeKeys();
+            bool isRouteFailed = net->m_vAllDemands[demandId].GetRoutedFailed();
 
             int newRow = ui->tableWidget_out->rowCount();
             ui->tableWidget_out->insertRow(newRow);    // 末尾增加一行
@@ -376,6 +392,7 @@ void QKDSim::showOutput()
             QTableWidgetItem* avaiableKeysItem = new QTableWidgetItem();
             QTableWidgetItem* relayVolumeItem = new QTableWidgetItem(QString::number(relayVolume, 'f', 2));
             QTableWidgetItem* isDeliveredItem = new QTableWidgetItem(isDelivered ? "True" : "False");
+            QTableWidgetItem* isRouteFailedItem = new QTableWidgetItem(isRouteFailed ? "True" : "False");
 
             ui->tableWidget_out->setItem(newRow, 0, demandIdItem);
             ui->tableWidget_out->setItem(newRow, 1, nodeIdItem);
@@ -384,6 +401,7 @@ void QKDSim::showOutput()
             ui->tableWidget_out->setItem(newRow, 4, avaiableKeysItem);
             ui->tableWidget_out->setItem(newRow, 5, relayVolumeItem);
             ui->tableWidget_out->setItem(newRow, 6, isDeliveredItem);
+            ui->tableWidget_out->setItem(newRow, 7, isRouteFailedItem);
         }
     }
 
@@ -392,10 +410,21 @@ void QKDSim::showOutput()
     QStringList headers_path = {"demandId", "Node1", "Node2"};     // 尚未确定
     ui->tableWidget_path->setColumnCount(headers_path.size());
     ui->tableWidget_path->setHorizontalHeaderLabels(headers_path);
+
     // 显示每个需求的路由的最短路径
     for (auto demandIter = net->m_vAllDemands.begin(); demandIter != net->m_vAllDemands.end(); demandIter++)
     {
-        if (demandIter->GetRouted())
+        if (demandIter->GetRoutedFailed())
+        {
+            DEMANDID demandId = demandIter->GetDemandId();
+            int newRow = ui->tableWidget_path->rowCount();
+            ui->tableWidget_path->insertRow(newRow);    // 末尾增加一行
+            ui->tableWidget_path->setItem(newRow, 0, new QTableWidgetItem(QString::number(demandId)));
+            // 都显示-1
+            ui->tableWidget_path->setItem(newRow, 1, new QTableWidgetItem("-1"));
+            ui->tableWidget_path->setItem(newRow, 2, new QTableWidgetItem("-1"));
+        }
+        else
         {
             DEMANDID demandId = demandIter->GetDemandId();
             list<NODEID> node_path = net->m_vAllDemands[demandId].m_Path.m_lTraversedNodes;
@@ -452,12 +481,11 @@ void QKDSim::next_step()
         net->MoveSimTime(executeTime);
 
         showOutput();
-        step++;
-        ui->statusbar->showMessage(QString("Now is %1 step").arg(step), 5000);
+        ui->statusbar->showMessage(QString("Now is %1 step").arg(net->CurrentStep()), 5000);
     }
     else
     {
-        ui->statusbar->showMessage(QString("All demand has benn delivered, the end step is %1").arg(step), 5000);
+        ui->statusbar->showMessage(QString("All demand has benn delivered, the end step is %1").arg(net->CurrentStep()), 5000);
     }
 }
 

@@ -1,5 +1,5 @@
 ﻿#include "KeyManager.h"
-
+#include <cassert>
 
 CKeyManager::CKeyManager(void)
 {
@@ -68,6 +68,15 @@ VOLUME CKeyManager::GetAvailableKeys()
 void CKeyManager::ConsumeKeys(VOLUME keys)
 {
     m_dAvailableKeys -= keys;
+    // if (m_dAvailableKeys < keys)
+    // {
+    //     throw std::runtime_error("Not enough available keys to consume!");
+    //     //m_dAvailableKeys = 12345;
+    // }
+    // else
+    // {
+    //     m_dAvailableKeys -= keys;
+    // }
 }
 void CKeyManager::CollectKeys(VOLUME keys)
 {
@@ -89,4 +98,20 @@ void CKeyManager::SetKeyRate(RATE keyRate)
 RATE CKeyManager::GetKeyRate()
 {
     return m_dKeyRate;
+}
+
+void CKeyManager::InvalidateKeys(double failureProbability, std::default_random_engine& generator)
+{
+    // 使用伯努利分布决定失效数量
+    std::bernoulli_distribution distribution(failureProbability);
+    //int invalidatedKeys = 0;
+
+    for (int i = 0; i < static_cast<int>(m_dAvailableKeys); ++i) { // 转换为 int 以避免警告
+        if (distribution(generator)) {
+            --m_dAvailableKeys;
+           // ++invalidatedKeys;
+        }
+    }
+
+    // std::cout << "Invalidated " << invalidatedKeys << " keys. Total: " << m_dAvailableKeys << std::endl;
 }
