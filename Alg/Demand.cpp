@@ -3,8 +3,10 @@
 CDemand::CDemand(void)
 {
     m_dDeliveredVolume = 0;
-    m_bRouted = false;
+//    m_bRouted = false;
+    m_bRouteFailed = false;
     m_bAllDelivered = false;
+    m_bRouteFailed = false;
 }
 
 
@@ -23,9 +25,11 @@ CDemand::CDemand(const CDemand& Demand)
     m_dVolume = Demand.m_dVolume;
     m_dRemainingVolume = Demand.m_dRemainingVolume;
     m_Path = Demand.m_Path;
-    m_bRouted = Demand.m_bRouted;
+//    m_bRouted = Demand.m_bRouted;
+    m_bRouteFailed = Demand.m_bRouteFailed;
     m_bAllDelivered = Demand.m_bAllDelivered;
     m_dDeliveredVolume = Demand.m_dDeliveredVolume;
+    m_bRouteFailed = Demand.m_bRouteFailed;
 }
 
 void CDemand::operator=(const CDemand& Demand)
@@ -38,9 +42,11 @@ void CDemand::operator=(const CDemand& Demand)
     m_dVolume = Demand.m_dVolume;
     m_dRemainingVolume = Demand.m_dRemainingVolume;
     m_Path = Demand.m_Path;
-    m_bRouted = Demand.m_bRouted;
+//    m_bRouted = Demand.m_bRouted;
+    m_bRouteFailed = Demand.m_bRouteFailed;
     m_bAllDelivered = Demand.m_bAllDelivered;
     m_dDeliveredVolume = Demand.m_dDeliveredVolume;
+    m_bRouteFailed = Demand.m_bRouteFailed;
 }
 
 void CDemand::SetDemandId(DEMANDID demandId)
@@ -116,28 +122,41 @@ VOLUME CDemand::GetRemainingVolume()
 
 void CDemand::ReduceVolume(VOLUME consumeVolume)
 {
+    // 减少剩余的数据量
     m_dRemainingVolume -= consumeVolume;
+
+    // 检查剩余的数据量是否小于一个非常小的负值（表示近似为负数）
     if (m_dRemainingVolume < NEGSMALLVALUE)
     {
+        // 输出错误信息，指出哪个需求的剩余数据量变成了负值
         cout << "check why the volume of DEMAND " << m_uiDemandID << " become a negative value." << endl;
+
+        // 暂停程序，让用户看到错误信息
         getchar();
+
+        // 退出程序
         exit(0);
     }
 }
 
-void CDemand::SetRouted(bool routed)
-{
-    m_bRouted = routed;
-}
+//void CDemand::SetRouted(bool routed)
+//{
+//    m_bRouted = routed;
+//}
 
 void CDemand::SetAllDelivered(bool delivered)
 {
     m_bAllDelivered = delivered;
 }
 
-bool CDemand::GetRouted()
+//bool CDemand::GetRouted()
+//{
+//    return m_bRouted;
+//}
+
+bool CDemand::GetRoutedFailed()
 {
-    return m_bRouted;
+    return m_bRouteFailed;
 }
 
 VOLUME CDemand::GetDeliveredVolume()
@@ -155,10 +174,15 @@ void CDemand::UpdateDeliveredVolume(VOLUME moreDelivered, TIME simTime)
     }
 }
 
-
-void CDemand::InitRelayPath(list<NODEID>& nodeList, list<LINKID>& linkList)
+void CDemand::CheckRoutedFailed()
 {
-    m_bRouted = true;
+    m_bRouteFailed = true;
+    m_bAllDelivered = true;
+}
+
+void CDemand::InitRelayPath(list<NODEID>& nodeList, list<LINKID>& linkList) //在CNetwork::InitRelayPath()中被调用
+{
+//    m_bRouted = true;
     m_Path.SetAssociateDemand(m_uiDemandID);
     m_Path.m_lTraversedNodes = nodeList;
     m_Path.m_lTraversedLinks = linkList;
@@ -179,3 +203,5 @@ bool CDemand::GetAllDelivered()
 {
     return m_bAllDelivered;
 }
+
+

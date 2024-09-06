@@ -1,4 +1,5 @@
 ﻿#pragma once
+#include <random>
 #include "StdAfx.h"
 class CKeyManager
 {
@@ -38,5 +39,7 @@ public:
 
     void ConsumeKeys(VOLUME keys);	// 消耗指定数量的密钥
     void CollectKeys(VOLUME keys);	// 增加指定数量的密钥（通常用于根据时间生成新的密钥）
+
+    void InvalidateKeys(double failureProbability, std::default_random_engine& generator);//密钥随着时间有一定概率失效
 };
 

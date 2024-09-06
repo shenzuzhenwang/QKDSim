@@ -14,13 +14,19 @@ public:
     vector<CNode> m_vAllNodes;	// 存储网络中所有节点的列表
     vector<CLink> m_vAllLinks;	// 存储网络中所有链路的列表
     vector<CDemand> m_vAllDemands;	// 存储网络中所有需求的列表
+    vector<CRelayPath> m_vAllRelayPaths;	// 存储网络中所有中继路径的列表
     map<pair<NODEID, NODEID>, LINKID> m_mNodePairToLink;	// 用于根据节点对查找对应链路的映射表
     vector<CNetEvent> m_vAllExistingEvent;	// 存储网络中的所有事件   保留，未使用
 
     //data structure for simulation
     multimap<TIME, EVENTID> m_mUncompltedEvent;	// 存储未完成事件的时间和事件ID的映射表  保留，未使用
+
 //    vector<CKeyManager> m_vAllKeyManager;	// 存储网络中所有密钥管理器的列表
+
     multimap<TIME, DEMANDID> m_mDemandArriveTime;	// 存储需求到达时间和需求ID的映射表
+
+    TIME FaultTime;  //表示当前故障发生的时间
+
 
 private:
     UINT m_uiNodeNum;	// 网络中的节点数量
@@ -57,12 +63,21 @@ public:
     void InitRelayPath(DEMANDID demandId);
     void InitRelayPath();//for all demands
 
+    // functions for relay rerouting  发生故障时的抗毁（重路由）功能
+    // void CheckFault(DEMANDID demandId);
+    void CheckFault();
+    void ReInitRelayPath(DEMANDID demandId);
+    void ReInitRelayPath();//for all demands
+    void Rerouting();
+
     //function for scheduling
     TIME MinimumRemainingTimeFirst(NODEID nodeId, map<DEMANDID, VOLUME>& relayDemands); // 计算给定节点的需求转发执行时间
+	TIME AverageKeyScheduling(NODEID nodeId, map<DEMANDID,VOLUME>& relayDemands);// 计算给定节点的需求转发执行时间
     TIME FindDemandToRelay(NODEID nodeId, map<DEMANDID, VOLUME>& relayDemand);	// 确定应转发的需求，并计算所需的时间
     TIME FindDemandToRelay(map<NODEID, map<DEMANDID, VOLUME>>& relayDemand);
     void RelayForOneHop(TIME executeTime, map<NODEID, map<DEMANDID, VOLUME>>& relayDemands); // 执行一次需求转发操作，中继到下一跳
-    void UpdateRemainingKeys(TIME executionTime);	// 新链路上剩余的密钥量
+    void UpdateRemainingKeys(TIME executionTime);	// 更新链路上剩余的密钥量
+    void UpdateRemainingKeys(TIME executionTime, TIME m_dSimTime);	// 更新链路上剩余的密钥量
     void SimTimeForward(TIME executionTime);	// 将模拟时间推进指定的执行时间
 
     //main process
