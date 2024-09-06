@@ -169,6 +169,73 @@ bool CNetwork::ShortestPath(NODEID sourceId, NODEID sinkId, list<NODEID>& nodeLi
     return true;
 }
 
+// 只考虑keyrate的最短路算法
+bool CNetwork::KeyRateShortestPath(NODEID sourceId, NODEID sinkId, list<NODEID>& nodeList, list<LINKID>& linkList)
+{
+    UINT NodeNum = m_vAllNodes.size();
+    vector<NODEID> preNode(NodeNum, sourceId);	// 记录每个节点在最短路径中的前驱节点
+    vector<RATE> curDist(NodeNum, INF);	// 用于记录从 sourceId 到各节点的当前最短距离
+    vector<bool> visited(NodeNum, false);	// 用于记录每个节点是否已被访问
+    curDist[sourceId] = 0;
+    visited[sourceId] = true;
+    NODEID curNode = sourceId;
+    while (curNode != sinkId)
+    {
+        list<NODEID>::iterator adjNodeIter;
+        adjNodeIter = m_vAllNodes[curNode].m_lAdjNodes.begin();
+        for (; adjNodeIter != m_vAllNodes[curNode].m_lAdjNodes.end(); adjNodeIter++)
+        {
+            if (visited[*adjNodeIter])
+            {
+                continue;
+            }
+            LINKID midLink = m_mNodePairToLink[make_pair(curNode, *adjNodeIter)];
+            if (curDist[curNode] + m_vAllLinks[midLink].GetQKDRate() < curDist[*adjNodeIter])
+            {
+                curDist[*adjNodeIter] = curDist[curNode] + m_vAllLinks[midLink].GetQKDRate();
+                preNode[*adjNodeIter] = curNode;
+            }
+        }
+        //Find next node
+        RATE minDist = INF;
+        NODEID nextNode = curNode;
+        for (NODEID nodeId = 0; nodeId < NodeNum; nodeId++)
+        {
+            if (visited[nodeId])
+            {
+                continue;
+            }
+            if (curDist[nodeId] < minDist)
+            {
+                nextNode = nodeId;
+                minDist = curDist[nodeId];
+            }
+        }
+        if (minDist >= INF || nextNode == curNode)
+        {
+            return false;
+        }
+        curNode = nextNode;
+        visited[nextNode] = true;
+    }
+    if (curNode != sinkId)
+    {
+        cout << "why current node is not sink node?? check function shortestPath!" << endl;
+        getchar();
+        exit(0);
+    }
+    while(curNode != sourceId)
+    {
+        nodeList.push_front(curNode);
+        NODEID pre = preNode[curNode];
+        LINKID midLink = m_mNodePairToLink[make_pair(pre, curNode)];
+        linkList.push_front(midLink);
+        curNode = pre;
+    }
+    nodeList.push_front(sourceId);
+    return true;
+}
+
 // 为指定需求 demandId 初始化中继路径。如果需求已经被路由，则跳过此操作
 void CNetwork::InitRelayPath(DEMANDID demandId)
 {

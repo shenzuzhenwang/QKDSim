@@ -55,7 +55,7 @@ public:
 public:
     //common algorithms
     bool ShortestPath(NODEID sourceId, NODEID sinkId, list<NODEID>& nodeList, list<LINKID>& linkList);	// 用于计算从源节点到汇节点的最短路径，返回经过的节点和链路列表
-
+    bool KeyRateShortestPath(NODEID sourceId, NODEID sinkId, list<NODEID>& nodeList, list<LINKID>& linkList);  // 权重为keyrate的最短路算法，返回经过的节点和链路列表
 
     //functions for relay routing	初始化指定需求或所有需求的中继路径
     void InitRelayPath(DEMANDID demandId);
