@@ -6,10 +6,31 @@ CNetwork::CNetwork(void)
     m_dSimTime = 0;
     FaultTime = 0;
     m_step = 0;
+    currentRouteAlg = [this](NODEID sourceId, NODEID sinkId, list<NODEID>& nodeList, list<LINKID>& linkList) -> bool
+    {
+        return this->ShortestPath(sourceId, sinkId, nodeList, linkList);
+    };
+    currentScheduleAlg = [this](NODEID nodeId, map<DEMANDID, VOLUME>& relayDemands) -> TIME
+    {
+        return this->MinimumRemainingTimeFirst(nodeId, relayDemands);
+    };
 }
 
 CNetwork::~CNetwork(void)
 {
+}
+
+void CNetwork::Clear()
+{
+    m_dSimTime = 0;
+    FaultTime = 0;
+    m_step = 0;
+    m_vAllNodes.clear();
+    m_vAllLinks.clear();
+    m_vAllDemands.clear();
+    m_vAllRelayPaths.clear();
+    m_mNodePairToLink.clear();
+    m_mDemandArriveTime.clear();
 }
 
 TIME CNetwork::CurrentTime()
@@ -252,7 +273,8 @@ void CNetwork::InitRelayPath(DEMANDID demandId)
     // 清空旧路径
     m_vAllDemands[demandId].m_Path.Clear();
     // 调用 ShortestPath 函数，寻找从 sourceId 到 sinkId 的最短路径
-    if (ShortestPath(sourceId, sinkId, nodeList, linkList))
+//    if (ShortestPath(sourceId, sinkId, nodeList, linkList))
+    if (currentRouteAlg(sourceId, sinkId, nodeList, linkList))
     {
         m_vAllDemands[demandId].InitRelayPath(nodeList, linkList); // 完成指定demand和中继路径的各种信息的匹配（尤其是node上和指定demand相关的下一条的确定操作   ）
     }
@@ -389,7 +411,6 @@ TIME CNetwork::MinimumRemainingTimeFirst(NODEID nodeId, map<DEMANDID, VOLUME> &r
 // 平均分配当前密钥，计算给定节点的需求转发执行时间
 TIME CNetwork::AverageKeyScheduling(NODEID nodeId, map<DEMANDID, VOLUME> &relayDemands)
 {
-
     TIME executeTime = INF; // 表示当前的最小执行时间
     VOLUME minAvailableKeyVolume = 5;
     map<LINKID, vector<DEMANDID>> scheduledDemand; // 记录每条链路上计划要转发的需求
@@ -464,8 +485,8 @@ TIME CNetwork::AverageKeyScheduling(NODEID nodeId, map<DEMANDID, VOLUME> &relayD
 // 为指定节点 nodeId 找到需要转发的需求，并计算所需时间
 TIME CNetwork::FindDemandToRelay(NODEID nodeId, map<DEMANDID, RATE> &relayDemand)
 {
-    return MinimumRemainingTimeFirst(nodeId, relayDemand);
-    // return AverageKeyScheduling(nodeId, relayDemand);
+//    return MinimumRemainingTimeFirst(nodeId, relayDemand);
+    return currentScheduleAlg(nodeId, relayDemand);
 }
 // 为所有节点找到需要转发的需求，并计算执行时间
 TIME CNetwork::FindDemandToRelay(map<NODEID, map<DEMANDID, VOLUME>> &relayDemand)

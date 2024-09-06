@@ -5,6 +5,7 @@
 #include "Demand.h"
 #include "NetEvent.h"
 //#include "KeyManager.h"
+#include <functional>
 class CNetwork
 {
 public:
@@ -53,12 +54,19 @@ public:
 
     void InitNodes(UINT nodeNum);
 
+    void Clear();
 
-public:
-    //common algorithms
+
+    //common route algorithms
+    std::function<bool(NODEID, NODEID, list<NODEID>&, list<LINKID>&)> currentRouteAlg;
     bool ShortestPath(NODEID sourceId, NODEID sinkId, list<NODEID>& nodeList, list<LINKID>& linkList);	// 用于计算从源节点到汇节点的最短路径，返回经过的节点和链路列表
     bool KeyRateShortestPath(NODEID sourceId, NODEID sinkId, list<NODEID>& nodeList, list<LINKID>& linkList);  // 权重为keyrate的最短路算法，返回经过的节点和链路列表
+    //function for scheduling
+    std::function<TIME(NODEID, map<DEMANDID, VOLUME>&)> currentScheduleAlg;
+    TIME MinimumRemainingTimeFirst(NODEID nodeId, map<DEMANDID, VOLUME>& relayDemands); // 计算给定节点的需求转发执行时间
+    TIME AverageKeyScheduling(NODEID nodeId, map<DEMANDID, VOLUME>& relayDemands); // 计算给定节点的需求转发执行时间
 
+public:
     //functions for relay routing	初始化指定需求或所有需求的中继路径
     void InitRelayPath(DEMANDID demandId);
     void InitRelayPath();//for all demands
@@ -70,9 +78,6 @@ public:
     void ReInitRelayPath();//for all demands
     void Rerouting();
 
-    //function for scheduling
-    TIME MinimumRemainingTimeFirst(NODEID nodeId, map<DEMANDID, VOLUME>& relayDemands); // 计算给定节点的需求转发执行时间
-	TIME AverageKeyScheduling(NODEID nodeId, map<DEMANDID,VOLUME>& relayDemands);// 计算给定节点的需求转发执行时间
     TIME FindDemandToRelay(NODEID nodeId, map<DEMANDID, VOLUME>& relayDemand);	// 确定应转发的需求，并计算所需的时间
     TIME FindDemandToRelay(map<NODEID, map<DEMANDID, VOLUME>>& relayDemand);
     void RelayForOneHop(TIME executeTime, map<NODEID, map<DEMANDID, VOLUME>>& relayDemands); // 执行一次需求转发操作，中继到下一跳
@@ -84,5 +89,35 @@ public:
     bool AllDemandsDelivered();	// 检查是否所有需求都已完成传输
     TIME OneTimeRelay();	// 执行一次转发操作，并推进模拟时间
     void MainProcess();	// 网络模拟的主流程，负责初始化路径，逐步执行需求转发，直到所有需求完成
+
+    // 切换算法
+    void setShortestPath()
+    {
+        currentRouteAlg = [this](NODEID sourceId, NODEID sinkId, list<NODEID>& nodeList, list<LINKID>& linkList) -> bool
+        {
+            return this->ShortestPath(sourceId, sinkId, nodeList, linkList);
+        };
+    }
+    void setKeyRateShortestPath()
+    {
+        currentRouteAlg = [this](NODEID sourceId, NODEID sinkId, list<NODEID>& nodeList, list<LINKID>& linkList) -> bool
+        {
+            return this->KeyRateShortestPath(sourceId, sinkId, nodeList, linkList);
+        };
+    }
+    void setMinimumRemainingTimeFirst()
+    {
+        currentScheduleAlg = [this](NODEID nodeId, map<DEMANDID, VOLUME>& relayDemands) -> TIME
+        {
+            return this->MinimumRemainingTimeFirst(nodeId, relayDemands);
+        };
+    }
+    void setAverageKeyScheduling()
+    {
+        currentScheduleAlg = [this](NODEID nodeId, map<DEMANDID, VOLUME>& relayDemands) -> TIME
+        {
+            return this->AverageKeyScheduling(nodeId, relayDemands);
+        };
+    }
 };
 

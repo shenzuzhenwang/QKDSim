@@ -18,13 +18,14 @@ QKDSim::QKDSim(QWidget *parent)
     ui->tableWidget_out->verticalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);
 
     // 读取csv文件
-    loadCSV("../../Input/network.csv", Network);
-    loadCSV("../../Input/demand.csv", Demand);
+    loadCSV("../Input/network.csv", Network);
+    loadCSV("../Input/demand.csv", Demand);
     timer = new QTimer(this);
 
     Connections();
 
-    net = nullptr;
+//    net = nullptr;
+    net = new CNetwork();
 
     scene = new QGraphicsScene(this);
     ui->graph_node->setScene(scene);
@@ -458,9 +459,10 @@ void QKDSim::showOutput()
 void QKDSim::on_bt_start_clicked()
 {
     // 清空上一次的数据
-    if (net != nullptr)
-        delete net;
-    net = new CNetwork();
+//    if (net != nullptr)
+//        delete net;
+//    net = new CNetwork();
+    net->Clear();
 
     readNetTable();
     readDemTable();
@@ -471,6 +473,14 @@ void QKDSim::on_bt_start_clicked()
     // 输出表格
     showOutput();
 
+    if (ui->bt_route1->isChecked())
+        net->setShortestPath();
+    else
+        net->setKeyRateShortestPath();
+    if (ui->bt_schedule1->isChecked())
+        net->setMinimumRemainingTimeFirst();
+    else
+        net->setAverageKeyScheduling();
 }
 
 void QKDSim::next_step()
@@ -652,4 +662,3 @@ void QKDSim::on_bt_show_node_clicked()
 {
     showNodeGraph();
 }
-

@@ -107,7 +107,7 @@
              </layout>
             </item>
             <item>
-             <widget class="QGroupBox" name="groupBox">
+             <widget class="QGroupBox" name="group_route">
               <property name="sizePolicy">
                <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
                 <horstretch>0</horstretch>
@@ -151,7 +151,7 @@
              </widget>
             </item>
             <item>
-             <widget class="QGroupBox" name="groupBox_2">
+             <widget class="QGroupBox" name="group_schedule">
               <property name="sizePolicy">
                <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
                 <horstretch>0</horstretch>
@@ -175,14 +175,14 @@
                 <enum>QLayout::SetDefaultConstraint</enum>
                </property>
                <item row="0" column="1">
-                <widget class="QRadioButton" name="bt_dispatch2">
+                <widget class="QRadioButton" name="bt_schedule2">
                  <property name="text">
                   <string>平均密钥</string>
                  </property>
                 </widget>
                </item>
                <item row="0" column="0">
-                <widget class="QRadioButton" name="bt_dispatch1">
+                <widget class="QRadioButton" name="bt_schedule1">
                  <property name="text">
                   <string>最小任务剩余时间</string>
                  </property>

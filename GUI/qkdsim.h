@@ -73,8 +73,6 @@ private:
     void showOutput();
     void showNodeGraph();
     void next_step();
-
-//    int step;
 };
 
 #endif // QKDSIM_H
