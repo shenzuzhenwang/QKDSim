@@ -51,6 +51,8 @@ private slots:
 
     void on_bt_next100_clicked();
 
+    void on_bt_show_node_clicked();
+
 private:
     Ui::QKDSim *ui;
     QGraphicsScene *scene;  // 将scene作为成员变量
@@ -69,8 +71,10 @@ private:
     void readNetTable();
     void readDemTable();
     void showOutput();
-    void showNodeGraph(NODEID nodeId);
+    void showNodeGraph();
     void next_step();
+
+    int step;
 };
 
 #endif // QKDSIM_H

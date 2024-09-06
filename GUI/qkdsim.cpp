@@ -9,9 +9,13 @@ QKDSim::QKDSim(QWidget *parent)
 {
     ui->setupUi(this);
     ui->tableWidget_net->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);  // 表格列宽自动伸缩
+    ui->tableWidget_net->verticalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);
     ui->tableWidget_dem->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+    ui->tableWidget_dem->verticalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);
     ui->tableWidget_path->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+    ui->tableWidget_path->verticalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);
     ui->tableWidget_out->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+    ui->tableWidget_out->verticalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);
 
     // 读取csv文件
     loadCSV("../Input/network.csv", Network);
@@ -21,6 +25,7 @@ QKDSim::QKDSim(QWidget *parent)
     Connections();
 
     net = nullptr;
+    step = 0;
 
     scene = new QGraphicsScene(this);
     ui->graph_node->setScene(scene);
@@ -419,7 +424,6 @@ void QKDSim::showOutput()
             }
         }
     }
-    showNodeGraph(2);
 }
 
 void QKDSim::on_bt_start_clicked()
@@ -448,10 +452,12 @@ void QKDSim::next_step()
         net->MoveSimTime(executeTime);
 
         showOutput();
+        step++;
+        ui->statusbar->showMessage(QString("Now is %1 step").arg(step), 5000);
     }
     else
     {
-        ui->statusbar->showMessage("All demand has benn delivered", 5000);
+        ui->statusbar->showMessage(QString("All demand has benn delivered, the end step is %1").arg(step), 5000);
     }
 }
 
@@ -519,8 +525,10 @@ void tableWidget_cellChanged(int row, int column, QTableWidget* tableWidget)
     }
 }
 
-void QKDSim::showNodeGraph(NODEID nodeId)
+void QKDSim::showNodeGraph()
 {
+    scene->clear();
+    NODEID nodeId = ui->edit_show_node->text().toInt();
     int WIDTH = ui->graph_node->size().width() - 10;
     int HEIGHT = ui->graph_node->size().height() - 10;
     qreal RADIUS = min(WIDTH, HEIGHT) / 3;
@@ -529,7 +537,7 @@ void QKDSim::showNodeGraph(NODEID nodeId)
     scene->setSceneRect(0, 0, WIDTH, HEIGHT);  // 场景大小
 
     // 中心节点
-    QGraphicsEllipseItem* centerNode = scene->addEllipse(WIDTH / 2 - NODE_SIZE / 2, HEIGHT / 2 - NODE_SIZE / 2, NODE_SIZE, NODE_SIZE, QPen(), QBrush(Qt::cyan));
+    scene->addEllipse(WIDTH / 2 - NODE_SIZE / 2, HEIGHT / 2 - NODE_SIZE / 2, NODE_SIZE, NODE_SIZE, QPen(), QBrush(Qt::cyan));
     QGraphicsTextItem* centerNodeText = scene->addText(QString::number(nodeId), QFont("Arial", 24));
     centerNodeText->setPos(WIDTH / 2 - centerNodeText->boundingRect().width() / 2, HEIGHT / 2 - centerNodeText->boundingRect().height() / 2);
 
@@ -567,7 +575,7 @@ void QKDSim::showNodeGraph(NODEID nodeId)
         qreal angle = 2 * M_PI * i / numPeripheralNodes;  // 分割圆周
         qreal x = WIDTH / 2 + RADIUS * cos(angle);
         qreal y = HEIGHT / 2 + RADIUS * sin(angle);
-        QGraphicsEllipseItem* peripheralNode = scene->addEllipse(x - NODE_SIZE / 2, y - NODE_SIZE / 2, NODE_SIZE, NODE_SIZE, QPen(), QBrush(Qt::lightGray));
+        scene->addEllipse(x - NODE_SIZE / 2, y - NODE_SIZE / 2, NODE_SIZE, NODE_SIZE, QPen(), QBrush(Qt::lightGray));
         QGraphicsTextItem* peripheralNodeText = scene->addText(QString::number(iter->first), QFont("Arial", 24)); // 给每个节点一个编号
         peripheralNodeText->setPos(x - peripheralNodeText->boundingRect().width() / 2, y - peripheralNodeText->boundingRect().height() / 2);
         // 链路
@@ -610,5 +618,10 @@ void QKDSim::on_tableWidget_net_cellChanged(int row, int column)
 void QKDSim::on_tableWidget_dem_cellChanged(int row, int column)
 {
     tableWidget_cellChanged(row, column, ui->tableWidget_dem);
+}
+
+void QKDSim::on_bt_show_node_clicked()
+{
+    showNodeGraph();
 }
 
