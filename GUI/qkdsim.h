@@ -53,6 +53,7 @@ private slots:
 
     void on_bt_show_node_clicked();
 
+
 private:
     Ui::QKDSim *ui;
     QGraphicsScene *scene;  // 将scene作为成员变量

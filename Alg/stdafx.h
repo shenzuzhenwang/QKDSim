@@ -40,17 +40,17 @@ typedef UINT DEMANDID;
 typedef UINT KEYID;
 
 typedef double WEIGHT;
-typedef bool (CNetwork::*CalcuPath)(NODEID,NODEID,list<NODEID>&,list<LINKID>&);
+typedef bool (CNetwork::*CalcuPath)(NODEID, NODEID, list<NODEID>&, list<LINKID>&);
 
-const UINT IMPOSSIBLENODE=-1;
-const double THRESHOLD=0.01;
-const double SMALLNUM=0.0001;
-const double INFSMALL=0.000001;
-const EVENTID IMPOSSIBLEEVENT=-1;
-const UINT INFUINT=100000000;
-const double INF=10000000000.0;
-const double LARGEVALUE=100000.0;
-const TIME IMPOSSIBLETIME=-0.1;
-const double NEGSMALLVALUE=-0.0001;
+const UINT IMPOSSIBLENODE = -1;
+const double THRESHOLD = 0.01;
+const double SMALLNUM = 0.0001;
+const double INFSMALL = 0.000001;
+const EVENTID IMPOSSIBLEEVENT = -1;
+const UINT INFUINT = 100000000;
+const double INF = 10000000000.0;
+const double LARGEVALUE = 100000.0;
+const TIME IMPOSSIBLETIME = -0.1;
+const double NEGSMALLVALUE = -0.0001;
 
 enum EVENTTYPE {DEMANDARRIVE, DEMANDCOMPLETE};

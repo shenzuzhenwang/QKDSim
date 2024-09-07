@@ -1,7 +1,7 @@
 ﻿
 #include "qkdsim.h"
 #include "ui_qkdsim.h"
-
+#include <unordered_set>
 
 QKDSim::QKDSim(QWidget *parent)
     : QMainWindow(parent)
@@ -502,69 +502,105 @@ void QKDSim::on_bt_next100_clicked()
 void QKDSim::showNodeGraph()
 {
     scene->clear();
-    NODEID nodeId = ui->edit_show_node->text().toInt();
+    NODEID centerNodeId = ui->edit_show_node->text().toInt(); // 中心节点
     int WIDTH = ui->graph_node->size().width() - 10;
     int HEIGHT = ui->graph_node->size().height() - 10;
-    qreal RADIUS = min(WIDTH, HEIGHT) / 3;
     int NODE_SIZE = min(WIDTH, HEIGHT) / 10;
+    qreal RADIUS = min(WIDTH, HEIGHT) / 4;
 
     scene->setSceneRect(0, 0, WIDTH, HEIGHT);  // 场景大小
-    vector<NODEID> nodeShow;
-    vector<LINKID> linkShow;
+
+    unordered_set<NODEID> nodeShow;
+    unordered_set<LINKID> linkShow;
+    unordered_map<NODEID, pair<int, int>> loc;    // 节点位置
 
     // 中心节点
-    nodeShow.emplace_back(nodeId);
     scene->addEllipse(WIDTH / 2 - NODE_SIZE / 2, HEIGHT / 2 - NODE_SIZE / 2, NODE_SIZE, NODE_SIZE, QPen(), QBrush(Qt::cyan));
-    QGraphicsTextItem* centerNodeText = scene->addText(QString::number(nodeId), QFont("Arial", 24));
+    QGraphicsTextItem* centerNodeText = scene->addText(QString::number(centerNodeId), QFont("Arial", 24));
     centerNodeText->setPos(WIDTH / 2 - centerNodeText->boundingRect().width() / 2, HEIGHT / 2 - centerNodeText->boundingRect().height() / 2);
+    nodeShow.emplace(centerNodeId);
+    loc[centerNodeId] = make_pair(WIDTH / 2, HEIGHT / 2);
 
-    map<NODEID, LINKID> perNode1;   // 第一层节点
-    for (auto linkIter = net->m_vAllLinks.begin(); linkIter != net->m_vAllLinks.end(); linkIter++)
+    int node_layer = ui->box_layer->currentText().toInt();
+    unordered_set<NODEID> per1Nodes;   // 第一层节点
+    if (node_layer >= 1)    // 显示第一层（距离中心节点为1）的节点与链路
     {
-        if (linkIter->GetSourceId() == nodeId)
-            perNode1.insert(make_pair(linkIter->GetSinkId(), linkIter->GetLinkId()));
-        if (linkIter->GetSinkId() == nodeId)
-            perNode1.insert(make_pair(linkIter->GetSourceId(), linkIter->GetLinkId()));
-    }
-    map<NODEID, pair<int, int>> loc;
-    int numPeripheralNodes = static_cast<int>(perNode1.size());
-    auto iter = perNode1.begin();
-    // 以中心节点为圆心的一个圆环，分布第一层节点
-    for (int i = 0; i < numPeripheralNodes; i++, iter++)
-    {
-//        nodeShow.emplace_back(iter->first);
-        linkShow.emplace_back(iter->second);
-        qreal angle = 2 * M_PI * i / numPeripheralNodes;  // 分割圆周
-        qreal x = WIDTH / 2 + RADIUS * cos(angle);
-        qreal y = HEIGHT / 2 + RADIUS * sin(angle);
-        scene->addEllipse(x - NODE_SIZE / 2, y - NODE_SIZE / 2, NODE_SIZE, NODE_SIZE, QPen(), QBrush(Qt::lightGray));
-        QGraphicsTextItem* peripheralNodeText = scene->addText(QString::number(iter->first), QFont("Arial", 24)); // 给每个节点一个编号
-        peripheralNodeText->setPos(x - peripheralNodeText->boundingRect().width() / 2, y - peripheralNodeText->boundingRect().height() / 2);
-        // 链路
-        scene->addLine(WIDTH / 2, HEIGHT / 2, x, y, QPen(Qt::gray));
-        LINKID link = iter->second;
-        QGraphicsTextItem* lineText = scene->addText(QString::number(link), QFont("Arial", 20)); // 线上也显示编号
-        lineText->setPos((WIDTH / 2 + x) / 2, (HEIGHT / 2 + y) / 2);
+        for (auto linkIter = net->m_vAllLinks.begin(); linkIter != net->m_vAllLinks.end(); linkIter++)
+        {
+            if (linkIter->GetSourceId() == centerNodeId)
+                per1Nodes.emplace(linkIter->GetSinkId());
+            if (linkIter->GetSinkId() == centerNodeId)
+                per1Nodes.emplace(linkIter->GetSourceId());
+        }
 
-        // 位置
-        loc[iter->first] = make_pair(x, y);
+        int numPer1Node = static_cast<int>(per1Nodes.size());
+        auto per1Node = per1Nodes.begin();
+        // 以中心节点为圆心的一个圆环，分布第一层节点
+        for (int i = 0; i < numPer1Node; i++, per1Node++)
+        {
+            qreal angle = 2 * M_PI * i / numPer1Node;  // 分割圆周
+            qreal x = WIDTH / 2 + RADIUS * cos(angle);
+            qreal y = HEIGHT / 2 + RADIUS * sin(angle);
+            scene->addEllipse(x - NODE_SIZE / 2, y - NODE_SIZE / 2, NODE_SIZE, NODE_SIZE, QPen(), QBrush(Qt::lightGray));
+            QGraphicsTextItem* peripheralNodeText = scene->addText(QString::number(*per1Node), QFont("Arial", 24)); // 给每个节点一个编号
+            peripheralNodeText->setPos(x - peripheralNodeText->boundingRect().width() / 2, y - peripheralNodeText->boundingRect().height() / 2);
+            // 位置
+            nodeShow.emplace(*per1Node);
+            loc[*per1Node] = make_pair(x, y);
+        }
     }
-    // 第一层节点之间的链路
-    for (auto i = perNode1.begin(); i != perNode1.end(); i++)
+    unordered_set<NODEID> per2Nodes;   // 第二层节点
+    if (node_layer >= 2)    // 显示第二层（距离中心节点为2）的节点与链路
+    {
+        /************完成第二层节点的显示***************/
+        qreal RADIUS_LAYER2 = RADIUS * 2; // 第二层的半径比第一层大200
+        // 获取并显示第二层的节点
+        for (auto linkIter = net->m_vAllLinks.begin(); linkIter != net->m_vAllLinks.end(); ++linkIter)
+        {
+            NODEID sourceId = linkIter->GetSourceId();
+            NODEID sinkId = linkIter->GetSinkId();
+
+            // 当此link的sourceId在第一层，且sinkId不在nodeShow（不为中心节点且不在第一层）
+            if (auto conNode = per1Nodes.find(sourceId); conNode != per1Nodes.end() && nodeShow.find(sinkId) == nodeShow.end())
+                per2Nodes.emplace(sinkId);
+            // 当此link的sinkId在第一层，且sourceId不在nodeShow（不为中心节点且不在第一层）
+            if (auto conNode = per1Nodes.find(sinkId); conNode != per1Nodes.end() && nodeShow.find(sourceId) == nodeShow.end())
+                per2Nodes.emplace(sourceId);
+        }
+
+        int numPer2Node = static_cast<int>(per2Nodes.size());
+        auto per2Node = per2Nodes.begin();
+        // 以中心节点为圆心的一个圆环，分布第二层节点
+        for (int i = 0; i < numPer2Node; i++, per2Node++)
+        {
+            qreal angle = 2 * M_PI * i / numPer2Node + M_PI / 6; // 分割圆周 为了岔开，第二层起始点加30度
+            qreal x = WIDTH / 2 + RADIUS_LAYER2 * cos(angle);
+            qreal y = HEIGHT / 2 + RADIUS_LAYER2 * sin(angle);
+            scene->addEllipse(x - NODE_SIZE / 2, y - NODE_SIZE / 2, NODE_SIZE, NODE_SIZE, QPen(), QBrush(Qt::lightGray));
+            QGraphicsTextItem* peripheralNodeText = scene->addText(QString::number(*per2Node), QFont("Arial", 24)); // 给每个节点一个编号
+            peripheralNodeText->setPos(x - peripheralNodeText->boundingRect().width() / 2, y - peripheralNodeText->boundingRect().height() / 2);
+            // 位置
+            nodeShow.emplace(*per2Node);
+            loc[*per2Node] = make_pair(x, y);
+        }
+    }
+    // 所有显示节点的两两间的链路
+    for (auto i = nodeShow.begin(); i != nodeShow.end(); i++)
     {
         auto next = i;
-        for(auto j = ++next; j != perNode1.end(); j++)
+        for(auto j = ++next; j != nodeShow.end(); j++)
         {
-            if(net->m_mNodePairToLink.count(make_pair(i->first, j->first)))
+            if(net->m_mNodePairToLink.find(make_pair(*i, *j)) != net->m_mNodePairToLink.end())
             {
-                qreal x1 = loc[i->first].first;
-                qreal y1 = loc[i->first].second;
-                qreal x2 = loc[j->first].first;
-                qreal y2 = loc[j->first].second;
+                qreal x1 = loc[*i].first;
+                qreal y1 = loc[*i].second;
+                qreal x2 = loc[*j].first;
+                qreal y2 = loc[*j].second;
                 scene->addLine(x1, y1, x2, y2, QPen(Qt::gray));
-                LINKID link = net->m_mNodePairToLink[make_pair(i->first, j->first)];
-                QGraphicsTextItem* lineText = scene->addText(QString::number(link), QFont("Arial", 20)); // 线上也显示编号
-                lineText->setPos((x1 + x2) / 2, (y1 + y2) / 2);
+                LINKID linkId = net->m_mNodePairToLink[make_pair(*i, *j)];
+                QGraphicsTextItem* lineText = scene->addText(QString::number(linkId), QFont("Arial", 20)); // 线上也显示编号
+                lineText->setPos((x1 + x2) / 2 - lineText->boundingRect().width() / 2, (y1 + y2) / 2 - lineText->boundingRect().height() / 2);
+                linkShow.emplace(linkId);
             }
         }
     }
