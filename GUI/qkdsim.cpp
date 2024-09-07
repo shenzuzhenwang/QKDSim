@@ -16,6 +16,10 @@ QKDSim::QKDSim(QWidget *parent)
     ui->tableWidget_path->verticalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);
     ui->tableWidget_out->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
     ui->tableWidget_out->verticalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);
+    ui->tableWidget_link->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+    ui->tableWidget_link->verticalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);
+    ui->tableWidget_node->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+    ui->tableWidget_node->verticalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);
 
     // 读取csv文件
     loadCSV("../Input/network.csv", Network);
@@ -209,26 +213,18 @@ void QKDSim::readNetTable()
         WEIGHT weight;
 
         // 从表格的每一列读取数据
-        QTableWidgetItem *linkIdItem = ui->tableWidget_net->item(row, 0);
-        QTableWidgetItem *sourceIdItem = ui->tableWidget_net->item(row, 1);
-        QTableWidgetItem *sinkIdItem = ui->tableWidget_net->item(row, 2);
-        QTableWidgetItem *keyRateItem = ui->tableWidget_net->item(row, 3);
-        QTableWidgetItem *proDelayItem = ui->tableWidget_net->item(row, 4);
-        QTableWidgetItem *bandWidthItem = ui->tableWidget_net->item(row, 5);
-        QTableWidgetItem *weightItem = ui->tableWidget_net->item(row, 6);
-        QTableWidgetItem *faultTimeItem = ui->tableWidget_net->item(row, 7);
-
-        if (linkIdItem && sourceIdItem && sinkIdItem && keyRateItem && proDelayItem && bandWidthItem && weightItem)
+        if (ui->tableWidget_net->item(row, 0) && ui->tableWidget_net->item(row, 1) && ui->tableWidget_net->item(row, 2) && ui->tableWidget_net->item(row, 3)
+                && ui->tableWidget_net->item(row, 4) && ui->tableWidget_net->item(row, 5) && ui->tableWidget_net->item(row, 6))
         {
             // 转换为相应的数据类型
-            linkId = linkIdItem->text().toUInt();
-            sourceId = sourceIdItem->text().toUInt();
-            sinkId = sinkIdItem->text().toUInt();
-            keyRate = keyRateItem->text().toDouble();  // 假设 keyRate 是一个双精度浮点数
-            proDelay = proDelayItem->text().toDouble(); // 假设 proDelay 是一个双精度浮点数
-            bandWidth = bandWidthItem->text().toDouble();
-            weight = weightItem->text().toDouble();
-            faultTime = faultTimeItem->text() == "" ? -1 : faultTimeItem->text().toDouble();    // 没有故障，则为-1
+            linkId = ui->tableWidget_net->item(row, 0)->text().toUInt();
+            sourceId = ui->tableWidget_net->item(row, 1)->text().toUInt();
+            sinkId = ui->tableWidget_net->item(row, 2)->text().toUInt();
+            keyRate = ui->tableWidget_net->item(row, 3)->text().toDouble();  // 假设 keyRate 是一个双精度浮点数
+            proDelay = ui->tableWidget_net->item(row, 4)->text().toDouble(); // 假设 proDelay 是一个双精度浮点数
+            bandWidth = ui->tableWidget_net->item(row, 5)->text().toDouble();
+            weight = ui->tableWidget_net->item(row, 6)->text().toDouble();
+            faultTime = ui->tableWidget_net->item(row, 7)->text() == "" ? -1 : ui->tableWidget_net->item(row, 7)->text().toDouble();    // 没有故障，则为-1
 
             // 处理链路信息
             CLink newLink;
@@ -348,23 +344,14 @@ void QKDSim::showOutput()
             int newRow = ui->tableWidget_out->rowCount();
             ui->tableWidget_out->insertRow(newRow);    // 末尾增加一行
 
-            QTableWidgetItem* demandIdItem = new QTableWidgetItem(QString::number(demandId));
-            QTableWidgetItem* nodeIdItem = new QTableWidgetItem(QString::number(nodeId));
-            QTableWidgetItem* nextNodeItem = new QTableWidgetItem(QString::number(nextNode));
-            QTableWidgetItem* minLinkItem = new QTableWidgetItem(QString::number(minLink));
-            QTableWidgetItem* avaiableKeysItem = new QTableWidgetItem(QString::number(avaiableKeys, 'f', 2));
-            QTableWidgetItem* relayVolumeItem = new QTableWidgetItem(QString::number(relayVolume, 'f', 2));
-            QTableWidgetItem* isDeliveredItem = new QTableWidgetItem(isDelivered ? "True" : "False");
-            QTableWidgetItem* isRouteFailedItem = new QTableWidgetItem(isRouteFailed ? "True" : "False");
-
-            ui->tableWidget_out->setItem(newRow, 0, demandIdItem);
-            ui->tableWidget_out->setItem(newRow, 1, nodeIdItem);
-            ui->tableWidget_out->setItem(newRow, 2, nextNodeItem);
-            ui->tableWidget_out->setItem(newRow, 3, minLinkItem);
-            ui->tableWidget_out->setItem(newRow, 4, avaiableKeysItem);
-            ui->tableWidget_out->setItem(newRow, 5, relayVolumeItem);
-            ui->tableWidget_out->setItem(newRow, 6, isDeliveredItem);
-            ui->tableWidget_out->setItem(newRow, 7, isRouteFailedItem);
+            ui->tableWidget_out->setItem(newRow, 0, new QTableWidgetItem(QString::number(demandId)));
+            ui->tableWidget_out->setItem(newRow, 1, new QTableWidgetItem(QString::number(nodeId)));
+            ui->tableWidget_out->setItem(newRow, 2, new QTableWidgetItem(QString::number(nextNode)));
+            ui->tableWidget_out->setItem(newRow, 3, new QTableWidgetItem(QString::number(minLink)));
+            ui->tableWidget_out->setItem(newRow, 4, new QTableWidgetItem(QString::number(avaiableKeys, 'f', 2)));
+            ui->tableWidget_out->setItem(newRow, 5, new QTableWidgetItem(QString::number(relayVolume, 'f', 2)));
+            ui->tableWidget_out->setItem(newRow, 6, new QTableWidgetItem(isDelivered ? "True" : "False"));
+            ui->tableWidget_out->setItem(newRow, 7, new QTableWidgetItem(isRouteFailed ? "True" : "False"));
 
             demandIter++;
         }
@@ -386,23 +373,14 @@ void QKDSim::showOutput()
             int newRow = ui->tableWidget_out->rowCount();
             ui->tableWidget_out->insertRow(newRow);    // 末尾增加一行
 
-            QTableWidgetItem* demandIdItem = new QTableWidgetItem(QString::number(demandId));
-            QTableWidgetItem* nodeIdItem = new QTableWidgetItem(QString::number(nodeId));
-            QTableWidgetItem* nextNodeItem = new QTableWidgetItem();
-            QTableWidgetItem* minLinkItem = new QTableWidgetItem();
-            QTableWidgetItem* avaiableKeysItem = new QTableWidgetItem();
-            QTableWidgetItem* relayVolumeItem = new QTableWidgetItem(QString::number(relayVolume, 'f', 2));
-            QTableWidgetItem* isDeliveredItem = new QTableWidgetItem(isDelivered ? "True" : "False");
-            QTableWidgetItem* isRouteFailedItem = new QTableWidgetItem(isRouteFailed ? "True" : "False");
-
-            ui->tableWidget_out->setItem(newRow, 0, demandIdItem);
-            ui->tableWidget_out->setItem(newRow, 1, nodeIdItem);
-            ui->tableWidget_out->setItem(newRow, 2, nextNodeItem);
-            ui->tableWidget_out->setItem(newRow, 3, minLinkItem);
-            ui->tableWidget_out->setItem(newRow, 4, avaiableKeysItem);
-            ui->tableWidget_out->setItem(newRow, 5, relayVolumeItem);
-            ui->tableWidget_out->setItem(newRow, 6, isDeliveredItem);
-            ui->tableWidget_out->setItem(newRow, 7, isRouteFailedItem);
+            ui->tableWidget_out->setItem(newRow, 0, new QTableWidgetItem(QString::number(demandId)));
+            ui->tableWidget_out->setItem(newRow, 1, new QTableWidgetItem(QString::number(nodeId)));
+            ui->tableWidget_out->setItem(newRow, 2, new QTableWidgetItem());
+            ui->tableWidget_out->setItem(newRow, 3, new QTableWidgetItem());
+            ui->tableWidget_out->setItem(newRow, 4, new QTableWidgetItem());
+            ui->tableWidget_out->setItem(newRow, 5, new QTableWidgetItem(QString::number(relayVolume, 'f', 2)));
+            ui->tableWidget_out->setItem(newRow, 6, new QTableWidgetItem(isDelivered ? "True" : "False"));
+            ui->tableWidget_out->setItem(newRow, 7, new QTableWidgetItem(isRouteFailed ? "True" : "False"));
         }
     }
 
@@ -431,7 +409,7 @@ void QKDSim::showOutput()
             list<NODEID> node_path = net->m_vAllDemands[demandId].m_Path.m_lTraversedNodes;
 
             // 如果当前行需要的列数大于表格当前列数，则扩展表格的列数
-            int currentColCount = node_path.size() + 1; // 因为第一列是demandId
+            int currentColCount = static_cast<int>(node_path.size() + 1); // 因为第一列是demandId
             if (currentColCount > ui->tableWidget_path->columnCount())
             {
                 int oldColCount = ui->tableWidget_path->columnCount();
@@ -573,29 +551,14 @@ void QKDSim::showNodeGraph()
     int NODE_SIZE = min(WIDTH, HEIGHT) / 10;
 
     scene->setSceneRect(0, 0, WIDTH, HEIGHT);  // 场景大小
+    vector<NODEID> nodeShow;
+    vector<LINKID> linkShow;
 
     // 中心节点
+    nodeShow.emplace_back(nodeId);
     scene->addEllipse(WIDTH / 2 - NODE_SIZE / 2, HEIGHT / 2 - NODE_SIZE / 2, NODE_SIZE, NODE_SIZE, QPen(), QBrush(Qt::cyan));
     QGraphicsTextItem* centerNodeText = scene->addText(QString::number(nodeId), QFont("Arial", 24));
     centerNodeText->setPos(WIDTH / 2 - centerNodeText->boundingRect().width() / 2, HEIGHT / 2 - centerNodeText->boundingRect().height() / 2);
-
-//    // 周围的节点数量
-//    int numPeripheralNodes = 5;
-//    // 为每个周围的节点计算位置
-//    for (int i = 0; i < numPeripheralNodes; ++i)
-//    {
-//        qreal angle = 2 * M_PI * i / numPeripheralNodes;  // 分割圆周
-//        qreal x = WIDTH / 2 + RADIUS * cos(angle);
-//        qreal y = HEIGHT / 2 + RADIUS * sin(angle);
-//        QGraphicsEllipseItem* peripheralNode = scene->addEllipse(x - NODE_SIZE / 2, y - NODE_SIZE / 2, NODE_SIZE, NODE_SIZE, QPen(), QBrush(Qt::blue));
-//        QGraphicsTextItem* peripheralNodeText = scene->addText(QString::number(i + 1), QFont("Arial", 24)); // 给每个节点一个编号
-//        peripheralNodeText->setPos(x - peripheralNodeText->boundingRect().width() / 2, y - peripheralNodeText->boundingRect().height() / 2);
-//        // 连接线
-//        QGraphicsLineItem* line = scene->addLine(WIDTH / 2, HEIGHT / 2, x, y, QPen(Qt::black));
-//        QGraphicsTextItem* lineText = scene->addText(QString::number(i + 1), QFont("Arial", 20)); // 线上也显示编号
-//        lineText->setPos((WIDTH / 2 + x) / 2, (HEIGHT / 2 + y) / 2);
-//    }
-
 
     map<NODEID, LINKID> perNode1;   // 第一层节点
     for (auto linkIter = net->m_vAllLinks.begin(); linkIter != net->m_vAllLinks.end(); linkIter++)
@@ -606,10 +569,12 @@ void QKDSim::showNodeGraph()
             perNode1.insert(make_pair(linkIter->GetSourceId(), linkIter->GetLinkId()));
     }
     map<NODEID, pair<int, int>> loc;
-    int numPeripheralNodes = perNode1.size();
+    int numPeripheralNodes = static_cast<int>(perNode1.size());
     auto iter = perNode1.begin();
     for (int i = 0; i < numPeripheralNodes; i++, iter++)
     {
+//        nodeShow.emplace_back(iter->first);
+        linkShow.emplace_back(iter->second);
         qreal angle = 2 * M_PI * i / numPeripheralNodes;  // 分割圆周
         qreal x = WIDTH / 2 + RADIUS * cos(angle);
         qreal y = HEIGHT / 2 + RADIUS * sin(angle);
@@ -646,6 +611,57 @@ void QKDSim::showNodeGraph()
     }
 
     ui->graph_node->show();
+
+    // 显示node
+    ui->tableWidget_node->clear();
+    ui->tableWidget_node->setRowCount(0);    // 清空表格
+    QStringList headers = {"demandId", "nodeId", "minLink", "relayVolume"};     // 尚未确定
+    ui->tableWidget_node->setColumnCount(headers.size());
+    ui->tableWidget_node->setHorizontalHeaderLabels(headers);
+    for (NODEID nodeId : nodeShow)
+    {
+        for (auto demandIter = net->m_vAllNodes[nodeId].m_mRelayVolume.begin(); demandIter != net->m_vAllNodes[nodeId].m_mRelayVolume.end(); demandIter++)
+        {
+//            if (net->m_vAllDemands[demandIter->first].GetRoutedFailed()||net->m_vAllDemands[demandIter->first].GetAllDelivered())
+//            {
+//                continue;
+//            }
+            DEMANDID demandId = demandIter->first;
+            VOLUME relayVolume = demandIter->second;
+            // 对于每个需求，从其路径中找到下一个要中继到的节点 nextNode
+            NODEID nextNode = net->m_vAllDemands[demandId].m_Path.m_mNextNode[nodeId];
+            // 找到当前节点和下一个节点之间的链路 minLink
+            LINKID minLink = net->m_mNodePairToLink[make_pair(nodeId, nextNode)];
+
+            int newRow = ui->tableWidget_node->rowCount();
+            ui->tableWidget_node->insertRow(newRow);    // 末尾增加一行
+
+            ui->tableWidget_node->setItem(newRow, 0, new QTableWidgetItem(QString::number(demandId)));
+            ui->tableWidget_node->setItem(newRow, 1, new QTableWidgetItem(QString::number(nodeId)));
+            ui->tableWidget_node->setItem(newRow, 2, new QTableWidgetItem(QString::number(minLink)));
+            ui->tableWidget_node->setItem(newRow, 3, new QTableWidgetItem(QString::number(relayVolume, 'f', 2)));
+        }
+    }
+    // 显示link
+    ui->tableWidget_link->clear();
+    ui->tableWidget_link->setRowCount(0);    // 清空表格
+    QStringList headers_2 = {"linkId", "nodeId", "nextNode", "avaiableKeys"};     // 尚未确定
+    ui->tableWidget_link->setColumnCount(headers_2.size());
+    ui->tableWidget_link->setHorizontalHeaderLabels(headers_2);
+    for (LINKID linkId : linkShow)
+    {
+        NODEID nodeId = net->m_vAllLinks[linkId].GetSourceId();
+        NODEID nextNode = net->m_vAllLinks[linkId].GetSinkId();
+        VOLUME avaiableKeys = net->m_vAllLinks[linkId].GetAvaialbeKeys();
+
+        int newRow = ui->tableWidget_link->rowCount();
+        ui->tableWidget_link->insertRow(newRow);    // 末尾增加一行
+
+        ui->tableWidget_link->setItem(newRow, 0, new QTableWidgetItem(QString::number(linkId)));
+        ui->tableWidget_link->setItem(newRow, 1, new QTableWidgetItem(QString::number(nodeId)));
+        ui->tableWidget_link->setItem(newRow, 2, new QTableWidgetItem(QString::number(nextNode)));
+        ui->tableWidget_link->setItem(newRow, 3, new QTableWidgetItem(QString::number(avaiableKeys, 'f', 2)));
+    }
 }
 
 void QKDSim::on_tableWidget_net_cellChanged(int row, int column)

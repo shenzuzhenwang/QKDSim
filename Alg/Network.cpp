@@ -132,7 +132,7 @@ void CNetwork::InitNodes(UINT nodeNum)
 // 使用最短路径算法Dijkstra计算从源节点 sourceId 到汇节点 sinkId 的最短路径，并将路径中的节点和链路记录在 nodeList 和 linkList 中。如果找到有效路径，返回 true，否则返回 false
 bool CNetwork::ShortestPath(NODEID sourceId, NODEID sinkId, list<NODEID> &nodeList, list<LINKID> &linkList)
 {
-    UINT NodeNum = m_vAllNodes.size();
+    UINT NodeNum = static_cast<UINT>(m_vAllNodes.size());
     vector<NODEID> preNode(NodeNum, sourceId); // 记录每个节点在最短路径中的前驱节点
     vector<WEIGHT> curDist(NodeNum, INF);      // 用于记录从 sourceId 到各节点的当前最短距离
     vector<bool> visited(NodeNum, false);      // 用于记录每个节点是否已被访问
@@ -199,7 +199,7 @@ bool CNetwork::ShortestPath(NODEID sourceId, NODEID sinkId, list<NODEID> &nodeLi
 // 只考虑keyrate的最短路算法
 bool CNetwork::KeyRateShortestPath(NODEID sourceId, NODEID sinkId, list<NODEID>& nodeList, list<LINKID>& linkList)
 {
-    UINT NodeNum = m_vAllNodes.size();
+    UINT NodeNum = static_cast<UINT>(m_vAllNodes.size());
     vector<NODEID> preNode(NodeNum, sourceId);	// 记录每个节点在最短路径中的前驱节点
     vector<RATE> curDist(NodeNum, INF);	// 用于记录从 sourceId 到各节点的当前最短距离
     vector<bool> visited(NodeNum, false);	// 用于记录每个节点是否已被访问
@@ -412,7 +412,7 @@ TIME CNetwork::MinimumRemainingTimeFirst(NODEID nodeId, map<DEMANDID, VOLUME> &r
 TIME CNetwork::AverageKeyScheduling(NODEID nodeId, map<DEMANDID, VOLUME> &relayDemands)
 {
     TIME executeTime = INF; // 表示当前的最小执行时间
-    VOLUME minAvailableKeyVolume = 5;
+//    VOLUME minAvailableKeyVolume = 5;
     map<LINKID, vector<DEMANDID>> scheduledDemand; // 记录每条链路上计划要转发的需求
     map<DEMANDID, TIME> executeTimeDemand;         // 记录需求的执行时间
     // 遍历当前节点 nodeId 上的所有需求（记录在 m_mRelayVolume 中），跳过尚未到达的需求（通过到达时间判断）
@@ -430,7 +430,7 @@ TIME CNetwork::AverageKeyScheduling(NODEID nodeId, map<DEMANDID, VOLUME> &relayD
         NODEID nextNode = m_vAllDemands[selectedDemand].m_Path.m_mNextNode[nodeId];
         LINKID midLink = m_mNodePairToLink[make_pair(nodeId, nextNode)];
         scheduledDemand[midLink].push_back(selectedDemand);
-        RATE bandwidth = m_vAllLinks[midLink].GetBandwidth();
+//        RATE bandwidth = m_vAllLinks[midLink].GetBandwidth();
     }
     map<LINKID, vector<DEMANDID>>::iterator scheduledIter;
     scheduledIter = scheduledDemand.begin();
