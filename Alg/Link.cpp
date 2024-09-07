@@ -144,7 +144,7 @@ void CLink::UpdateRemainingKeys(TIME executionTime, TIME m_dSimTime)
 {
     // 获取当前的关键速率
     double m_dKeyRate = m_KeyManager.GetKeyRate();
-    cout<<"KeyRate:"<<m_dKeyRate<<endl;
+//    cout<<"KeyRate:"<<m_dKeyRate<<endl;
     m_KeyManager.CollectKeys(m_dKeyRate * executionTime);
     // // 将当前仿真时间转换为种子
     // unsigned int seed = static_cast<unsigned int>(m_dSimTime);
