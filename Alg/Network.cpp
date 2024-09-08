@@ -5,8 +5,8 @@ CNetwork::CNetwork(void)
 {
     m_dSimTime = 0;
     FaultTime = 0;
+    m_step = 0;
 }
-
 
 CNetwork::~CNetwork(void)
 {
@@ -16,11 +16,18 @@ TIME CNetwork::CurrentTime()
 {
     return m_dSimTime;
 }
+
+UINT CNetwork::CurrentStep()
+{
+    return m_step;
+}
+
 // 推进模拟时间 m_dSimTime，并删除所有已到达的需求
 void CNetwork::MoveSimTime(TIME executionTime)
 {
+    m_step++;
     m_dSimTime += executionTime;
-    //erase all arrived demands
+    // erase all arrived demands
     if (m_mDemandArriveTime.empty())
         return;
     multimap<TIME, DEMANDID>::iterator demandIter;
@@ -39,7 +46,7 @@ void CNetwork::MoveSimTime(TIME executionTime)
 
         // std::cout << "Current demandIter: " << demandIter->first << std::endl;
         // std::cout << "Current Time: " << m_dSimTime << std::endl;
-        demandIter = m_mDemandArriveTime.erase(demandIter);     //erase 方法删除当前迭代器所指向的元素，并返回一个指向下一个元素的迭代器。
+        demandIter = m_mDemandArriveTime.erase(demandIter); // erase 方法删除当前迭代器所指向的元素，并返回一个指向下一个元素的迭代器。
         if (demandIter == m_mDemandArriveTime.end())
         {
             break;
@@ -88,8 +95,7 @@ void CNetwork::InitKeyManagerOverLink(LINKID linkId)
     newKeyManager.SetAvailableKeys(0);
 
     m_vAllLinks[linkId].SetKeyManager(newKeyManager);
-//    m_vAllKeyManager.push_back(newKeyManager);
-
+    //    m_vAllKeyManager.push_back(newKeyManager);
 }
 
 void CNetwork::InitNodes(UINT nodeNum)
@@ -103,12 +109,12 @@ void CNetwork::InitNodes(UINT nodeNum)
     }
 }
 // 使用最短路径算法Dijkstra计算从源节点 sourceId 到汇节点 sinkId 的最短路径，并将路径中的节点和链路记录在 nodeList 和 linkList 中。如果找到有效路径，返回 true，否则返回 false
-bool CNetwork::ShortestPath(NODEID sourceId, NODEID sinkId, list<NODEID>& nodeList, list<LINKID>& linkList)
+bool CNetwork::ShortestPath(NODEID sourceId, NODEID sinkId, list<NODEID> &nodeList, list<LINKID> &linkList)
 {
     UINT NodeNum = m_vAllNodes.size();
-    vector<NODEID> preNode(NodeNum, sourceId);	// 记录每个节点在最短路径中的前驱节点
-    vector<WEIGHT> curDist(NodeNum, INF);	// 用于记录从 sourceId 到各节点的当前最短距离
-    vector<bool> visited(NodeNum, false);	// 用于记录每个节点是否已被访问
+    vector<NODEID> preNode(NodeNum, sourceId); // 记录每个节点在最短路径中的前驱节点
+    vector<WEIGHT> curDist(NodeNum, INF);      // 用于记录从 sourceId 到各节点的当前最短距离
+    vector<bool> visited(NodeNum, false);      // 用于记录每个节点是否已被访问
     curDist[sourceId] = 0;
     visited[sourceId] = true;
     NODEID curNode = sourceId;
@@ -129,7 +135,7 @@ bool CNetwork::ShortestPath(NODEID sourceId, NODEID sinkId, list<NODEID>& nodeLi
                 preNode[*adjNodeIter] = curNode;
             }
         }
-        //Find next node
+        // Find next node
         WEIGHT minDist = INF;
         NODEID nextNode = curNode;
         for (NODEID nodeId = 0; nodeId < NodeNum; nodeId++)
@@ -157,7 +163,7 @@ bool CNetwork::ShortestPath(NODEID sourceId, NODEID sinkId, list<NODEID>& nodeLi
         getchar();
         exit(0);
     }
-    while(curNode != sourceId)
+    while (curNode != sourceId)
     {
         nodeList.push_front(curNode);
         NODEID pre = preNode[curNode];
@@ -248,14 +254,14 @@ void CNetwork::InitRelayPath(DEMANDID demandId)
     // 调用 ShortestPath 函数，寻找从 sourceId 到 sinkId 的最短路径
     if (ShortestPath(sourceId, sinkId, nodeList, linkList))
     {
-        m_vAllDemands[demandId].InitRelayPath(nodeList, linkList); //完成指定demand和中继路径的各种信息的匹配（尤其是node上和指定demand相关的下一条的确定操作   ）
+        m_vAllDemands[demandId].InitRelayPath(nodeList, linkList); // 完成指定demand和中继路径的各种信息的匹配（尤其是node上和指定demand相关的下一条的确定操作   ）
     }
     // 通过遍历 linkList，将当前需求ID (demandId) 添加到每条路径链路 m_lCarriedDemands 列表中，表示这些链路将承载该需求的数据传输
     list<LINKID>::iterator linkIter;
     linkIter = linkList.begin();
     for (; linkIter != linkList.end(); linkIter++)
     {
-        m_vAllLinks[*linkIter].m_lCarriedDemands.push_back(demandId);   // ？？m_lCarriedDemands仅在此做了赋值，之后未使用，感觉不对（被（node,nextnode）的方式代替了）
+        m_vAllLinks[*linkIter].m_lCarriedDemands.push_back(demandId); // ？？m_lCarriedDemands仅在此做了赋值，之后未使用，感觉不对（被（node,nextnode）的方式代替了）
     }
 }
 // 为所有需求初始化中继路径
@@ -270,15 +276,13 @@ void CNetwork::InitRelayPath()
     }
 }
 
-
-
 // 计算给定节点 nodeId 上最小剩余时间优先的需求转发时间，并记录将要转发的需求和数据量
-TIME CNetwork::MinimumRemainingTimeFirst(NODEID nodeId, map<DEMANDID, VOLUME>& relayDemands)
+TIME CNetwork::MinimumRemainingTimeFirst(NODEID nodeId, map<DEMANDID, VOLUME> &relayDemands)
 {
-    TIME executeTime = INF;	// 表示当前的最小执行时间
-    map<LINKID, DEMANDID> scheduledDemand;	// 记录每条链路上计划要转发的需求
+    TIME executeTime = INF;                // 表示当前的最小执行时间
+    map<LINKID, DEMANDID> scheduledDemand; // 记录每条链路上计划要转发的需求
     multimap<TIME, DEMANDID, less<VOLUME>> remainTime;
-    map<DEMANDID, TIME> executeTimeDemand;  // 记录需求的执行时间
+    map<DEMANDID, TIME> executeTimeDemand; // 记录需求的执行时间
     // 遍历当前节点 nodeId 上的所有需求（记录在 m_mRelayVolume 中），跳过尚未到达的需求（通过到达时间判断）
     map<DEMANDID, VOLUME>::iterator demandIter;
     demandIter = m_vAllNodes[nodeId].m_mRelayVolume.begin();
@@ -353,7 +357,7 @@ TIME CNetwork::MinimumRemainingTimeFirst(NODEID nodeId, map<DEMANDID, VOLUME>& r
             {
                 scheduledDemand[midLink] = selectedDemand;
             }
-            else	// 如果该链路已经有一个需求被调度，那么比较新需求和已调度需求的剩余数据量，选择数据量较少的需求作为调度对象（最小剩余时间优先）
+            else // 如果该链路已经有一个需求被调度，那么比较新需求和已调度需求的剩余数据量，选择数据量较少的需求作为调度对象（最小剩余时间优先）
             {
                 DEMANDID preDemand = scheduledDemand[midLink];
                 if (m_vAllNodes[nodeId].m_mRelayVolume[preDemand] > m_vAllNodes[nodeId].m_mRelayVolume[selectedDemand])
@@ -362,7 +366,6 @@ TIME CNetwork::MinimumRemainingTimeFirst(NODEID nodeId, map<DEMANDID, VOLUME>& r
                 }
             }
         }
-
     }
 
     // 遍历所有被调度的需求，计算它们在执行时间内的转发数据量（带宽乘以执行时间），并将这些数据量记录在 relayDemands 中
@@ -384,13 +387,13 @@ TIME CNetwork::MinimumRemainingTimeFirst(NODEID nodeId, map<DEMANDID, VOLUME>& r
 }
 
 // 平均分配当前密钥，计算给定节点的需求转发执行时间
-TIME CNetwork::AverageKeyScheduling(NODEID nodeId, map<DEMANDID, VOLUME>& relayDemands)
+TIME CNetwork::AverageKeyScheduling(NODEID nodeId, map<DEMANDID, VOLUME> &relayDemands)
 {
 
-    TIME executeTime = INF;	// 表示当前的最小执行时间
+    TIME executeTime = INF; // 表示当前的最小执行时间
     VOLUME minAvailableKeyVolume = 5;
-    map<LINKID, vector<DEMANDID>> scheduledDemand;	// 记录每条链路上计划要转发的需求
-    map<DEMANDID, TIME> executeTimeDemand;  // 记录需求的执行时间
+    map<LINKID, vector<DEMANDID>> scheduledDemand; // 记录每条链路上计划要转发的需求
+    map<DEMANDID, TIME> executeTimeDemand;         // 记录需求的执行时间
     // 遍历当前节点 nodeId 上的所有需求（记录在 m_mRelayVolume 中），跳过尚未到达的需求（通过到达时间判断）
     map<DEMANDID, VOLUME>::iterator demandIter;
     demandIter = m_vAllNodes[nodeId].m_mRelayVolume.begin();
@@ -459,16 +462,16 @@ TIME CNetwork::AverageKeyScheduling(NODEID nodeId, map<DEMANDID, VOLUME>& relayD
 }
 
 // 为指定节点 nodeId 找到需要转发的需求，并计算所需时间
-TIME CNetwork::FindDemandToRelay(NODEID nodeId, map<DEMANDID, RATE>& relayDemand)
+TIME CNetwork::FindDemandToRelay(NODEID nodeId, map<DEMANDID, RATE> &relayDemand)
 {
     return MinimumRemainingTimeFirst(nodeId, relayDemand);
     // return AverageKeyScheduling(nodeId, relayDemand);
 }
 // 为所有节点找到需要转发的需求，并计算执行时间
-TIME CNetwork::FindDemandToRelay(map<NODEID, map<DEMANDID, VOLUME>>& relayDemand)
+TIME CNetwork::FindDemandToRelay(map<NODEID, map<DEMANDID, VOLUME>> &relayDemand)
 {
     map<NODEID, map<DEMANDID, VOLUME>> nodeRelayDemand; // 表示对应NODEID在nodeRelayTime时间中，每个需求发送的数据量
-    map<NODEID, TIME> nodeRelayTime;    // NODEID节点上的需求执行一跳的最短时间
+    map<NODEID, TIME> nodeRelayTime;                    // NODEID节点上的需求执行一跳的最短时间
     TIME minExecuteTime = INF;
     // 遍历所有节点 (nodeId)，对每个节点调用 FindDemandToRelay，计算该节点的需求转发时间和需要转发的需求量 tempRelayDemand
     for (NODEID nodeId = 0; nodeId < m_uiNodeNum; nodeId++)
@@ -481,7 +484,7 @@ TIME CNetwork::FindDemandToRelay(map<NODEID, map<DEMANDID, VOLUME>>& relayDemand
         {
             minExecuteTime = executeTime;
         }
-//        nodeRelayTime[nodeId] = executeTime;
+        //        nodeRelayTime[nodeId] = executeTime;
         // 将每个节点的转发需求量存储在 nodeRelayDemand 中
         nodeRelayDemand[nodeId] = tempRelayDemand;
     }
@@ -500,13 +503,13 @@ TIME CNetwork::FindDemandToRelay(map<NODEID, map<DEMANDID, VOLUME>>& relayDemand
     for (; nodeIter != nodeRelayDemand.end(); nodeIter++)
     {
         TIME relayTime = nodeRelayTime[nodeIter->first];
-        demandIter = nodeIter->second.begin(); //second表示该元素的value值
+        demandIter = nodeIter->second.begin(); // second表示该元素的value值
         for (; demandIter != nodeIter->second.end(); demandIter++)
         {
-//            if (relayDemand[nodeIter->first][demandIter->first] == 0)
-//            {
-//                continue;
-//            }
+            //            if (relayDemand[nodeIter->first][demandIter->first] == 0)
+            //            {
+            //                continue;
+            //            }
             VOLUME newVolume = demandIter->second * minExecuteTime / relayTime;
             // VOLUME newVolume = demandIter->second;
             // if (relayTime)
@@ -519,7 +522,7 @@ TIME CNetwork::FindDemandToRelay(map<NODEID, map<DEMANDID, VOLUME>>& relayDemand
     return minExecuteTime;
 }
 // 执行一次单跳的需求转发操作，更新各节点和链路上的数据量和密钥
-void CNetwork::RelayForOneHop(TIME executeTime, map<NODEID, map<DEMANDID, VOLUME>>& relayDemands)
+void CNetwork::RelayForOneHop(TIME executeTime, map<NODEID, map<DEMANDID, VOLUME>> &relayDemands)
 {
     map<NODEID, map<DEMANDID, VOLUME>>::iterator nodeIter;
     nodeIter = relayDemands.begin();
@@ -544,7 +547,7 @@ void CNetwork::RelayForOneHop(TIME executeTime, map<NODEID, map<DEMANDID, VOLUME
 
             if (nodeIter->first == m_vAllDemands[demandIter->first].GetSourceId())
             {
-                m_vAllDemands[demandIter->first].ReduceVolume(demandIter->second);      // ？？仅在需求在源节点被传输后，才减少数据量，中间节点没有这个操作，不知道是否符合逻辑
+                m_vAllDemands[demandIter->first].ReduceVolume(demandIter->second); // ？？仅在需求在源节点被传输后，才减少数据量，中间节点没有这个操作，不知道是否符合逻辑
             }
             // 找到当前节点和下一个节点之间的链路 minLink，并在该链路上消耗相应的密钥数量（等于转发的数据量）
             LINKID minLink = m_mNodePairToLink[make_pair(nodeIter->first, nextNode)];
@@ -608,7 +611,7 @@ TIME CNetwork::OneTimeRelay()
 
     // if (CheckFault() && std::abs(m_dSimTime-FaultTime)< SMALLNUM)  //发现fault且时间已经推进到FaultTime
     // 这里需要注意，故障生成需要按照faultTime逐次进行
-    if (m_dSimTime == FaultTime)  //
+    if (m_dSimTime == FaultTime) //
     {
         Rerouting();
     }
@@ -630,11 +633,10 @@ void CNetwork::MainProcess()
     }
 }
 
-
 // 在 find函数之前检查m_mDemandArriveTime，是否存在没有起点终点的demand，如果有，检查所有link，如果faultTime匹配，修改对应link的weight
-//故障节点检查（是否是源节点or目的节点,如果是源节点or目的节点，需要将对应的demand删除，并显示）
+// 故障节点检查（是否是源节点or目的节点,如果是源节点or目的节点，需要将对应的demand删除，并显示）
 
-//检查是否产生了fault（检查整个m_vAllDemands），并修改相应的link的weight
+// 检查是否产生了fault（检查整个m_vAllDemands），并修改相应的link的weight
 void CNetwork::CheckFault()
 {
     multimap<TIME, DEMANDID>::iterator demandIter;
@@ -643,7 +645,7 @@ void CNetwork::CheckFault()
     for (; demandIter != m_mDemandArriveTime.end(); demandIter++)
     {
         // if (demandIter->second >= 1000000 && std::abs(m_dSimTime-demandIter->first)<SMALLNUM)
-        if (demandIter->second >= 1000000)       // 说明是作为fault信息插入的demand
+        if (demandIter->second >= 1000000) // 说明是作为fault信息插入的demand
         {
             // 记录当前最小的FaultTime，用于后续比较
             if (previousFaultTime == 0)
@@ -661,34 +663,34 @@ void CNetwork::CheckFault()
             m_vAllLinks[linkId].SetWeight(INF);
             // std::cout << "Fault Link: " << linkId << std::endl;
 
-//            vector<CLink>::iterator linkIter;
-//            linkIter = m_vAllLinks.begin();
-//            for (; linkIter != m_vAllLinks.end(); linkIter++)
-//            {
-//                if (linkIter->GetFaultTime() == demandIter->first)
-//                {
-//                    linkIter->SetWeight(INF);
-//                    return true;
-//                    // vector<CDemand>::iterator demandIter;
-//                    // demandIter = m_vAllDemands.begin();
-//                    // for (; demandIter != m_vAllDemands.end(); demandIter++)
-//                    // {
-//                    //     //备用于故障link/node特殊性（是否是源节点、目的节点）的检查
-//                    // }
-//                }
-//            }
+            //            vector<CLink>::iterator linkIter;
+            //            linkIter = m_vAllLinks.begin();
+            //            for (; linkIter != m_vAllLinks.end(); linkIter++)
+            //            {
+            //                if (linkIter->GetFaultTime() == demandIter->first)
+            //                {
+            //                    linkIter->SetWeight(INF);
+            //                    return true;
+            //                    // vector<CDemand>::iterator demandIter;
+            //                    // demandIter = m_vAllDemands.begin();
+            //                    // for (; demandIter != m_vAllDemands.end(); demandIter++)
+            //                    // {
+            //                    //     //备用于故障link/node特殊性（是否是源节点、目的节点）的检查
+            //                    // }
+            //                }
+            //            }
         }
     }
 }
 
-//重路由函数
+// 重路由函数
 void CNetwork::Rerouting()
 {
-    //重新执行CNetwork::InitRelayPath()（修改后的，确保每一个demand的路径都完成更新）
+    // 重新执行CNetwork::InitRelayPath()（修改后的，确保每一个demand的路径都完成更新）
     InitRelayPath();
 
-    //检查是否存在无法通信的源目的节点对（即无法算出连接源节点和目的节点的路径），并显示相应的源目的节点对
-    for (int demandID = static_cast<int>(GetDemandNum()) - 1; demandID >= 0; demandID--)  //从后向前遍历，避免因删除元素导致的vector访问越界
+    // 检查是否存在无法通信的源目的节点对（即无法算出连接源节点和目的节点的路径），并显示相应的源目的节点对
+    for (int demandID = static_cast<int>(GetDemandNum()) - 1; demandID >= 0; demandID--) // 从后向前遍历，避免因删除元素导致的vector访问越界
     {
         std::cout << "GetDemandNum " << GetDemandNum() << std::endl;
         std::cout << "GetLinkNum " << GetLinkNum() << std::endl;
@@ -702,5 +704,5 @@ void CNetwork::Rerouting()
             m_vAllDemands[demandID].CheckRoutedFailed();
         }
     }
-    //遍历全部demand，对于每个demand，比较旧relaypath和新relaypath，将不在新relaypath中的node上和上link上的待发送需求清空
+    // 遍历全部demand，对于每个demand，比较旧relaypath和新relaypath，将不在新relaypath中的node上和上link上的待发送需求清空
 }

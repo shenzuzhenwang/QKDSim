@@ -25,7 +25,6 @@ QKDSim::QKDSim(QWidget *parent)
     Connections();
 
     net = nullptr;
-    step = 0;
 
     scene = new QGraphicsScene(this);
     ui->graph_node->setScene(scene);
@@ -482,12 +481,11 @@ void QKDSim::next_step()
         net->MoveSimTime(executeTime);
 
         showOutput();
-        step++;
-        ui->statusbar->showMessage(QString("Now is %1 step").arg(step), 5000);
+        ui->statusbar->showMessage(QString("Now is %1 step").arg(net->CurrentStep()), 5000);
     }
     else
     {
-        ui->statusbar->showMessage(QString("All demand has benn delivered, the end step is %1").arg(step), 5000);
+        ui->statusbar->showMessage(QString("All demand has benn delivered, the end step is %1").arg(net->CurrentStep()), 5000);
     }
 }
 

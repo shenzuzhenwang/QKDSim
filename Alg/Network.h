@@ -4,7 +4,7 @@
 #include "Link.h"
 #include "Demand.h"
 #include "NetEvent.h"
-#include "KeyManager.h"
+//#include "KeyManager.h"
 class CNetwork
 {
 public:
@@ -33,6 +33,7 @@ private:
     UINT m_uiLinkNum;	// 网络中的链路数量
     UINT m_uiDemandNum;	// 网络中的需求数量
     TIME m_dSimTime;	// 当前模拟时间
+    UINT m_step;        // 执行步数
 
 public:
     void SetNodeNum(UINT nodeNum);
@@ -45,6 +46,7 @@ public:
     UINT GetDemandNum();
 
     TIME CurrentTime();	// 获取当前模拟时间
+    UINT CurrentStep();
     void MoveSimTime(TIME executeTime);	// 推进模拟时间并处理相应的事件
 
     void InitKeyManagerOverLink(LINKID linkId);	// 为特定链路初始化密钥管理器
