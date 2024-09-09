@@ -18,6 +18,7 @@ SOURCES += \
     Alg/Node.cpp \
     Alg/RelayPath.cpp \
     Alg/stdafx.cpp \
+    GUI/progressbar.cpp \
     GUI/qkdsim.cpp \
     main.cpp
 
@@ -32,6 +33,7 @@ HEADERS += \
     Alg/RelayPath.h \
     Alg/stdafx.h \
     Alg/targetver.h \
+    GUI/progressbar.h \
     GUI/qkdsim.h
 
 FORMS += \

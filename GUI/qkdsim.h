@@ -3,6 +3,7 @@
 #define QKDSIM_H
 
 #include "Alg/Network.h"
+#include "progressbar.h"
 
 #include <QMainWindow>
 #include <QTableWidgetItem>
@@ -53,6 +54,17 @@ private slots:
 
     void on_bt_show_node_clicked();
 
+//    void startComputation()
+//    {
+//        progressBar->show(); // 显示进度条窗口
+//        for (int i = 0; i <= 100; i++)
+//        {
+//            QThread::msleep(100); // 模拟长时间计算
+//            emit progressChanged(i); // 发射进度变化信号
+//        }
+//        progressBar->hide(); // 隐藏进度条窗口
+//    }
+
 
 private:
     Ui::QKDSim *ui;
@@ -74,6 +86,12 @@ private:
     void showOutput();
     void showNodeGraph();
     void next_step();
+
+    ProgressBar *progressBar;
+
+signals:
+    void progressChanged(int);
+
 };
 
 #endif // QKDSIM_H

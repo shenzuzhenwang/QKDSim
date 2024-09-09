@@ -32,6 +32,8 @@ QKDSim::QKDSim(QWidget *parent)
     // 设置拓扑图
     scene = new QGraphicsScene(this);
     ui->graph_node->setScene(scene);
+    // 进度条界面
+//    progressBar = new ProgressBar(this);
 }
 
 QKDSim::~QKDSim()
@@ -56,6 +58,9 @@ void QKDSim::Connections()
 
     // 定时器
     connect(timer, &QTimer::timeout, this, &QKDSim::next_step);
+
+    // 进度条界面
+//    connect(this, &QKDSim::progressChanged, progressBar, &ProgressBar::updateProgress);
 }
 
 void QKDSim::loadCSV(const QString &fileName, Kind kind)
@@ -501,8 +506,14 @@ void QKDSim::on_bt_next100_clicked()
 
 void QKDSim::showNodeGraph()
 {
-    scene->clear();
     NODEID centerNodeId = ui->edit_show_node->text().toInt(); // 中心节点
+    if (centerNodeId >= net->GetNodeNum())
+    {
+        QMessageBox::critical(nullptr, "错误", "没有这个节点！");
+        return;
+    }
+
+    scene->clear();
     int WIDTH = ui->graph_node->size().width() - 10;
     int HEIGHT = ui->graph_node->size().height() - 10;
     int NODE_SIZE = min(WIDTH, HEIGHT) / 10;
