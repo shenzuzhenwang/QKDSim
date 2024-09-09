@@ -609,7 +609,7 @@ void QKDSim::showNodeGraph()
                 qreal y2 = loc[*j].second;
                 scene->addLine(x1, y1, x2, y2, QPen(Qt::gray));
                 LINKID linkId = net->m_mNodePairToLink[make_pair(*i, *j)];
-                QGraphicsTextItem* lineText = scene->addText(QString::number(linkId), QFont("Arial", 20)); // 线上也显示编号
+                QGraphicsTextItem* lineText = scene->addText(QString::number(linkId), QFont("Arial", 16)); // 线上也显示编号
                 lineText->setPos((x1 + x2) / 2 - lineText->boundingRect().width() / 2, (y1 + y2) / 2 - lineText->boundingRect().height() / 2);
                 linkShow.emplace(linkId);
             }
