@@ -33,6 +33,16 @@ QKDSim::QKDSim(QWidget *parent)
     scene = new QGraphicsScene(this);
     ui->graph_node->setScene(scene);
     // 进度条界面
+    LoadingDialog *loadingDialog = new LoadingDialog(this);
+    connect(this, &QKDSim::computationDone, this, [loadingDialog]()
+    {
+        loadingDialog->accept();  // 关闭对话框
+    });
+
+    connect(this, &QKDSim::startComputation, this, [loadingDialog]()
+    {
+        loadingDialog->exec();  // 显示模态对话框
+    });
 //    progressBar = new ProgressBar(this);
 }
 
@@ -194,6 +204,7 @@ void QKDSim::save_dem()
 void QKDSim::readNetTable()
 {
     // 读取节点信息
+    emit startComputation();
     QString nodeNumString = ui->edit_node_num->text();
     if (nodeNumString.isEmpty())
     {
@@ -260,6 +271,7 @@ void QKDSim::readNetTable()
     }
     net->SetLinkNum(ui->tableWidget_net->rowCount() - 1); //第一行是link数量，需要rowCount()-1
     ui->statusbar->showMessage("Network data processed successfully", 5000);
+    emit computationDone();
 }
 
 void QKDSim::readDemTable()
@@ -498,12 +510,6 @@ void QKDSim::on_bt_next10_clicked()
         next_step();
 }
 
-void QKDSim::on_bt_next100_clicked()
-{
-    for (int i = 0; i < 100; i++)
-        next_step();
-}
-
 void QKDSim::showNodeGraph()
 {
     NODEID centerNodeId = ui->edit_show_node->text().toInt(); // 中心节点
@@ -517,7 +523,7 @@ void QKDSim::showNodeGraph()
     int WIDTH = ui->graph_node->size().width() - 10;
     int HEIGHT = ui->graph_node->size().height() - 10;
     int NODE_SIZE = min(WIDTH, HEIGHT) / 10;
-    qreal RADIUS = min(WIDTH, HEIGHT) / 4;
+    qreal RADIUS = min(WIDTH, HEIGHT) / 4.2;
 
     scene->setSceneRect(0, 0, WIDTH, HEIGHT);  // 场景大小
 
@@ -609,8 +615,11 @@ void QKDSim::showNodeGraph()
                 qreal y2 = loc[*j].second;
                 scene->addLine(x1, y1, x2, y2, QPen(Qt::gray));
                 LINKID linkId = net->m_mNodePairToLink[make_pair(*i, *j)];
-                QGraphicsTextItem* lineText = scene->addText(QString::number(linkId), QFont("Arial", 16)); // 线上也显示编号
-                lineText->setPos((x1 + x2) / 2 - lineText->boundingRect().width() / 2, (y1 + y2) / 2 - lineText->boundingRect().height() / 2);
+                if (ui->check_show_linkid->isChecked() == true)
+                {
+                    QGraphicsTextItem* lineText = scene->addText(QString::number(linkId), QFont("Arial", 16)); // 线上也显示编号
+                    lineText->setPos((x1 + x2) / 2 - lineText->boundingRect().width() / 2, (y1 + y2) / 2 - lineText->boundingRect().height() / 2);
+                }
                 linkShow.emplace(linkId);
             }
         }
