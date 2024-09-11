@@ -9,17 +9,17 @@ QKDSim::QKDSim(QWidget *parent)
 {
     ui->setupUi(this);
     ui->tableWidget_net->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);  // 表格列宽自动伸缩
-    ui->tableWidget_net->verticalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);
+    ui->tableWidget_net->verticalHeader()->setDefaultSectionSize(20);
     ui->tableWidget_dem->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
-    ui->tableWidget_dem->verticalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);
+    ui->tableWidget_dem->verticalHeader()->setDefaultSectionSize(20);
     ui->tableWidget_path->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
-    ui->tableWidget_path->verticalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);
+    ui->tableWidget_path->verticalHeader()->setDefaultSectionSize(20);
     ui->tableWidget_out->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
-    ui->tableWidget_out->verticalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);
+    ui->tableWidget_out->verticalHeader()->setDefaultSectionSize(20);
     ui->tableWidget_link->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
-    ui->tableWidget_link->verticalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);
+    ui->tableWidget_link->verticalHeader()->setDefaultSectionSize(20);
     ui->tableWidget_node->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
-    ui->tableWidget_node->verticalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);
+    ui->tableWidget_node->verticalHeader()->setDefaultSectionSize(20);
 
     // 读取csv文件
     loadCSV("../Input/network.csv", Network);
@@ -34,15 +34,15 @@ QKDSim::QKDSim(QWidget *parent)
     ui->graph_node->setScene(scene);
     // 进度条界面
     LoadingDialog *loadingDialog = new LoadingDialog(this);
-    connect(this, &QKDSim::computationDone, this, [loadingDialog]()
-    {
-        loadingDialog->accept();  // 关闭对话框
-    });
+//    connect(this, &QKDSim::computationDone, this, [loadingDialog]()
+//    {
+//        loadingDialog->accept();  // 关闭对话框
+//    });
 
-    connect(this, &QKDSim::startComputation, this, [loadingDialog]()
-    {
-        loadingDialog->exec();  // 显示模态对话框
-    });
+//    connect(this, &QKDSim::startComputation, this, [loadingDialog]()
+//    {
+//        loadingDialog->exec();  // 显示模态对话框
+//    });
 //    progressBar = new ProgressBar(this);
 }
 
@@ -204,7 +204,6 @@ void QKDSim::save_dem()
 void QKDSim::readNetTable()
 {
     // 读取节点信息
-    emit startComputation();
     QString nodeNumString = ui->edit_node_num->text();
     if (nodeNumString.isEmpty())
     {
@@ -271,7 +270,6 @@ void QKDSim::readNetTable()
     }
     net->SetLinkNum(ui->tableWidget_net->rowCount() - 1); //第一行是link数量，需要rowCount()-1
     ui->statusbar->showMessage("Network data processed successfully", 5000);
-    emit computationDone();
 }
 
 void QKDSim::readDemTable()
