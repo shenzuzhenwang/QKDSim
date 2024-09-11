@@ -2,6 +2,7 @@
 #include "qkdsim.h"
 #include "ui_qkdsim.h"
 #include <unordered_set>
+#include <QtConcurrent>
 
 QKDSim::QKDSim(QWidget *parent)
     : QMainWindow(parent)
@@ -33,7 +34,7 @@ QKDSim::QKDSim(QWidget *parent)
     scene = new QGraphicsScene(this);
     ui->graph_node->setScene(scene);
     // 进度条界面
-    LoadingDialog *loadingDialog = new LoadingDialog(this);
+    loadingDialog = new LoadingDialog(this);
 //    connect(this, &QKDSim::computationDone, this, [loadingDialog]()
 //    {
 //        loadingDialog->accept();  // 关闭对话框
@@ -67,7 +68,25 @@ void QKDSim::Connections()
     connect(ui->action_save_dem, &QAction::triggered, this, &QKDSim::save_dem);
 
     // 定时器
-    connect(timer, &QTimer::timeout, this, &QKDSim::next_step);
+//    connect(timer, &QTimer::timeout, this, &QKDSim::next_step);
+    connect(timer, &QTimer::timeout, this, [this]()
+    {
+        QFuture<void> future = QtConcurrent::run([this]()
+        {
+            QMetaObject::invokeMethod(timer, "stop");  // 定时器阻塞期间不运行
+            this->next_step();
+            showOutput();
+            QMetaObject::invokeMethod(timer, "start", Q_ARG(int, 1000));
+        });
+        QFutureWatcher<void> *watcher = new QFutureWatcher<void>(this);
+        connect(watcher, &QFutureWatcher<void>::started, loadingDialog, &QDialog::exec);
+        connect(watcher, &QFutureWatcher<void>::finished, this, [this, watcher]()
+        {
+            loadingDialog->accept(); // 关闭加载对话框
+            watcher->deleteLater();  // 清理 watcher
+        });
+        watcher->setFuture(future);
+    });
 
     // 进度条界面
 //    connect(this, &QKDSim::progressChanged, progressBar, &ProgressBar::updateProgress);
@@ -207,7 +226,7 @@ void QKDSim::readNetTable()
     QString nodeNumString = ui->edit_node_num->text();
     if (nodeNumString.isEmpty())
     {
-        ui->statusbar->showMessage("Error: Missing data in node number", 5000);
+        ui->statusbar->showMessage("Error: Missing data in node number");
         return;
     }
     int nodeNum = nodeNumString.toInt();
@@ -260,16 +279,16 @@ void QKDSim::readNetTable()
 
             /**********如何赋值**************/
             int id_faultTime = 1000000 + linkId;    // m_mDemandArriveTime插入的value为1000000 + linkId     ？？可能有bug
-            if (faultTime >= 0)
+            if (faultTime > 0)
                 net->m_mDemandArriveTime.insert(make_pair(faultTime, id_faultTime));   // 增加m_mDemandArriveTime视为增加故障点
         }
         else
         {
-            ui->statusbar->showMessage("Error: Missing data in network table", 5000);
+            ui->statusbar->showMessage("Error: Missing data in network table");
         }
     }
     net->SetLinkNum(ui->tableWidget_net->rowCount() - 1); //第一行是link数量，需要rowCount()-1
-    ui->statusbar->showMessage("Network data processed successfully", 5000);
+//    ui->statusbar->showMessage("Network data processed successfully", 5000);
 }
 
 void QKDSim::readDemTable()
@@ -283,20 +302,15 @@ void QKDSim::readDemTable()
         TIME arriveTime;
 
         // 从表格的每一列读取数据
-        QTableWidgetItem *demandIdItem = ui->tableWidget_dem->item(row, 0);
-        QTableWidgetItem *sourceIdItem = ui->tableWidget_dem->item(row, 1);
-        QTableWidgetItem *sinkIdItem = ui->tableWidget_dem->item(row, 2);
-        QTableWidgetItem *demandVolumeItem = ui->tableWidget_dem->item(row, 3);
-        QTableWidgetItem *arriveTimeItem = ui->tableWidget_dem->item(row, 4);
-
-        if (demandIdItem && sourceIdItem && sinkIdItem && demandVolumeItem && arriveTimeItem)
+        if (ui->tableWidget_dem->item(row, 0) && ui->tableWidget_dem->item(row, 1) && ui->tableWidget_dem->item(row, 2)
+                && ui->tableWidget_dem->item(row, 3) && ui->tableWidget_dem->item(row, 4))
         {
             // 转换为相应的数据类型
-            demandId = demandIdItem->text().toUInt();
-            sourceId = sourceIdItem->text().toUInt();
-            sinkId = sinkIdItem->text().toUInt();
-            demandVolume = demandVolumeItem->text().toDouble();  // 假设 demandVolume 是一个双精度浮点数
-            arriveTime = arriveTimeItem->text().toDouble();  // 假设 arriveTime 是一个双精度浮点数
+            demandId = ui->tableWidget_dem->item(row, 0)->text().toUInt();
+            sourceId = ui->tableWidget_dem->item(row, 1)->text().toUInt();
+            sinkId = ui->tableWidget_dem->item(row, 2)->text().toUInt();
+            demandVolume = ui->tableWidget_dem->item(row, 3)->text().toDouble();  // 假设 demandVolume 是一个双精度浮点数
+            arriveTime = ui->tableWidget_dem->item(row, 4)->text().toDouble();  // 假设 arriveTime 是一个双精度浮点数
 
             // 处理需求信息
             CDemand newDemand;
@@ -313,13 +327,13 @@ void QKDSim::readDemTable()
         }
         else
         {
-            ui->statusbar->showMessage("Error: Missing data in demand table", 5000);
+            ui->statusbar->showMessage("Error: Missing data in demand table");
         }
     }
 
 
     net->SetDemandNum(ui->tableWidget_dem->rowCount() - 1); //第一行是demand数量，需要rowCount()-1
-    ui->statusbar->showMessage("Demand data processed successfully", 5000);
+//    ui->statusbar->showMessage("Demand data processed successfully", 5000);
 }
 
 void QKDSim::showOutput()
@@ -443,7 +457,6 @@ void QKDSim::showOutput()
             }
         }
     }
-//    showNodeGraph();
 }
 
 void QKDSim::on_bt_start_clicked()
@@ -452,8 +465,6 @@ void QKDSim::on_bt_start_clicked()
     net->Clear();
     readNetTable();
     readDemTable();
-    // 初始化
-    net->InitRelayPath();
     // 根据选中的按钮更改算法
     if (ui->bt_route1->isChecked())
         net->setShortestPath();
@@ -463,8 +474,25 @@ void QKDSim::on_bt_start_clicked()
         net->setMinimumRemainingTimeFirst();
     else
         net->setAverageKeyScheduling();
-    // 输出
-    showOutput();
+
+    // 初始化
+    QFuture<void> future = QtConcurrent::run([this]()
+    {
+        this->net->InitRelayPath();
+        QMetaObject::invokeMethod(this, "showOutput");  // InitRelayPath 完成后显示输出
+
+    });
+    QFutureWatcher<void> *watcher = new QFutureWatcher<void>(this);
+    connect(watcher, &QFutureWatcher<void>::started, loadingDialog, &QDialog::exec);
+    connect(watcher, &QFutureWatcher<void>::finished, this, [this, watcher]()
+    {
+        loadingDialog->accept(); // 关闭加载对话框
+        watcher->deleteLater();  // 清理 watcher
+    });
+    watcher->setFuture(future);
+//    net->InitRelayPath();
+//    showOutput();
+    ui->statusbar->showMessage("All network and demand is init!");
 }
 
 void QKDSim::on_bt_begin_clicked()
@@ -488,24 +516,53 @@ void QKDSim::next_step()
         TIME executeTime = net->OneTimeRelay();
         net->MoveSimTime(executeTime);
 
-        showOutput();
-        ui->statusbar->showMessage(QString("Now is %1 step").arg(net->CurrentStep()), 5000);
+//        showOutput();
+        ui->statusbar->showMessage(QString("Now is %1 step").arg(net->CurrentStep()));
     }
     else
     {
-        ui->statusbar->showMessage(QString("All demand has benn delivered, the end step is %1").arg(net->CurrentStep()), 5000);
+        ui->statusbar->showMessage(QString("All demand has benn delivered, the end step is %1").arg(net->CurrentStep()));
     }
 }
 
 void QKDSim::on_bt_next_clicked()
 {
-    next_step();
+    QFuture<void> future = QtConcurrent::run([this]()
+    {
+        this->next_step();
+        QMetaObject::invokeMethod(this, "showOutput");
+//        showOutput();
+    });
+    QFutureWatcher<void> *watcher = new QFutureWatcher<void>(this);
+    connect(watcher, &QFutureWatcher<void>::started, loadingDialog, &QDialog::exec);
+    connect(watcher, &QFutureWatcher<void>::finished, this, [this, watcher]()
+    {
+        loadingDialog->accept(); // 关闭加载对话框
+        watcher->deleteLater();  // 清理 watcher
+    });
+    watcher->setFuture(future);
+//    next_step();
 }
 
 void QKDSim::on_bt_next10_clicked()
 {
-    for (int i = 0; i < 10; i++)
-        next_step();
+    QFuture<void> future = QtConcurrent::run([this]()
+    {
+        for (int i = 0; i < 10; i++)
+            next_step();
+        QMetaObject::invokeMethod(this, "showOutput");
+//        showOutput();
+    });
+    QFutureWatcher<void> *watcher = new QFutureWatcher<void>(this);
+    connect(watcher, &QFutureWatcher<void>::started, loadingDialog, &QDialog::exec);
+    connect(watcher, &QFutureWatcher<void>::finished, this, [this, watcher]()
+    {
+        loadingDialog->accept(); // 关闭加载对话框
+        watcher->deleteLater();  // 清理 watcher
+    });
+    watcher->setFuture(future);
+//    for (int i = 0; i < 10; i++)
+//        next_step();
 }
 
 void QKDSim::showNodeGraph()

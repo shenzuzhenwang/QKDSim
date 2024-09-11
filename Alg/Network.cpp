@@ -632,7 +632,7 @@ TIME CNetwork::OneTimeRelay()
 
     // if (CheckFault() && std::abs(m_dSimTime-FaultTime)< SMALLNUM)  //发现fault且时间已经推进到FaultTime
     // 这里需要注意，故障生成需要按照faultTime逐次进行
-    if (m_dSimTime == FaultTime) //
+    if (m_dSimTime == FaultTime)
     {
         Rerouting();
     }

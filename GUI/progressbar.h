@@ -37,7 +37,7 @@ public:
         setAttribute(Qt::WA_TranslucentBackground); // 可选：背景透明
 
         QLabel *loadingLabel = new QLabel(this);
-        QMovie *loadingMovie = new QMovie("../loading.gif");
+        QMovie *loadingMovie = new QMovie("../GUI/loading.gif");
         loadingLabel->setMovie(loadingMovie);
         loadingMovie->start();
 

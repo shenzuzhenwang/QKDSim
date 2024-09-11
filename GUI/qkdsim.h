@@ -52,6 +52,8 @@ private slots:
 
     void on_bt_show_node_clicked();
 
+    void showOutput();
+
 //    void startComputation()
 //    {
 //        progressBar->show(); // 显示进度条窗口
@@ -81,11 +83,12 @@ private:
     void loadCSV(const QString &fileName, Kind kind);
     void readNetTable();
     void readDemTable();
-    void showOutput();
+
     void showNodeGraph();
     void next_step();
 
 //    ProgressBar *progressBar;
+    LoadingDialog *loadingDialog;
 
 signals:
 //    void progressChanged(int);
