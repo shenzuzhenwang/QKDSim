@@ -6,6 +6,7 @@
 #include "NetEvent.h"
 //#include "KeyManager.h"
 #include <functional>
+
 class CNetwork
 {
 public:
@@ -24,7 +25,7 @@ public:
 
 //    vector<CKeyManager> m_vAllKeyManager;	// 存储网络中所有密钥管理器的列表
 
-    multimap<TIME, DEMANDID> m_mDemandArriveTime;	// 存储需求到达时间和需求ID的映射表
+    multimap<TIME, DEMANDID> m_mDemandArriveTime;	// 存储需求到达时间和需求ID的映射表    有序
 
     TIME FaultTime;  //表示当前故障发生的时间
 
@@ -88,7 +89,7 @@ public:
     //main process
     bool AllDemandsDelivered();	// 检查是否所有需求都已完成传输
     TIME OneTimeRelay();	// 执行一次转发操作，并推进模拟时间
-    void MainProcess();	// 网络模拟的主流程，负责初始化路径，逐步执行需求转发，直到所有需求完成
+//    void MainProcess();	// 网络模拟的主流程，负责初始化路径，逐步执行需求转发，直到所有需求完成   废弃
 
     // 切换算法
     void setShortestPath()

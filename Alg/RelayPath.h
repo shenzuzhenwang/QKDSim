@@ -1,4 +1,5 @@
 ﻿#pragma once
+#include <unordered_map>
 #include "StdAfx.h"
 class CRelayPath
 {
@@ -16,7 +17,7 @@ private:
 public:
     list<NODEID> m_lTraversedNodes;	// 一个节点ID的列表，表示路径上依次经过的节点
     list<LINKID> m_lTraversedLinks;	// 一个链路ID的列表，表示路径上依次经过的链路
-    map<NODEID, NODEID> m_mNextNode;	// 一个节点ID到下一个节点ID的映射，用于快速查找路径中某节点的下一个节点
+    unordered_map<NODEID, NODEID> m_mNextNode;	// 一个节点ID到下一个节点ID的映射，用于快速查找路径中某节点的下一个节点
 
 public:
     void SetSourceId(NODEID SourceId);

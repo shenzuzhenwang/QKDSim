@@ -188,8 +188,8 @@ void CDemand::InitRelayPath(list<NODEID>& nodeList, list<LINKID>& linkList) //åœ
     m_Path.m_lTraversedLinks = linkList;
     m_Path.SetSourceId(m_uiSourceId);
     m_Path.SetSinkId(m_uiSinkId);
-    list<NODEID>::iterator nodeIter;
-    nodeIter = nodeList.begin();
+//    list<NODEID>::iterator nodeIter;
+    auto nodeIter = nodeList.begin();
     NODEID curNode = *nodeIter;
     nodeIter++;
     for (; nodeIter != nodeList.end(); nodeIter++)

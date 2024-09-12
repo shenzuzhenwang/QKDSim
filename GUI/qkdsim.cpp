@@ -23,8 +23,8 @@ QKDSim::QKDSim(QWidget *parent)
     ui->tableWidget_node->verticalHeader()->setDefaultSectionSize(20);
 
     // 读取csv文件
-    loadCSV("../../Input/network.csv", Network);
-    loadCSV("../../Input/demand.csv", Demand);
+    loadCSV("../Input/network.csv", Network);
+    loadCSV("../Input/demand.csv", Demand);
     timer = new QTimer(this);
 
     Connections();
@@ -480,7 +480,7 @@ void QKDSim::on_bt_start_clicked()
     {
         this->net->InitRelayPath();
         QMetaObject::invokeMethod(this, "showOutput");  // InitRelayPath 完成后显示输出
-
+        QMetaObject::invokeMethod(ui->statusbar, "showMessage", Q_ARG(QString, "All network and demand is init!"));
     });
     QFutureWatcher<void> *watcher = new QFutureWatcher<void>(this);
     connect(watcher, &QFutureWatcher<void>::started, loadingDialog, &QDialog::exec);
@@ -492,7 +492,7 @@ void QKDSim::on_bt_start_clicked()
     watcher->setFuture(future);
 //    net->InitRelayPath();
 //    showOutput();
-    ui->statusbar->showMessage("All network and demand is init!");
+
 }
 
 void QKDSim::on_bt_begin_clicked()
