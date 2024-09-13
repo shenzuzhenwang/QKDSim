@@ -30,7 +30,7 @@ private://data structure for algorithms
     WEIGHT m_dWeight;	// 链路的权重，用于路径选择算法中
 
 public:
-    list<DEMANDID> m_lCarriedDemands;	// 一个需求ID的列表，表示当前链路上正在传输的所有需求   ？？用法感觉不对
+//    list<DEMANDID> m_lCarriedDemands;	// 一个需求ID的列表，表示当前链路上正在传输的所有需求   ？？用法感觉不对
 
 
     void SetLinkId(LINKID linkId);
