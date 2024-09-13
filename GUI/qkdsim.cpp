@@ -25,8 +25,8 @@ QKDSim::QKDSim(QWidget *parent)
     // 读取csv文件
     // loadCSV("../../Input/network.csv", Network);
     // loadCSV("../../Input/demand.csv", Demand);
-    loadCSV("../../Input/network(100).csv", Network);
-    loadCSV("../../Input/demand(100).csv", Demand);
+    loadCSV("../../Input/network(500).csv", Network);
+    loadCSV("../../Input/demand(500).csv", Demand);
 
     // loadCSV("../../Input/10规模/network.csv", Network);
     // loadCSV("../../Input/10规模/demand.csv", Demand);
