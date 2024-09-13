@@ -50,9 +50,9 @@ private slots:
 
     void on_bt_next10_clicked();
 
-    void on_bt_next100_clicked();
-
     void on_bt_show_node_clicked();
+
+    void showOutput();
 
 //    void startComputation()
 //    {
@@ -83,14 +83,17 @@ private:
     void loadCSV(const QString &fileName, Kind kind);
     void readNetTable();
     void readDemTable();
-    void showOutput();
+
     void showNodeGraph();
     void next_step();
 
-    ProgressBar *progressBar;
+//    ProgressBar *progressBar;
+    LoadingDialog *loadingDialog;
 
 signals:
-    void progressChanged(int);
+//    void progressChanged(int);
+    void computationDone();
+    void startComputation();
 
 };
 
