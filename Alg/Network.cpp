@@ -4,7 +4,7 @@
 CNetwork::CNetwork(void)
 {
     m_dSimTime = 0;
-    FaultTime = 0;
+    FaultTime = -1;
     m_step = 0;
     currentRouteAlg = [this](NODEID sourceId, NODEID sinkId, list<NODEID>& nodeList, list<LINKID>& linkList) -> bool
     {
@@ -23,7 +23,7 @@ CNetwork::~CNetwork(void)
 void CNetwork::Clear()
 {
     m_dSimTime = 0;
-    FaultTime = 0;
+    FaultTime = -1;
     m_step = 0;
     m_vAllNodes.clear();
     m_vAllLinks.clear();
@@ -470,7 +470,6 @@ TIME CNetwork::FindDemandToRelay(map<NODEID, map<DEMANDID, VOLUME>> &relayDemand
         {
             minExecuteTime = executeTime;
         }
-        //        nodeRelayTime[nodeId] = executeTime;
         // 将每个节点的转发需求量存储在 nodeRelayDemand 中
         nodeRelayDemand[nodeId] = tempRelayDemand;
     }
