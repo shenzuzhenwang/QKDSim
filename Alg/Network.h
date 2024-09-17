@@ -28,7 +28,8 @@ public:
     multimap<TIME, DEMANDID> m_mDemandArriveTime;	// 存储需求到达时间和需求ID的映射表    有序
 
     TIME FaultTime;  //表示当前故障发生的时间
-
+    // vector<CLink> failedLink; //存储当前时隙故障的link
+    list<LINKID> failedLink; //存储当前时隙故障的linkID
 
 private:
     UINT m_uiNodeNum;	// 网络中的节点数量

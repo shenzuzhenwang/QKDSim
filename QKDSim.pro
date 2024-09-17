@@ -10,7 +10,6 @@ CONFIG += c++17
 
 SOURCES += \
     Alg/Demand.cpp \
-    Alg/InputOutput.cpp \
     Alg/KeyManager.cpp \
     Alg/Link.cpp \
     Alg/NetEvent.cpp \
@@ -24,7 +23,6 @@ SOURCES += \
 
 HEADERS += \
     Alg/Demand.h \
-    Alg/InputOutput.h \
     Alg/KeyManager.h \
     Alg/Link.h \
     Alg/NetEvent.h \

@@ -1,4 +1,5 @@
 ﻿#include "Network.h"
+#include "Link.h"
 #include <iostream>
 
 CNetwork::CNetwork(void)
@@ -114,68 +115,167 @@ void CNetwork::InitNodes(UINT nodeNum)
         m_vAllNodes.push_back(newNode);
     }
 }
-// 使用最短路径算法Dijkstra计算从源节点 sourceId 到汇节点 sinkId 的最短路径，并将路径中的节点和链路记录在 nodeList 和 linkList 中。如果找到有效路径，返回 true，否则返回 false
+// // 使用最短路径算法Dijkstra计算从源节点 sourceId 到汇节点 sinkId 的最短路径，并将路径中的节点和链路记录在 nodeList 和 linkList 中。如果找到有效路径，返回 true，否则返回 false
+// bool CNetwork::ShortestPath(NODEID sourceId, NODEID sinkId, list<NODEID> &nodeList, list<LINKID> &linkList)
+// {
+//     UINT NodeNum = static_cast<UINT>(m_vAllNodes.size());
+//     vector<NODEID> preNode(NodeNum, sourceId); // 记录每个节点在最短路径中的前驱节点
+//     vector<WEIGHT> curDist(NodeNum, INF);      // 用于记录从 sourceId 到各节点的当前最短距离
+//     vector<bool> visited(NodeNum, false);      // 用于记录每个节点是否已被访问
+//     curDist[sourceId] = 0;
+//     visited[sourceId] = true;
+//     NODEID curNode = sourceId;
+//     while (curNode != sinkId)
+//     {
+//         for (auto adjNodeIter = m_vAllNodes[curNode].m_lAdjNodes.begin(); adjNodeIter != m_vAllNodes[curNode].m_lAdjNodes.end(); adjNodeIter++)
+//         {
+//             if (visited[*adjNodeIter])
+//             {
+//                 continue;
+//             }
+//             LINKID midLink = m_mNodePairToLink[make_pair(curNode, *adjNodeIter)];
+//             if (curDist[curNode] + m_vAllLinks[midLink].GetWeight() < curDist[*adjNodeIter])
+//             {
+//                 curDist[*adjNodeIter] = curDist[curNode] + m_vAllLinks[midLink].GetWeight();
+//                 preNode[*adjNodeIter] = curNode;
+//             }
+//         }
+//         // Find next node
+//         WEIGHT minDist = INF;
+//         NODEID nextNode = curNode;
+//         for (NODEID nodeId = 0; nodeId < NodeNum; nodeId++)
+//         {
+//             if (visited[nodeId])
+//             {
+//                 continue;
+//             }
+//             if (curDist[nodeId] < minDist)
+//             {
+//                 nextNode = nodeId;
+//                 minDist = curDist[nodeId];
+//             }
+//         }
+//         if (minDist >= INF || nextNode == curNode)
+//         {
+//             return false;
+//         }
+//         curNode = nextNode;
+//         visited[nextNode] = true;
+//     }
+//     if (curNode != sinkId)
+//     {
+//         cout << "why current node is not sink node?? check function shortestPath!" << endl;
+//         getchar();
+//         exit(0);
+//     }
+//     while (curNode != sourceId)
+//     {
+//         nodeList.push_front(curNode);
+//         NODEID pre = preNode[curNode];
+//         LINKID midLink = m_mNodePairToLink[make_pair(pre, curNode)];
+//         linkList.push_front(midLink);
+//         curNode = pre;
+//     }
+//     nodeList.push_front(sourceId);
+//     return true;
+// }
+
+// 使用BFS的最短路径算法
 bool CNetwork::ShortestPath(NODEID sourceId, NODEID sinkId, list<NODEID> &nodeList, list<LINKID> &linkList)
 {
+    // 获取网络中节点的总数
     UINT NodeNum = static_cast<UINT>(m_vAllNodes.size());
-    vector<NODEID> preNode(NodeNum, sourceId); // 记录每个节点在最短路径中的前驱节点
-    vector<WEIGHT> curDist(NodeNum, INF);      // 用于记录从 sourceId 到各节点的当前最短距离
-    vector<bool> visited(NodeNum, false);      // 用于记录每个节点是否已被访问
-    curDist[sourceId] = 0;
+
+    // 用于记录每个节点在最短路径中的前驱节点，初始化为 -1
+    vector<NODEID> preNode(NodeNum, -1);
+
+    // 用于记录每个节点是否已被访问，初始化为 false
+    vector<bool> visited(NodeNum, false);
+
+    // 队列用于进行广度优先搜索（BFS）
+    queue<NODEID> toVisit;
+
+    // 将源节点加入待访问队列并标记为已访问
+    toVisit.push(sourceId);
     visited[sourceId] = true;
-    NODEID curNode = sourceId;
-    while (curNode != sinkId)
+
+    // 开始进行 BFS 搜索
+    while (!toVisit.empty())
     {
-        for (auto adjNodeIter = m_vAllNodes[curNode].m_lAdjNodes.begin(); adjNodeIter != m_vAllNodes[curNode].m_lAdjNodes.end(); adjNodeIter++)
+        // 取出队首元素作为当前节点
+        NODEID curNode = toVisit.front();
+        toVisit.pop();
+
+        // 如果当前节点是目标节点，则跳出循环
+        if (curNode == sinkId)
         {
-            if (visited[*adjNodeIter])
-            {
-                continue;
+            break;
+        }
+
+        // 遍历当前节点的所有邻接节点
+        for (auto adjNodeIter = m_vAllNodes[curNode].m_lAdjNodes.begin();
+             adjNodeIter != m_vAllNodes[curNode].m_lAdjNodes.end();
+             adjNodeIter++)
+        {
+            NODEID adjNode = *adjNodeIter;  // 获取邻接节点 ID
+
+            // 获取边的 ID
+            LINKID linkId = m_mNodePairToLink[make_pair(curNode, adjNode)];
+
+            // 检查边的权重是否为无穷大
+            if (m_vAllLinks[linkId].GetWeight() == INF) {
+                continue; // 跳过权重为无穷大的边
             }
-            LINKID midLink = m_mNodePairToLink[make_pair(curNode, *adjNodeIter)];
-            if (curDist[curNode] + m_vAllLinks[midLink].GetWeight() < curDist[*adjNodeIter])
+
+            // 如果邻接节点未被访问过
+            if (!visited[adjNode])
             {
-                curDist[*adjNodeIter] = curDist[curNode] + m_vAllLinks[midLink].GetWeight();
-                preNode[*adjNodeIter] = curNode;
+                // 标记邻接节点为已访问
+                visited[adjNode] = true;
+
+                // 更新邻接节点的前驱节点为当前节点
+                preNode[adjNode] = curNode;
+
+                // 将邻接节点加入待访问队列
+                toVisit.push(adjNode);
+
+                // 如果邻接节点是目标节点，则跳出内层循环
+                if (adjNode == sinkId)
+                {
+                    break;
+                }
             }
         }
-        // Find next node
-        WEIGHT minDist = INF;
-        NODEID nextNode = curNode;
-        for (NODEID nodeId = 0; nodeId < NodeNum; nodeId++)
-        {
-            if (visited[nodeId])
-            {
-                continue;
-            }
-            if (curDist[nodeId] < minDist)
-            {
-                nextNode = nodeId;
-                minDist = curDist[nodeId];
-            }
-        }
-        if (minDist >= INF || nextNode == curNode)
-        {
-            return false;
-        }
-        curNode = nextNode;
-        visited[nextNode] = true;
     }
-    if (curNode != sinkId)
+
+    // 如果目标节点没有被访问过，说明不存在从 sourceId 到 sinkId 的路径
+    if (!visited[sinkId])
     {
-        cout << "why current node is not sink node?? check function shortestPath!" << endl;
-        getchar();
-        exit(0);
+        return false;
     }
+
+    // 从目标节点开始回溯路径，直到源节点
+    NODEID curNode = sinkId;
     while (curNode != sourceId)
     {
+        // 将当前节点加入路径列表（头部）
         nodeList.push_front(curNode);
+
+        // 获取当前节点的前驱节点
         NODEID pre = preNode[curNode];
+
+        // 获取前驱节点到当前节点的边 ID，并加入边列表（头部）
         LINKID midLink = m_mNodePairToLink[make_pair(pre, curNode)];
         linkList.push_front(midLink);
+
+        // 移动到前驱节点
         curNode = pre;
     }
+
+    // 将源节点加入路径列表（头部）
     nodeList.push_front(sourceId);
+
+    // 返回 true 表示找到了路径
     return true;
 }
 
@@ -252,12 +352,21 @@ void CNetwork::InitRelayPath(DEMANDID demandId)
     list<NODEID> nodeList;
     list<LINKID> linkList;
     // 清空旧路径
+    // CRelayPath old_path = m_vAllDemands[demandId].m_Path;
     m_vAllDemands[demandId].m_Path.Clear();
+
     //更新nextnode
     // 调用 ShortestPath 函数，寻找从 sourceId 到 sinkId 的最短路径
+    // cout << "Demand "<<demandId<<" is rerouting"<< endl;
     if (currentRouteAlg(sourceId, sinkId, nodeList, linkList))
     {
+        cout << "Here Demand "<<demandId<<" is rerouting"<< endl;
         m_vAllDemands[demandId].InitRelayPath(nodeList, linkList); // 完成指定demand和中继路径的各种信息的匹配（尤其是node上和指定demand相关的下一条的确定操作   ）
+        // CRelayPath new_path = m_vAllDemands[demandId].m_Path;
+        // if(old_path.m_lTraversedNodes != new_path.m_lTraversedNodes)
+        // {
+        //     cout<<"the relaypath of demand "<<demandId<<" is updated"<<endl;
+        // }
     }
 //    // 通过遍历 linkList，将当前需求ID (demandId) 添加到每条路径链路 m_lCarriedDemands 列表中，表示这些链路将承载该需求的数据传输
 //    for (auto linkIter = linkList.begin(); linkIter != linkList.end(); linkIter++)
@@ -299,7 +408,7 @@ TIME CNetwork::MinimumRemainingTimeFirst(NODEID nodeId, map<DEMANDID, VOLUME> &r
         VOLUME availableKeyVolume = m_vAllLinks[midLink].GetAvaialbeKeys();
 
         VOLUME actualTransmittableVolume = min(demandIter->second, availableKeyVolume);
-        cout<<"actualTransmittableVolume:"<<actualTransmittableVolume<<endl;
+        // cout<<"actualTransmittableVolume:"<<actualTransmittableVolume<<endl;
         // 根据链路的带宽和实际可传输的数据量，计算需求的执行时间，并更新最小执行时间 executeTime
 
         TIME demandExecuteTime = actualTransmittableVolume / bandwidth;
@@ -624,11 +733,22 @@ TIME CNetwork::OneTimeRelay()
 //    std::cout << "Current FaultTime: " << FaultTime << std::endl;
 
     // if (CheckFault() && std::abs(m_dSimTime-FaultTime)< SMALLNUM)  //发现fault且时间已经推进到FaultTime
+
+    // std::cout << "failedLink: " << failedLink << std::endl;  123456
+    // 检查一下是否failedLink的赋值有问题
+    // std::cout << "the length of failedLink: " << failedLink.size() << std::endl;
     // 这里需要注意，故障生成需要按照faultTime逐次进行
     if (m_dSimTime == FaultTime)
     {
+        // for(list<LINKID>::iterator index = failedLink.begin(); index!=failedLink.end(); index++)
+        // {
+        //     int count = 1;
+        //     std::cout << "the " << count <<"-th of failedLink: " << *index << std::endl;
+        //     count++;
+        // }
         Rerouting();
     }
+    failedLink.clear();
     CheckFault();
 //    std::cout << "Current Time after checkfault: " << m_dSimTime << std::endl;
 //    std::cout << "Current FaultTime after checkfault: " << FaultTime << std::endl;
@@ -662,8 +782,10 @@ void CNetwork::CheckFault()
             }
             LINKID linkId = demandIter->second - 1000000;
             m_vAllLinks[linkId].SetWeight(INF);
+            // 将故障link添加进记录当前发生故障的link的list
+            failedLink.push_back(linkId);
             // std::cout << "Fault Link: " << linkId << std::endl;
-
+            // std::cout << "Link " << linkId << " has weight with "<<m_vAllLinks[linkId].GetWeight()<<std::endl;
             //            vector<CLink>::iterator linkIter;
             //            linkIter = m_vAllLinks.begin();
             //            for (; linkIter != m_vAllLinks.end(); linkIter++)
@@ -688,20 +810,49 @@ void CNetwork::CheckFault()
 void CNetwork::Rerouting()
 {
     // 重新执行CNetwork::InitRelayPath()（修改后的，确保每一个demand的路径都完成更新）
-    InitRelayPath();
-
+    // ReInitRelayPath();
+    // 检查有哪些demand的relaypath包含了这些故障的link
     // 检查是否存在无法通信的源目的节点对（即无法算出连接源节点和目的节点的路径），并显示相应的源目的节点对
     for (int demandID = static_cast<int>(GetDemandNum()) - 1; demandID >= 0; demandID--) // 从后向前遍历，避免因删除元素导致的vector访问越界
     {
 //        std::cout << "GetDemandNum " << GetDemandNum() << std::endl;
 //        std::cout << "GetLinkNum " << GetLinkNum() << std::endl;
-        if (m_vAllDemands[demandID].m_Path.m_lTraversedNodes.empty())
+        bool if_break = false;
+        // 这一段没有发挥作用
+        list<LINKID> TraversedLinks;
+        TraversedLinks = m_vAllDemands[demandID].m_Path.m_lTraversedLinks;
+        for(list<LINKID>::iterator element=failedLink.begin();element!=failedLink.end();element++)
         {
-            // 打印这个被清空路径的 demand 对象
-            std::cout << "Demand" << demandID << " cannot be relayed" << std::endl;
-            // 结束这个demand的传输并添加标记
-            m_vAllDemands[demandID].CheckRoutedFailed();
+            for(list<LINKID>::iterator element_2=TraversedLinks.begin();element_2!=TraversedLinks.end();element_2++)
+            {
+                if(*element == *element_2)
+                {
+                    InitRelayPath(demandID);
+                    std::cout << "demand " <<demandID<< " has been rerouted " << std::endl;
+                    if (TraversedLinks.empty())
+                    {
+                        // // 打印这个被清空路径的 demand 对象
+                        // std::cout << "Demand" << demandID << " cannot be relayed" << std::endl;
+                        // 结束这个demand的传输并添加标记
+                        m_vAllDemands[demandID].CheckRoutedFailed();
+                    }
+                    if_break = true;
+                    break;
+                }
+                if(if_break == true)
+                {
+                    break;
+                }
+            }
         }
+        // for (LINKID& element : failedLink)
+        // {
+        //     if (std::find(TraversedLinks.begin(), TraversedLinks.end(), element) != TraversedLinks.end())
+        //     {
+        //         InitRelayPath(demandID);
+        //     }
+        // }
+
     }
     // 遍历全部demand，对于每个demand，比较旧relaypath和新relaypath，将不在新relaypath中的node上和上link上的待发送需求清空
 }
