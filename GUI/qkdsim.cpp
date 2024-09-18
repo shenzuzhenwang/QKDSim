@@ -5,8 +5,7 @@
 #include <QtConcurrent>
 
 QKDSim::QKDSim(QWidget *parent)
-    : QMainWindow(parent)
-    , ui(new Ui::QKDSim)
+    : QMainWindow(parent), ui(new Ui::QKDSim)
 {
     ui->setupUi(this);
     ui->tableWidget_net->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);  // 表格列宽自动伸缩
@@ -234,7 +233,7 @@ void QKDSim::readNetTable()
     net->InitNodes(nodeNum);
 
     // 逐行读取链路信息
-    for (int row = 0; row < ui->tableWidget_net->rowCount(); ++row)
+    for (int row = 0; row < ui->tableWidget_net->rowCount() - 1; ++row)     // 最后一行为空行
     {
         LINKID linkId;
         NODEID sourceId, sinkId;
@@ -294,7 +293,7 @@ void QKDSim::readNetTable()
 void QKDSim::readDemTable()
 {
     // 逐行读取需求信息
-    for (int row = 0; row < ui->tableWidget_dem->rowCount(); ++row)
+    for (int row = 0; row < ui->tableWidget_dem->rowCount() - 1; ++row)     // 最后一行为空行
     {
         DEMANDID demandId;
         NODEID sourceId, sinkId;
