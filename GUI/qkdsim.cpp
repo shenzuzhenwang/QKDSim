@@ -5,8 +5,7 @@
 #include <QtConcurrent>
 
 QKDSim::QKDSim(QWidget *parent)
-    : QMainWindow(parent)
-    , ui(new Ui::QKDSim)
+    : QMainWindow(parent), ui(new Ui::QKDSim)
 {
     ui->setupUi(this);
     ui->tableWidget_net->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);  // 表格列宽自动伸缩
@@ -122,13 +121,13 @@ void QKDSim::loadCSV(const QString &fileName, Kind kind)
         ui->edit_node_num->setText(QString::number(nodeNum));   // 将显示的nodeNum也更改
         in.readLine();  // 略过第一行的换行符
 
-        headers = {"链路ID", "源节点", "目的节点", "密钥生成速率", "时延", "带宽", "链路权重", "故障时间"};
+        headers = {"链路序号", "源节点序号", "目的节点序号", "密钥生成速率(keys/s)", "时延", "带宽(MB/s)", "链路权重", "故障时间(s)"};
         break;
 
     case Demand:
         tableWidget = ui->tableWidget_dem;
 
-        headers = {"需求ID", "源节点", "目的节点", "数据量", "到达时间"};
+        headers = {"需求序号", "源节点序号", "目的节点序号", "需传输数据量(MB)", "开始传输时间(s)"};
         break;
 
     default:
@@ -232,7 +231,7 @@ void QKDSim::readNetTable()
     QString nodeNumString = ui->edit_node_num->text();
     if (nodeNumString.isEmpty())
     {
-        ui->statusbar->showMessage("Error: Missing data in node number");
+        ui->statusbar->showMessage("Missing data in node number");
         return;
     }
     int nodeNum = nodeNumString.toInt();
@@ -240,7 +239,7 @@ void QKDSim::readNetTable()
     net->InitNodes(nodeNum);
 
     // 逐行读取链路信息
-    for (int row = 0; row < ui->tableWidget_net->rowCount(); ++row)
+    for (int row = 0; row < ui->tableWidget_net->rowCount() - 1; ++row)     // 最后一行为空行
     {
         LINKID linkId;
         NODEID sourceId, sinkId;
@@ -290,7 +289,7 @@ void QKDSim::readNetTable()
         }
         else
         {
-            ui->statusbar->showMessage("Error: Missing data in network table");
+            ui->statusbar->showMessage("Missing data in network table");
         }
     }
     net->SetLinkNum(ui->tableWidget_net->rowCount() - 1); //第一行是link数量，需要rowCount()-1
@@ -300,7 +299,7 @@ void QKDSim::readNetTable()
 void QKDSim::readDemTable()
 {
     // 逐行读取需求信息
-    for (int row = 0; row < ui->tableWidget_dem->rowCount(); ++row)
+    for (int row = 0; row < ui->tableWidget_dem->rowCount() - 1; ++row)     // 最后一行为空行
     {
         DEMANDID demandId;
         NODEID sourceId, sinkId;
@@ -333,7 +332,7 @@ void QKDSim::readDemTable()
         }
         else
         {
-            ui->statusbar->showMessage("Error: Missing data in demand table");
+            ui->statusbar->showMessage("Missing data in demand table");
         }
     }
 
@@ -344,11 +343,11 @@ void QKDSim::readDemTable()
 
 void QKDSim::showOutput()
 {
-    ui->edit_time->setText(QString::number(net->CurrentTime(), 'f', 2));
+    ui->edit_time->setText(QString("%1s").arg(QString::number(net->CurrentTime(), 'f', 2)));
 
     ui->tableWidget_out->clear();
     ui->tableWidget_out->setRowCount(0);    // 清空表格
-    QStringList headers = {"需求ID", "当前节点", "下一节点", "下一跳链路", "可用密钥", "待传数据量", "已传完", "已故障"};     // 尚未确定
+    QStringList headers = {"需求序号", "当前节点序号", "下一节点序号", "下一跳链路序号", "可用密钥(keys)", "待传输数据量(MB)", "完成时间(s)", "是否故障"};     // 尚未确定
     ui->tableWidget_out->setColumnCount(headers.size());
     ui->tableWidget_out->setHorizontalHeaderLabels(headers);
 
@@ -371,6 +370,7 @@ void QKDSim::showOutput()
             LINKID minLink = net->m_mNodePairToLink[make_pair(nodeId, nextNode)];
             VOLUME avaiableKeys = net->m_vAllLinks[minLink].GetAvaialbeKeys();
             bool isRouteFailed = net->m_vAllDemands[demandId].GetRoutedFailed();
+            TIME completeTime = net->m_vAllDemands[demandId].GetCompleteTime();
 
             int newRow = ui->tableWidget_out->rowCount();
             ui->tableWidget_out->insertRow(newRow);    // 末尾增加一行
@@ -381,8 +381,8 @@ void QKDSim::showOutput()
             ui->tableWidget_out->setItem(newRow, 3, new QTableWidgetItem(QString::number(minLink)));
             ui->tableWidget_out->setItem(newRow, 4, new QTableWidgetItem(QString::number(avaiableKeys, 'f', 2)));
             ui->tableWidget_out->setItem(newRow, 5, new QTableWidgetItem(QString::number(relayVolume, 'f', 2)));
-            ui->tableWidget_out->setItem(newRow, 6, new QTableWidgetItem(isDelivered ? "True" : "False"));
-            ui->tableWidget_out->setItem(newRow, 7, new QTableWidgetItem(isRouteFailed ? "True" : "False"));
+            ui->tableWidget_out->setItem(newRow, 6, new QTableWidgetItem(isDelivered ? QString::number(completeTime, 'f', 2) : "No"));
+            ui->tableWidget_out->setItem(newRow, 7, new QTableWidgetItem(isRouteFailed ? "Yes" : "No"));
 
             demandIter++;
         }
@@ -400,6 +400,7 @@ void QKDSim::showOutput()
 //            LINKID minLink = net->m_mNodePairToLink[make_pair(nodeId, nextNode)];
 //            VOLUME avaiableKeys = net->m_vAllLinks[minLink].GetAvaialbeKeys();
             bool isRouteFailed = net->m_vAllDemands[demandId].GetRoutedFailed();
+            TIME completeTime = net->m_vAllDemands[demandId].GetCompleteTime();
 
             int newRow = ui->tableWidget_out->rowCount();
             ui->tableWidget_out->insertRow(newRow);    // 末尾增加一行
@@ -410,14 +411,14 @@ void QKDSim::showOutput()
             ui->tableWidget_out->setItem(newRow, 3, new QTableWidgetItem());
             ui->tableWidget_out->setItem(newRow, 4, new QTableWidgetItem());
             ui->tableWidget_out->setItem(newRow, 5, new QTableWidgetItem(QString::number(relayVolume, 'f', 2)));
-            ui->tableWidget_out->setItem(newRow, 6, new QTableWidgetItem(isDelivered ? "True" : "False"));
-            ui->tableWidget_out->setItem(newRow, 7, new QTableWidgetItem(isRouteFailed ? "True" : "False"));
+            ui->tableWidget_out->setItem(newRow, 6, new QTableWidgetItem(isDelivered ? QString::number(completeTime, 'f', 2) : "No"));
+            ui->tableWidget_out->setItem(newRow, 7, new QTableWidgetItem(isRouteFailed ? "Yes" : "No"));
         }
     }
 
     ui->tableWidget_path->clear();
     ui->tableWidget_path->setRowCount(0);    // 清空表格
-    QStringList headers_path = {"需求ID", "节点1", "节点2"};     // 至少首尾两个节点
+    QStringList headers_path = {"需求序号", "节点1序号", "节点2序号"};     // 至少首尾两个节点
     ui->tableWidget_path->setColumnCount(headers_path.size());
     ui->tableWidget_path->setHorizontalHeaderLabels(headers_path);
 
@@ -448,7 +449,7 @@ void QKDSim::showOutput()
                 // 设置新的列头
                 for (int col = oldColCount; col < currentColCount; ++col)
                 {
-                    ui->tableWidget_path->setHorizontalHeaderItem(col, new QTableWidgetItem(QString("节点%1").arg(col)));
+                    ui->tableWidget_path->setHorizontalHeaderItem(col, new QTableWidgetItem(QString("节点%1序号").arg(col)));
                 }
             }
 
@@ -486,7 +487,8 @@ void QKDSim::on_bt_start_clicked()
     {
         this->net->InitRelayPath();
         QMetaObject::invokeMethod(this, "showOutput");  // InitRelayPath 完成后显示输出
-        QMetaObject::invokeMethod(ui->statusbar, "showMessage", Q_ARG(QString, "All network and demand is init!"));
+        QMetaObject::invokeMethod(ui->statusbar, "showMessage",
+                                  Q_ARG(QString, QString("%1 links and %2 demands are init").arg(net->GetLinkNum()).arg(net->GetDemandNum())));
     });
     QFutureWatcher<void> *watcher = new QFutureWatcher<void>(this);
     connect(watcher, &QFutureWatcher<void>::started, loadingDialog, &QDialog::exec);
@@ -496,9 +498,6 @@ void QKDSim::on_bt_start_clicked()
         watcher->deleteLater();  // 清理 watcher
     });
     watcher->setFuture(future);
-//    net->InitRelayPath();
-//    showOutput();
-
 }
 
 void QKDSim::on_bt_begin_clicked()
@@ -523,11 +522,11 @@ void QKDSim::next_step()
         net->MoveSimTime(executeTime);
 
 //        showOutput();
-        ui->statusbar->showMessage(QString("Now is %1 step").arg(net->CurrentStep()));
+        ui->statusbar->showMessage(QString("step %1").arg(net->CurrentStep()));
     }
     else
     {
-        ui->statusbar->showMessage(QString("All demand has benn delivered, the end step is %1").arg(net->CurrentStep()));
+        ui->statusbar->showMessage(QString("All demand have been delivered, the end step is %1").arg(net->CurrentStep()));
     }
 }
 
@@ -691,7 +690,7 @@ void QKDSim::showNodeGraph()
     // 显示node
     ui->tableWidget_node->clear();
     ui->tableWidget_node->setRowCount(0);    // 清空表格
-    QStringList headers_node = {"需求ID", "节点ID", "下一跳链路", "待传数据量"};     // 尚未确定
+    QStringList headers_node = {"需求序号", "节点序号", "下一跳链路序号", "待传输数据量(MB)"};     // 尚未确定
     ui->tableWidget_node->setColumnCount(headers_node.size());
     ui->tableWidget_node->setHorizontalHeaderLabels(headers_node);
     for (NODEID nodeId : nodeShow)
@@ -721,7 +720,7 @@ void QKDSim::showNodeGraph()
     // 显示link
     ui->tableWidget_link->clear();
     ui->tableWidget_link->setRowCount(0);    // 清空表格
-    QStringList headers_link = {"链路ID", "节点1", "节点2", "可用密钥"};     // 尚未确定
+    QStringList headers_link = {"链路序号", "节点1序号", "节点2序号", "可用密钥量(key)"};     // 尚未确定
     ui->tableWidget_link->setColumnCount(headers_link.size());
     ui->tableWidget_link->setHorizontalHeaderLabels(headers_link);
     for (LINKID linkId : linkShow)
