@@ -26,5 +26,3 @@ int main(int argc, char *argv[])
     w.show();
     return a.exec();
 }
-
-// 10 5.14

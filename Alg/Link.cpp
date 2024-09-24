@@ -3,6 +3,7 @@
 
 CLink::CLink(void)
 {
+    wait_or_not = true;
 }
 
 
@@ -23,6 +24,9 @@ CLink::CLink(const CLink& link)
     m_dFaultTime = link.m_dFaultTime;
 
     m_dWeight = link.m_dWeight;
+
+
+    wait_or_not = link.wait_or_not;
 }
 
 void CLink::operator=(const CLink& link)

@@ -40,10 +40,6 @@ private slots:
 
     void on_bt_start_clicked();
 
-    void on_tableWidget_net_cellChanged(int row, int column);
-
-    void on_tableWidget_dem_cellChanged(int row, int column);
-
     void on_bt_begin_clicked();
 
     void on_bt_next_clicked();
@@ -54,47 +50,43 @@ private slots:
 
     void showOutput();
 
-//    void startComputation()
-//    {
-//        progressBar->show(); // 显示进度条窗口
-//        for (int i = 0; i <= 100; i++)
-//        {
-//            QThread::msleep(100); // 模拟长时间计算
-//            emit progressChanged(i); // 发射进度变化信号
-//        }
-//        progressBar->hide(); // 隐藏进度条窗口
-//    }
+    //    void on_tableWidget_dem_cellChanged(int row, int column);
 
+    void on_tableWidget_in_cellChanged(int row, int column);
+
+    void on_box_input_currentIndexChanged(int index);
 
 private:
     Ui::QKDSim *ui;
     QGraphicsScene *scene;  // 将scene作为成员变量
 
-//    int nodeNum;
     CNetwork* net;
+    void next_step();
+
     QTimer *timer;
     void Connections();
+
+//    void readNetTable();
+//    void readDemTable();
+
+    // 加载进度条
+    LoadingDialog *loadingDialog;
+
+    // 用于存储读取的csv文件数据
+    vector<tuple<int, int, int, double, double, double, double, double>> network;
+    vector<tuple<int, int, int, double, double>> demand;
 
     enum Kind
     {
         Network,
         Demand
     };
-    void loadCSV(const QString &fileName, Kind kind);
-    void readNetTable();
-    void readDemTable();
+    void loadCSV(const QString &fileName, Kind kind);   // 加载csv文件至数据结构
+    void showCSV(Kind kind);    // 将数据结构存储的数据显示到表格上
+    void readCSV(Kind kind);    // 将存储的数据结构转化为初始化CNetwork
+    void readTable(Kind kind);  // 读取表格并存储为数据结构
 
     void showNodeGraph();
-    void next_step();
-
-//    ProgressBar *progressBar;
-    LoadingDialog *loadingDialog;
-
-signals:
-//    void progressChanged(int);
-    void computationDone();
-    void startComputation();
-
 };
 
 #endif // QKDSIM_H
