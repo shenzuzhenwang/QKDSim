@@ -64,5 +64,5 @@ void CRelayPath::Clear()
 {
     m_lTraversedNodes.clear();
     m_lTraversedLinks.clear();
-    m_mNextNode.clear();
+    // m_mNextNode.clear();
 }

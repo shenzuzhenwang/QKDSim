@@ -7,10 +7,10 @@ QKDSim::QKDSim(QWidget *parent)
     : QMainWindow(parent), ui(new Ui::QKDSim)
 {
     ui->setupUi(this);
-    ui->tableWidget_in->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);  // 表格列宽自动伸缩
+    ui->tableWidget_in->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch); // 表格列宽自动伸缩
     ui->tableWidget_in->verticalHeader()->setDefaultSectionSize(20);
-//    ui->tableWidget_dem->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
-//    ui->tableWidget_dem->verticalHeader()->setDefaultSectionSize(20);
+    //    ui->tableWidget_dem->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+    //    ui->tableWidget_dem->verticalHeader()->setDefaultSectionSize(20);
     ui->tableWidget_path->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
     ui->tableWidget_path->verticalHeader()->setDefaultSectionSize(20);
     ui->tableWidget_out->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
@@ -47,7 +47,8 @@ QKDSim::~QKDSim()
 void QKDSim::Connections()
 {
     // 关于QT
-    connect(ui->action_qt, &QAction::triggered, [this] {QMessageBox::aboutQt(this);});
+    connect(ui->action_qt, &QAction::triggered, [this]
+            { QMessageBox::aboutQt(this); });
 
     // 关闭程序
     connect(ui->action_exit, &QAction::triggered, this, &QWidget::close);
@@ -59,9 +60,9 @@ void QKDSim::Connections()
     connect(ui->action_save_dem, &QAction::triggered, this, &QKDSim::save_dem);
 
     // 定时器
-//    connect(timer, &QTimer::timeout, this, &QKDSim::next_step);
+    //    connect(timer, &QTimer::timeout, this, &QKDSim::next_step);
     connect(timer, &QTimer::timeout, this, [this]()
-    {
+            {
 //        QFuture<void> future = QtConcurrent::run([this]()
 //        {
 //            QMetaObject::invokeMethod(timer, "stop");  // 定时器阻塞期间不运行
@@ -80,11 +81,10 @@ void QKDSim::Connections()
         timer->stop();
         this->next_step();
         showOutput();
-        timer->start(1000);
-    });
+        timer->start(1000); });
 
     // 进度条界面
-//    connect(this, &QKDSim::progressChanged, progressBar, &ProgressBar::updateProgress);
+    //    connect(this, &QKDSim::progressChanged, progressBar, &ProgressBar::updateProgress);
 }
 
 void QKDSim::open_net()
@@ -92,7 +92,7 @@ void QKDSim::open_net()
     // 加载文件至接收内容显示框
     QString filename = QFileDialog::getOpenFileName(this, tr("打开网络拓扑文件"));
     loadCSV(filename, Network);
-//    ui->tabWidget->setCurrentIndex(0);
+    //    ui->tabWidget->setCurrentIndex(0);
     ui->box_input->setCurrentIndex(0);
     showCSV(Network);
 }
@@ -102,7 +102,7 @@ void QKDSim::open_dem()
     // 加载文件至接收内容显示框
     QString filename = QFileDialog::getOpenFileName(this, tr("打开需求文件"));
     loadCSV(filename, Demand);
-//    ui->tabWidget->setCurrentIndex(1);
+    //    ui->tabWidget->setCurrentIndex(1);
     ui->box_input->setCurrentIndex(1);
     showCSV(Demand);
 }
@@ -119,16 +119,16 @@ void QKDSim::save_net()
 
     QTextStream out(&file);
     out << ui->edit_node_num->text().toInt() << "\n"; // 第一行存nodenum
-//    for (int row = 0; row < ui->tableWidget_in->rowCount(); ++row)
-//    {
-//        QStringList rowData;
-//        for (int column = 0; column < ui->tableWidget_in->columnCount(); ++column)
-//        {
-//            QTableWidgetItem *item = ui->tableWidget_in->item(row, column);
-//            rowData << (item ? item->text() : "");
-//        }
-//        out << rowData.join(",") << "\n";
-//    }
+                                                      //    for (int row = 0; row < ui->tableWidget_in->rowCount(); ++row)
+                                                      //    {
+                                                      //        QStringList rowData;
+                                                      //        for (int column = 0; column < ui->tableWidget_in->columnCount(); ++column)
+                                                      //        {
+                                                      //            QTableWidgetItem *item = ui->tableWidget_in->item(row, column);
+                                                      //            rowData << (item ? item->text() : "");
+                                                      //        }
+                                                      //        out << rowData.join(",") << "\n";
+                                                      //    }
     for (auto &net : network)
     {
         QStringList rowData;
@@ -160,16 +160,16 @@ void QKDSim::save_dem()
     }
 
     QTextStream out(&file);
-//    for (int row = 0; row < ui->tableWidget_dem->rowCount(); ++row)
-//    {
-//        QStringList rowData;
-//        for (int column = 0; column < ui->tableWidget_dem->columnCount(); ++column)
-//        {
-//            QTableWidgetItem *item = ui->tableWidget_dem->item(row, column);
-//            rowData << (item ? item->text() : "");
-//        }
-//        out << rowData.join(",") << "\n";
-//    }
+    //    for (int row = 0; row < ui->tableWidget_dem->rowCount(); ++row)
+    //    {
+    //        QStringList rowData;
+    //        for (int column = 0; column < ui->tableWidget_dem->columnCount(); ++column)
+    //        {
+    //            QTableWidgetItem *item = ui->tableWidget_dem->item(row, column);
+    //            rowData << (item ? item->text() : "");
+    //        }
+    //        out << rowData.join(",") << "\n";
+    //    }
     for (auto &dem : demand)
     {
         QStringList rowData;
@@ -190,11 +190,11 @@ void QKDSim::save_dem()
 void QKDSim::on_bt_start_clicked()
 {
     // 读取输入
-    net->Clear();   // 重置
+    net->Clear(); // 重置
 
-//    readNetTable();
-//    readDemTable();
-    if(ui->box_input->currentIndex() == 0)
+    //    readNetTable();
+    //    readDemTable();
+    if (ui->box_input->currentIndex() == 0)
         readTable(Network);
     else if (ui->box_input->currentIndex() == 1)
         readTable(Demand);
@@ -212,21 +212,21 @@ void QKDSim::on_bt_start_clicked()
         net->setAverageKeyScheduling();
 
     // 初始化
-//    QFuture<void> future = QtConcurrent::run([this]()
-//    {
-//        this->net->InitRelayPath();
-//        QMetaObject::invokeMethod(this, "showOutput");  // InitRelayPath 完成后显示输出
-//        QMetaObject::invokeMethod(ui->statusbar, "showMessage",
-//                                  Q_ARG(QString, QString("%1 links and %2 demands are init").arg(net->GetLinkNum()).arg(net->GetDemandNum())));
-//    });
-//    QFutureWatcher<void> *watcher = new QFutureWatcher<void>(this);
-//    connect(watcher, &QFutureWatcher<void>::started, loadingDialog, &QDialog::exec);
-//    connect(watcher, &QFutureWatcher<void>::finished, this, [this, watcher]()
-//    {
-//        loadingDialog->accept(); // 关闭加载对话框
-//        watcher->deleteLater();  // 清理 watcher
-//    });
-//    watcher->setFuture(future);
+    //    QFuture<void> future = QtConcurrent::run([this]()
+    //    {
+    //        this->net->InitRelayPath();
+    //        QMetaObject::invokeMethod(this, "showOutput");  // InitRelayPath 完成后显示输出
+    //        QMetaObject::invokeMethod(ui->statusbar, "showMessage",
+    //                                  Q_ARG(QString, QString("%1 links and %2 demands are init").arg(net->GetLinkNum()).arg(net->GetDemandNum())));
+    //    });
+    //    QFutureWatcher<void> *watcher = new QFutureWatcher<void>(this);
+    //    connect(watcher, &QFutureWatcher<void>::started, loadingDialog, &QDialog::exec);
+    //    connect(watcher, &QFutureWatcher<void>::finished, this, [this, watcher]()
+    //    {
+    //        loadingDialog->accept(); // 关闭加载对话框
+    //        watcher->deleteLater();  // 清理 watcher
+    //    });
+    //    watcher->setFuture(future);
     net->InitRelayPath();
     showOutput();
     ui->statusbar->showMessage(QString("%1 links and %2 demands are init").arg(net->GetLinkNum()).arg(net->GetDemandNum()));
@@ -254,7 +254,7 @@ void QKDSim::next_step()
         TIME executeTime = net->OneTimeRelay();
         net->MoveSimTime(executeTime);
 
-//        showOutput();
+        //        showOutput();
         ui->statusbar->showMessage(QString("step %1").arg(net->CurrentStep()));
     }
     else
@@ -265,40 +265,40 @@ void QKDSim::next_step()
 
 void QKDSim::on_bt_next_clicked()
 {
-//    QFuture<void> future = QtConcurrent::run([this]()
-//    {
-//        this->next_step();
-//        QMetaObject::invokeMethod(this, "showOutput");
-//    });
-//    QFutureWatcher<void> *watcher = new QFutureWatcher<void>(this);
-//    connect(watcher, &QFutureWatcher<void>::started, loadingDialog, &QDialog::exec);
-//    connect(watcher, &QFutureWatcher<void>::finished, this, [this, watcher]()
-//    {
-//        loadingDialog->accept(); // 关闭加载对话框
-//        watcher->deleteLater();  // 清理 watcher
-//    });
-//    watcher->setFuture(future);
+    //    QFuture<void> future = QtConcurrent::run([this]()
+    //    {
+    //        this->next_step();
+    //        QMetaObject::invokeMethod(this, "showOutput");
+    //    });
+    //    QFutureWatcher<void> *watcher = new QFutureWatcher<void>(this);
+    //    connect(watcher, &QFutureWatcher<void>::started, loadingDialog, &QDialog::exec);
+    //    connect(watcher, &QFutureWatcher<void>::finished, this, [this, watcher]()
+    //    {
+    //        loadingDialog->accept(); // 关闭加载对话框
+    //        watcher->deleteLater();  // 清理 watcher
+    //    });
+    //    watcher->setFuture(future);
     next_step();
     showOutput();
 }
 
 void QKDSim::on_bt_next10_clicked()
 {
-//    QFuture<void> future = QtConcurrent::run([this]()
-//    {
-//        for (int i = 0; i < 10; i++)
-//            next_step();
-//        QMetaObject::invokeMethod(this, "showOutput");
+    //    QFuture<void> future = QtConcurrent::run([this]()
+    //    {
+    //        for (int i = 0; i < 10; i++)
+    //            next_step();
+    //        QMetaObject::invokeMethod(this, "showOutput");
 
-//    });
-//    QFutureWatcher<void> *watcher = new QFutureWatcher<void>(this);
-//    connect(watcher, &QFutureWatcher<void>::started, loadingDialog, &QDialog::exec);
-//    connect(watcher, &QFutureWatcher<void>::finished, this, [this, watcher]()
-//    {
-//        loadingDialog->accept(); // 关闭加载对话框
-//        watcher->deleteLater();  // 清理 watcher
-//    });
-//    watcher->setFuture(future);
+    //    });
+    //    QFutureWatcher<void> *watcher = new QFutureWatcher<void>(this);
+    //    connect(watcher, &QFutureWatcher<void>::started, loadingDialog, &QDialog::exec);
+    //    connect(watcher, &QFutureWatcher<void>::finished, this, [this, watcher]()
+    //    {
+    //        loadingDialog->accept(); // 关闭加载对话框
+    //        watcher->deleteLater();  // 清理 watcher
+    //    });
+    //    watcher->setFuture(future);
     for (int i = 0; i < 10; i++)
         next_step();
     showOutput();
@@ -310,7 +310,7 @@ void QKDSim::on_bt_show_node_clicked()
 }
 
 // 表格自动加减行
-void tableWidget_cellChanged(int row, int column, QTableWidget* tableWidget)
+void tableWidget_cellChanged(int row, int column, QTableWidget *tableWidget)
 
 {
     // 最后一行添加数据，则再加一个空行
@@ -321,14 +321,14 @@ void tableWidget_cellChanged(int row, int column, QTableWidget* tableWidget)
     }
 
     // 某一行删除数据，查看此行是否为空行，并删除
-    QTableWidgetItem* item = tableWidget->item(row, column);
+    QTableWidgetItem *item = tableWidget->item(row, column);
     if (item != nullptr && item->text().isEmpty())
     {
         // 如果单元格为空，检查整行是否也为空
         bool isRowEmpty = true;
         for (int j = 0; j < tableWidget->columnCount(); ++j)
         {
-            QTableWidgetItem* cell = tableWidget->item(row, j);
+            QTableWidgetItem *cell = tableWidget->item(row, j);
             if (cell != nullptr && !cell->text().isEmpty())
             {
                 isRowEmpty = false;
@@ -337,15 +337,15 @@ void tableWidget_cellChanged(int row, int column, QTableWidget* tableWidget)
         }
         if (isRowEmpty)
         {
-            tableWidget->removeRow(row);  // 如果整行为空，则删除该行
+            tableWidget->removeRow(row); // 如果整行为空，则删除该行
         }
     }
 }
 
-//void QKDSim::on_tableWidget_dem_cellChanged(int row, int column)
+// void QKDSim::on_tableWidget_dem_cellChanged(int row, int column)
 //{
-//    tableWidget_cellChanged(row, column, ui->tableWidget_dem);
-//}
+//     tableWidget_cellChanged(row, column, ui->tableWidget_dem);
+// }
 
 void QKDSim::on_tableWidget_in_cellChanged(int row, int column)
 {
@@ -355,7 +355,7 @@ void QKDSim::on_tableWidget_in_cellChanged(int row, int column)
 // 切换表格显示内容
 void QKDSim::on_box_input_currentIndexChanged(int index)
 {
-    switch(index)
+    switch (index)
     {
     case 0:
         readTable(Demand);
@@ -369,4 +369,3 @@ void QKDSim::on_box_input_currentIndexChanged(int index)
         break;
     }
 }
-
