@@ -185,8 +185,8 @@ void QKDSim::readCSV(Kind kind)
             NODEID sourceId = std::get<1>(netw);
             NODEID sinkId = std::get<2>(netw);
             RATE keyRate = std::get<3>(netw);
-            RATE bandWidth = std::get<4>(netw);
-            TIME proDelay = std::get<5>(netw);
+            TIME proDelay = std::get<4>(netw);
+            RATE bandWidth = std::get<5>(netw);
             WEIGHT weight = std::get<6>(netw);
             TIME faultTime = std::get<7>(netw);
 
