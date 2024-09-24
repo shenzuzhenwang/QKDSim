@@ -19,6 +19,7 @@ SOURCES += \
     Alg/stdafx.cpp \
     GUI/progressbar.cpp \
     GUI/qkdsim.cpp \
+    GUI/showqkdsim.cpp \
     main.cpp
 
 HEADERS += \
