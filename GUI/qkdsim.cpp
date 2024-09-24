@@ -20,6 +20,8 @@ QKDSim::QKDSim(QWidget *parent)
     ui->tableWidget_node->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
     ui->tableWidget_node->verticalHeader()->setDefaultSectionSize(20);
 
+    ui->tableWidget_path->horizontalHeader()->setVisible(false);
+
     // 读取csv文件
     loadCSV("../Input/network(1000).csv", Network);
     loadCSV("../Input/demand(1000).csv", Demand);
@@ -48,7 +50,7 @@ void QKDSim::Connections()
 {
     // 关于QT
     connect(ui->action_qt, &QAction::triggered, [this]
-            { QMessageBox::aboutQt(this); });
+    { QMessageBox::aboutQt(this); });
 
     // 关闭程序
     connect(ui->action_exit, &QAction::triggered, this, &QWidget::close);
@@ -62,7 +64,7 @@ void QKDSim::Connections()
     // 定时器
     //    connect(timer, &QTimer::timeout, this, &QKDSim::next_step);
     connect(timer, &QTimer::timeout, this, [this]()
-            {
+    {
 //        QFuture<void> future = QtConcurrent::run([this]()
 //        {
 //            QMetaObject::invokeMethod(timer, "stop");  // 定时器阻塞期间不运行
@@ -81,7 +83,8 @@ void QKDSim::Connections()
         timer->stop();
         this->next_step();
         showOutput();
-        timer->start(1000); });
+        timer->start(1000);
+    });
 
     // 进度条界面
     //    connect(this, &QKDSim::progressChanged, progressBar, &ProgressBar::updateProgress);
@@ -119,16 +122,16 @@ void QKDSim::save_net()
 
     QTextStream out(&file);
     out << ui->edit_node_num->text().toInt() << "\n"; // 第一行存nodenum
-                                                      //    for (int row = 0; row < ui->tableWidget_in->rowCount(); ++row)
-                                                      //    {
-                                                      //        QStringList rowData;
-                                                      //        for (int column = 0; column < ui->tableWidget_in->columnCount(); ++column)
-                                                      //        {
-                                                      //            QTableWidgetItem *item = ui->tableWidget_in->item(row, column);
-                                                      //            rowData << (item ? item->text() : "");
-                                                      //        }
-                                                      //        out << rowData.join(",") << "\n";
-                                                      //    }
+    //    for (int row = 0; row < ui->tableWidget_in->rowCount(); ++row)
+    //    {
+    //        QStringList rowData;
+    //        for (int column = 0; column < ui->tableWidget_in->columnCount(); ++column)
+    //        {
+    //            QTableWidgetItem *item = ui->tableWidget_in->item(row, column);
+    //            rowData << (item ? item->text() : "");
+    //        }
+    //        out << rowData.join(",") << "\n";
+    //    }
     for (auto &net : network)
     {
         QStringList rowData;

@@ -120,7 +120,7 @@ void QKDSim::showCSV(Kind kind)
 {
     if (kind == Network)
     {
-        QStringList headers = {"链路序号", "源节点序号", "目的节点序号", "密钥生成速率(kbps)", "时延", "带宽(Mbps)", "链路权重", "故障时间(s)"};
+        QStringList headers = {"链路序号", "源节点序号", "目的节点序号", "密钥生成速率(Kbps)", "时延(s)", "带宽(Mbps)", "链路权重", "故障时间(s)"};
         ui->tableWidget_in->setColumnCount(headers.size());
         ui->tableWidget_in->setHorizontalHeaderLabels(headers);
         ui->tableWidget_in->setRowCount(static_cast<int>(network.size()));
@@ -135,7 +135,10 @@ void QKDSim::showCSV(Kind kind)
             ui->tableWidget_in->setItem(row, 4, new QTableWidgetItem(QString::number(std::get<4>(net), 'f', 2)));
             ui->tableWidget_in->setItem(row, 5, new QTableWidgetItem(QString::number(std::get<5>(net), 'f', 2)));
             ui->tableWidget_in->setItem(row, 6, new QTableWidgetItem(QString::number(std::get<6>(net), 'f', 2)));
-            ui->tableWidget_in->setItem(row, 7, new QTableWidgetItem(QString::number(std::get<7>(net), 'f', 2)));
+            if (std::get<7>(net) < 0)
+                ui->tableWidget_in->setItem(row, 7, new QTableWidgetItem());
+            else
+                ui->tableWidget_in->setItem(row, 7, new QTableWidgetItem(QString::number(std::get<7>(net), 'f', 2)));
             row++;
         }
     }
@@ -316,7 +319,7 @@ void QKDSim::showOutput()
 
     ui->tableWidget_out->clear();
     ui->tableWidget_out->setRowCount(0);    // 清空表格
-    QStringList headers = {"需求序号", "当前节点序号", "下一节点序号", "下一跳链路序号", "可用密钥(keys)", "待传输数据量(Mb)", "完成时间(s)", "是否故障", "等待或传输"};     // 尚未确定
+    QStringList headers = {"需求序号", "当前节点序号", "下一节点序号", "下一跳链路序号", "可用密钥(Kbit)", "待传输数据量(Mbit)", "完成时间(s)", "是否故障", "等待或传输"};     // 尚未确定
     ui->tableWidget_out->setColumnCount(headers.size());
     ui->tableWidget_out->setHorizontalHeaderLabels(headers);
 
@@ -398,6 +401,12 @@ void QKDSim::showOutput()
     QStringList headers_path = {"需求序号", "节点1序号", "节点2序号"};     // 至少首尾两个节点
     ui->tableWidget_path->setColumnCount(headers_path.size());
     ui->tableWidget_path->setHorizontalHeaderLabels(headers_path);
+    // 第一行插入作为表头
+    ui->tableWidget_path->insertRow(0);
+    ui->tableWidget_path->setItem(0, 0, new QTableWidgetItem("需求序号"));  // 第一列
+    QTableWidgetItem *newItem = new QTableWidgetItem("需求最短路径上的节点序号");
+    newItem->setTextAlignment(Qt::AlignCenter);
+    ui->tableWidget_path->setItem(0, 1, newItem);  // 后面列
 
     // 显示每个需求的路由的最短路径
     for (auto demandIter = net->m_vAllDemands.begin(); demandIter != net->m_vAllDemands.end(); demandIter++)
@@ -419,6 +428,7 @@ void QKDSim::showOutput()
 
             // 如果当前行需要的列数大于表格当前列数，则扩展表格的列数
             int currentColCount = static_cast<int>(node_path.size() + 1); // 因为第一列是demandId
+
             if (currentColCount > ui->tableWidget_path->columnCount())
             {
                 int oldColCount = ui->tableWidget_path->columnCount();
@@ -441,6 +451,7 @@ void QKDSim::showOutput()
             }
         }
     }
+    ui->tableWidget_path->setSpan(0, 1, 1, ui->tableWidget_path->columnCount() - 1);
 }
 
 // 显示局部节点拓扑图
@@ -564,7 +575,7 @@ void QKDSim::showNodeGraph()
     // 显示node
     ui->tableWidget_node->clear();
     ui->tableWidget_node->setRowCount(0);    // 清空表格
-    QStringList headers_node = {"需求序号", "节点序号", "下一跳链路序号", "待传输数据量(Mb)"};     // 尚未确定
+    QStringList headers_node = {"需求序号", "节点序号", "下一跳链路序号", "待传输数据量(Mbit)"};     // 尚未确定
     ui->tableWidget_node->setColumnCount(headers_node.size());
     ui->tableWidget_node->setHorizontalHeaderLabels(headers_node);
     for (NODEID nodeId : nodeShow)
@@ -594,7 +605,7 @@ void QKDSim::showNodeGraph()
     // 显示link
     ui->tableWidget_link->clear();
     ui->tableWidget_link->setRowCount(0);    // 清空表格
-    QStringList headers_link = {"链路序号", "节点1序号", "节点2序号", "可用密钥量(key)"};     // 尚未确定
+    QStringList headers_link = {"链路序号", "节点1序号", "节点2序号", "可用密钥量(Kbit)"};     // 尚未确定
     ui->tableWidget_link->setColumnCount(headers_link.size());
     ui->tableWidget_link->setHorizontalHeaderLabels(headers_link);
     for (LINKID linkId : linkShow)
