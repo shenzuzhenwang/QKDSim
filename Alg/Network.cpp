@@ -406,7 +406,7 @@ TIME CNetwork::MinimumRemainingTimeFirst(NODEID nodeId, map<DEMANDID, VOLUME> &r
 
         // 获取该链路上的可用密钥量
         VOLUME availableKeyVolume = m_vAllLinks[midLink].GetAvaialbeKeys();
-
+        cout<<"availableKeyVolume"<<availableKeyVolume<<endl;
         VOLUME actualTransmittableVolume = min(demandIter->second, availableKeyVolume);
         // cout<<"actualTransmittableVolume:"<<actualTransmittableVolume<<endl;
         // 根据链路的带宽和实际可传输的数据量，计算需求的执行时间，并更新最小执行时间 executeTime
@@ -621,16 +621,17 @@ TIME CNetwork::FindDemandToRelay(map<NODEID, map<DEMANDID, VOLUME>> &relayDemand
         TIME relayTime = nodeRelayTime[nodeIter->first];
         for (auto demandIter = nodeIter->second.begin(); demandIter != nodeIter->second.end(); demandIter++)
         {
-            VOLUME newVolume = demandIter->second * minExecuteTime / relayTime;
-            if (newVolume >= 1)
-            {
-                relayDemand[nodeIter->first][demandIter->first] = newVolume;
-            }
-            else
-            {
-                relayDemand[nodeIter->first][demandIter->first] = 0;
-            }
+            // VOLUME newVolume = demandIter->second * minExecuteTime / relayTime;
+            // if (newVolume >= 1)
+            // {
+            //     relayDemand[nodeIter->first][demandIter->first] = newVolume;
+            // }
+            // else
+            // {
+            //     relayDemand[nodeIter->first][demandIter->first] = 0;
+            // }
             // relayDemand[nodeIter->first][demandIter->first] = newVolume;
+            relayDemand[nodeIter->first][demandIter->first] = demandIter->second;
             cout<<"node id = "<<nodeIter->first<<endl;
             cout<<"demand id = "<<demandIter->first<<endl;
         }
@@ -679,6 +680,8 @@ void CNetwork::RelayForOneHop(TIME executeTime, map<NODEID, map<DEMANDID, VOLUME
                 m_vAllLinks[minLink].ConsumeKeys(demandIter->second);
                 // 从当前节点上移除已经转发的需求数据量 (demandIter->second)。如果当前节点是该需求的源节点，调用 ReduceVolume 减少需求的剩余数据量
                 // ？？仅在需求在源节点被传输后，才减少数据量，中间节点没有这个操作，不知道是否符合逻辑
+                
+                cout<<"demandIter->second"<<demandIter->second<<endl;
                 if (nodeIter->first == m_vAllDemands[demandIter->first].GetSourceId())
                 {
                     cout<<"nodeIter->first"<<nodeIter->first<<endl;

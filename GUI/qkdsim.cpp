@@ -23,11 +23,18 @@ QKDSim::QKDSim(QWidget *parent)
     ui->tableWidget_path->horizontalHeader()->setVisible(false);
 
     // 读取csv文件
-    loadCSV("../../Input/network.csv", Network);
-    loadCSV("../../Input/demand.csv", Demand);
+    // loadCSV("../../Input/network.csv", Network);
+    // loadCSV("../../Input/demand.csv", Demand);
+
+    // loadCSV("../../Input/network(1000) - 副本.csv", Network);
+    // loadCSV("../../Input/demand.csv", Demand);
+
 
     // loadCSV("../../Input/10规模/network.csv", Network);
     // loadCSV("../../Input/10规模/demand.csv", Demand);
+
+    loadCSV("../../Input/1000规模/network.csv", Network);
+    loadCSV("../../Input/1000规模/demand.csv", Demand);
 
     // 显示demand
     showCSV(Network);
