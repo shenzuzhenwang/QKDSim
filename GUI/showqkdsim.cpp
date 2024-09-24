@@ -71,6 +71,7 @@ void QKDSim::loadCSV(const QString &fileName, Kind kind)
     QTextStream in(&file);
     if (kind == Network)
     {
+        network.clear();
         int nodeNum;
         in >> nodeNum;
         ui->edit_node_num->setText(QString::number(nodeNum));   // 将显示的nodeNum也更改
@@ -96,6 +97,7 @@ void QKDSim::loadCSV(const QString &fileName, Kind kind)
     }
     else if (kind == Demand)
     {
+        demand.clear();
         while (!in.atEnd())
         {
             QString line = in.readLine();

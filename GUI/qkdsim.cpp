@@ -21,8 +21,8 @@ QKDSim::QKDSim(QWidget *parent)
     ui->tableWidget_node->verticalHeader()->setDefaultSectionSize(20);
 
     // 读取csv文件
-    loadCSV("../Input/network.csv", Network);
-    loadCSV("../Input/demand.csv", Demand);
+    loadCSV("../Input/network(1000).csv", Network);
+    loadCSV("../Input/demand(1000).csv", Demand);
     // 显示demand
     showCSV(Network);
 
