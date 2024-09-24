@@ -303,92 +303,60 @@ TIME CNetwork::MinimumRemainingTimeFirst(NODEID nodeId, map<DEMANDID, VOLUME> &r
 
         TIME demandExecuteTime = actualTransmittableVolume / bandwidth;
 
-        TIME demandWaitTime = 0;
         if (demandExecuteTime < executeTime)
         {
-            executeTime = demandExecuteTime;
+            
+            if (demandExecuteTime < 0.1 && demandIter->second > availableKeyVolume)
+            {
+                m_vAllLinks[midLink].wait_or_not = true;
+                TIME waitTime = (demandIter->second - availableKeyVolume) / m_vAllLinks[midLink].GetQKDRate();
+                if (waitTime < executeTime)
+                {
+                    executeTime = waitTime;
+                }
+                continue;
+                // executeTime = (demandIter->second - availableKeyVolume) / m_vAllLinks[midLink].GetQKDRate();
+            }
+            else
+            {
+                m_vAllLinks[midLink].wait_or_not = false;
+                executeTime = demandExecuteTime;
+            }
         }
-        // VOLUME minAvailableKeyVolume = 5;
-        // if (availableKeyVolume >= demandIter->second)
-        // {
-        //     if (demandIter->second != 0)
-        //     {
-        //         if (demandExecuteTime < executeTime)
-        //         {
-        //             executeTime = demandExecuteTime;
-        //             cout<<"key enough!!"<<endl;
-        //         }
-        //     }
-        // }
-        // else
-        // {
-        //     if (availableKeyVolume < minAvailableKeyVolume)
-        //     {
-        //         if (demandIter->second < minAvailableKeyVolume)
-        //         {
-        //             demandWaitTime = (demandIter->second - availableKeyVolume) / m_vAllLinks[midLink].GetQKDRate();
-        //         }
-        //         else
-        //         {
-        //             demandWaitTime = (minAvailableKeyVolume - availableKeyVolume) / m_vAllLinks[midLink].GetQKDRate();
-        //         }
-        //         if (demandWaitTime < executeTime)
-        //         {
-        //             executeTime = demandWaitTime;
-        //         }
-        //     }
-        //     else
-        //     {
-        //         if (demandExecuteTime < executeTime)
-        //         {
-        //             executeTime = demandExecuteTime;
-        //         }
-        //     }
-        // }
         // 该需求的执行时间
         executeTimeDemand[selectedDemand] = demandExecuteTime;
 
-        // if (demandIter->second / bandwidth < executeTime)
-        // {
-        //     executeTime = demandIter->second / bandwidth;
-        // }
+
 
         // 如果该链路上还没有被调度的需求，将当前需求 selectedDemand 设置为该链路的调度需求。
         // if (availableKeyVolume >= demandIter->second || availableKeyVolume >= minAvailableKeyVolume)
-        if (availableKeyVolume >= demandIter->second)
+
+        if (scheduledDemand.find(midLink) == scheduledDemand.end())
         {
-            if (scheduledDemand.find(midLink) == scheduledDemand.end())
+            scheduledDemand[midLink] = selectedDemand;
+        }
+        else // 如果该链路已经有一个需求被调度，那么比较新需求和已调度需求的剩余数据量，选择数据量较少的需求作为调度对象（最小剩余时间优先）
+        {
+            DEMANDID preDemand = scheduledDemand[midLink];
+            if (m_vAllNodes[nodeId].m_mRelayVolume[preDemand] > m_vAllNodes[nodeId].m_mRelayVolume[selectedDemand])
+            // if (m_vAllNodes[nodeId].m_mRelayVolume[preDemand] > m_vAllNodes[nodeId].m_mRelayVolume[selectedDemand] && m_vAllNodes[nodeId].m_mRelayVolume[selectedDemand] != 0)
             {
                 scheduledDemand[midLink] = selectedDemand;
             }
-            else // 如果该链路已经有一个需求被调度，那么比较新需求和已调度需求的剩余数据量，选择数据量较少的需求作为调度对象（最小剩余时间优先）
-            {
-                DEMANDID preDemand = scheduledDemand[midLink];
-                if (m_vAllNodes[nodeId].m_mRelayVolume[preDemand] > m_vAllNodes[nodeId].m_mRelayVolume[selectedDemand])
-                // if (m_vAllNodes[nodeId].m_mRelayVolume[preDemand] > m_vAllNodes[nodeId].m_mRelayVolume[selectedDemand] && m_vAllNodes[nodeId].m_mRelayVolume[selectedDemand] != 0)
-                {
-                    scheduledDemand[midLink] = selectedDemand;
-                }
-            }
         }
+
     }
 
     // 遍历所有被调度的需求，计算它们在执行时间内的转发数据量（带宽乘以执行时间），并将这些数据量记录在 relayDemands 中
     for (auto scheduledIter = scheduledDemand.begin(); scheduledIter != scheduledDemand.end(); scheduledIter++)
     {
         RATE bandwidth = m_vAllLinks[scheduledIter->first].GetBandwidth();
-        VOLUME availableKeyVolume = m_vAllLinks[scheduledIter->first].GetAvaialbeKeys();
-
         relayDemands[scheduledIter->second] = bandwidth * executeTime;
-        // if (executeTimeDemand[scheduledIter->second] >= executeTime)
-        // {
-        //     relayDemands[scheduledIter->second] = bandwidth * executeTime;
-        // }
-        // else
-        // {
-        //     relayDemands[scheduledIter->second] = 0;
-        // }
     }
+    // if (executeTime == INF)
+    // {
+    //     executeTime = 5;
+    // }
     return executeTime;
 }
 
@@ -473,7 +441,6 @@ TIME CNetwork::FindDemandToRelay(map<NODEID, map<DEMANDID, VOLUME>> &relayDemand
     map<NODEID, map<DEMANDID, VOLUME>> nodeRelayDemand; // 表示对应NODEID在nodeRelayTime时间中，每个需求发送的数据量
     map<NODEID, TIME> nodeRelayTime;                    // NODEID节点上的需求执行一跳的最短时间
     TIME minExecuteTime = INF;
-    bool waitorno = false;
     // 遍历所有节点 (nodeId)，对每个节点调用 FindDemandToRelay，计算该节点的需求转发时间和需要转发的需求量 tempRelayDemand
     for (NODEID nodeId = 0; nodeId < m_uiNodeNum; nodeId++)
     {
@@ -494,11 +461,6 @@ TIME CNetwork::FindDemandToRelay(map<NODEID, map<DEMANDID, VOLUME>> &relayDemand
     {
         minExecuteTime = m_mDemandArriveTime.begin()->first - m_dSimTime;
     }
-    if (minExecuteTime < 0.001 /  100)
-    {
-        minExecuteTime = 1;
-        waitorno = true;
-    }
 
     cout << "minExecuteTime: " << minExecuteTime << endl;
     // 对每个节点，将需求的转发量按最小执行时间比例缩放，并记录在 relayDemand 中
@@ -507,32 +469,25 @@ TIME CNetwork::FindDemandToRelay(map<NODEID, map<DEMANDID, VOLUME>> &relayDemand
         TIME relayTime = nodeRelayTime[nodeIter->first];
         for (auto demandIter = nodeIter->second.begin(); demandIter != nodeIter->second.end(); demandIter++)
         {
-            //            if (relayDemand[nodeIter->first][demandIter->first] == 0)
-            //            {
-            //                continue;
-            //            }
-            // VOLUME newVolume = demandIter->second * minExecuteTime / relayTime;
-            VOLUME newVolume;
-            if (waitorno)
+            VOLUME newVolume = demandIter->second * minExecuteTime / relayTime;
+            if (newVolume >= 1)
             {
-                newVolume = 0;
+                relayDemand[nodeIter->first][demandIter->first] = newVolume;
             }
             else
             {
-                newVolume = demandIter->second * minExecuteTime / relayTime;
+                relayDemand[nodeIter->first][demandIter->first] = 0;
             }
-            // VOLUME newVolume = demandIter->second;
-            // if (relayTime)
-            //     newVolume = demandIter->second * minExecuteTime / relayTime;   // minExecuteTime内每个demand传的数据量
-            // else
-            //     newVolume = demandIter->second;
-            relayDemand[nodeIter->first][demandIter->first] = newVolume;
+            // relayDemand[nodeIter->first][demandIter->first] = newVolume;
+            cout<<"node id = "<<nodeIter->first<<endl;
+            cout<<"demand id = "<<demandIter->first<<endl;
         }
     }
     // if (minExecuteTime < 0.1)
     // {
     //     minExecuteTime = 1;
     // }
+    
     return minExecuteTime;
 }
 // 执行一次单跳的需求转发操作，更新各节点和链路上的数据量和密钥
@@ -545,38 +500,59 @@ void CNetwork::RelayForOneHop(TIME executeTime, map<NODEID, map<DEMANDID, VOLUME
             // 对于每个需求，从其路径中找到下一个要中继到的节点 nextNode
             NODEID nextNode = m_vAllDemands[demandIter->first].m_Path.m_mNextNode[nodeIter->first];
 
-            // 从当前节点上移除已经转发的需求数据量 (demandIter->second)。如果当前节点是该需求的源节点，调用 ReduceVolume 减少需求的剩余数据量
-            m_vAllNodes[nodeIter->first].m_mRelayVolume[demandIter->first] -= demandIter->second;
-
-            // 当需求从此节点完全传输，则删除此节点上m_mRelayVolume对应的需求
+            // // 从当前节点上移除已经转发的需求数据量 (demandIter->second)。如果当前节点是该需求的源节点，调用 ReduceVolume 减少需求的剩余数据量
+            // // ？？仅在需求在源节点被传输后，才减少数据量，中间节点没有这个操作，不知道是否符合逻辑
+            // if (nodeIter->first == m_vAllDemands[demandIter->first].GetSourceId())
+            // {
+            //     m_vAllDemands[demandIter->first].ReduceVolume(demandIter->second);
+            // }
+            // else
+            // {
+            //     m_vAllNodes[nodeIter->first].m_mRelayVolume[demandIter->first] -= demandIter->second;
+            // }
             
-            // if (m_vAllNodes[nodeIter->first].m_mRelayVolume[demandIter->first] <= INFSMALL)  // 这里可能有问题
-            if (m_vAllNodes[nodeIter->first].m_mRelayVolume[demandIter->first] <= 1)  // 这里可能有问题
-            {
-                m_vAllNodes[nodeIter->first].m_mRelayVolume.erase(demandIter->first);
-            }
-
-            // ？？仅在需求在源节点被传输后，才减少数据量，中间节点没有这个操作，不知道是否符合逻辑
-            if (nodeIter->first == m_vAllDemands[demandIter->first].GetSourceId())
-            {
-                m_vAllDemands[demandIter->first].ReduceVolume(demandIter->second);
-            }
+            // // 当需求从此节点完全传输，则删除此节点上m_mRelayVolume对应的需求
+            // // if (m_vAllNodes[nodeIter->first].m_mRelayVolume[demandIter->first] <= INFSMALL)  // 这里可能有问题
+            // if (m_vAllNodes[nodeIter->first].m_mRelayVolume[demandIter->first] <= 0.01)  // 这里可能有问题
+            // {
+            //     m_vAllNodes[nodeIter->first].m_mRelayVolume.erase(demandIter->first);
+            // }
 
             // 找到当前节点和下一个节点之间的链路 minLink，并在该链路上消耗相应的密钥数量（等于转发的数据量）
             LINKID minLink = m_mNodePairToLink[make_pair(nodeIter->first, nextNode)];
             // if (m_vAllLinks[minLink].GetAvaialbeKeys() > THRESHOLD)
+            if (m_vAllLinks[minLink].wait_or_not == false)
+            {
                 m_vAllLinks[minLink].ConsumeKeys(demandIter->second);
+                // 从当前节点上移除已经转发的需求数据量 (demandIter->second)。如果当前节点是该需求的源节点，调用 ReduceVolume 减少需求的剩余数据量
+                // ？？仅在需求在源节点被传输后，才减少数据量，中间节点没有这个操作，不知道是否符合逻辑
+                if (nodeIter->first == m_vAllDemands[demandIter->first].GetSourceId())
+                {
+                    cout<<"nodeIter->first"<<nodeIter->first<<endl;
+                    cout<<"m_vAllDemands[demandIter->first].GetSourceId()"<<m_vAllDemands[demandIter->first].GetSourceId()<<endl;
+                    m_vAllDemands[demandIter->first].ReduceVolume(demandIter->second);
+                }
 
-            // 如果 nextNode 是需求的目标节点（汇节点），则调用 UpdateDeliveredVolume 更新已传输的数据量，并结束本次中继操作。如果 nextNode 不是汇节点，则将需求数据量添加到下一个节点的中继列表中
-            if (nextNode == m_vAllDemands[demandIter->first].GetSinkId())
-            {
-                m_vAllDemands[demandIter->first].UpdateDeliveredVolume(demandIter->second, m_dSimTime);
-                continue;
+                m_vAllNodes[nodeIter->first].m_mRelayVolume[demandIter->first] -= demandIter->second;
+
+                // 当需求从此节点完全传输，则删除此节点上m_mRelayVolume对应的需求
+                // if (m_vAllNodes[nodeIter->first].m_mRelayVolume[demandIter->first] <= INFSMALL)  // 这里可能有问题
+                if (m_vAllNodes[nodeIter->first].m_mRelayVolume[demandIter->first] <= 1)  // 这里可能有问题
+                {
+                    m_vAllNodes[nodeIter->first].m_mRelayVolume.erase(demandIter->first);
+                }
+                // 如果 nextNode 是需求的目标节点（汇节点），则调用 UpdateDeliveredVolume 更新已传输的数据量，并结束本次中继操作。如果 nextNode 不是汇节点，则将需求数据量添加到下一个节点的中继列表中
+                if (nextNode == m_vAllDemands[demandIter->first].GetSinkId())
+                {
+                    m_vAllDemands[demandIter->first].UpdateDeliveredVolume(demandIter->second, m_dSimTime);
+                    continue;
+                }
+                if (demandIter->second != 0)
+                {
+                    m_vAllNodes[nextNode].m_mRelayVolume[demandIter->first] += demandIter->second;
+                }
             }
-            if (demandIter->second != 0)
-            {
-                m_vAllNodes[nextNode].m_mRelayVolume[demandIter->first] += demandIter->second;
-            }
+            
         }
     }
     // 调用 UpdateRemainingKeys，根据执行时间 executeTime 更新所有链路上的剩余密钥数量
@@ -618,11 +594,11 @@ TIME CNetwork::OneTimeRelay()
 
     // if (CheckFault() && std::abs(m_dSimTime-FaultTime)< SMALLNUM)  //发现fault且时间已经推进到FaultTime
     // 这里需要注意，故障生成需要按照faultTime逐次进行
-    if (m_dSimTime == FaultTime)
-    {
-        Rerouting();
-    }
-    CheckFault();
+    // if (m_dSimTime == FaultTime)
+    // {
+    //     Rerouting();
+    // }
+    // CheckFault();
 //    std::cout << "Current Time after checkfault: " << m_dSimTime << std::endl;
 //    std::cout << "Current FaultTime after checkfault: " << FaultTime << std::endl;
     TIME executeTime = FindDemandToRelay(nodeRelay);

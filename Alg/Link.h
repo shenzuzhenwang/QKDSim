@@ -6,10 +6,12 @@
 class CLink
 {
 public:
+    bool wait_or_not;    // 当前节点此时刻应该等待还是传输
     CLink(void);
     ~CLink(void);
     CLink(const CLink& Link);
     void operator=(const CLink& Link);
+    
 
 private:
     LINKID m_uiLinkId;	// 链路的唯一标识符
@@ -20,8 +22,7 @@ private:
     RATE m_dBandwidth;	// 链路的带宽
 
     TIME m_dFaultTime;	// 链路故障的时间
-
-
+    
     CKeyManager m_KeyManager;	// 与链路相关联的密钥管理器，用于管理链路上的密钥分发和消耗
     //TIME m_dLastSimTime = 0; // 用于记录上一次密钥更新的时间，初始化为0或其它适当初值
 
