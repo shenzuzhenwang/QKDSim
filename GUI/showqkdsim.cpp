@@ -314,7 +314,7 @@ void QKDSim::showOutput()
 
     ui->tableWidget_out->clear();
     ui->tableWidget_out->setRowCount(0);    // 清空表格
-    QStringList headers = {"需求序号", "当前节点序号", "下一节点序号", "下一跳链路序号", "可用密钥(keys)", "待传输数据量(Mb)", "完成时间(s)", "是否故障"};     // 尚未确定
+    QStringList headers = {"需求序号", "当前节点序号", "下一节点序号", "下一跳链路序号", "可用密钥(keys)", "待传输数据量(Mb)", "完成时间(s)", "是否故障", "等待或传输"};     // 尚未确定
     ui->tableWidget_out->setColumnCount(headers.size());
     ui->tableWidget_out->setHorizontalHeaderLabels(headers);
 
@@ -328,6 +328,12 @@ void QKDSim::showOutput()
                 demandIter = net->m_vAllNodes[nodeId].m_mRelayVolume.erase(demandIter);
                 continue;
             }
+            if (net->m_vAllDemands[demandIter->first].GetArriveTime() > net->CurrentTime()) // 不显示未到达的需求
+            {
+                demandIter++;
+                continue;
+            }
+
             DEMANDID demandId = demandIter->first;
             VOLUME relayVolume = demandIter->second;
             bool isDelivered = net->m_vAllDemands[demandId].GetAllDelivered();
@@ -336,8 +342,9 @@ void QKDSim::showOutput()
             // 找到当前节点和下一个节点之间的链路 minLink
             LINKID minLink = net->m_mNodePairToLink[make_pair(nodeId, nextNode)];
             VOLUME avaiableKeys = net->m_vAllLinks[minLink].GetAvaialbeKeys();
-            bool isRouteFailed = net->m_vAllDemands[demandId].GetRoutedFailed();
             TIME completeTime = net->m_vAllDemands[demandId].GetCompleteTime();
+            bool isRouteFailed = net->m_vAllDemands[demandId].GetRoutedFailed();
+            bool isWait = net->m_vAllLinks[minLink].wait_or_not;
 
             int newRow = ui->tableWidget_out->rowCount();
             ui->tableWidget_out->insertRow(newRow);    // 末尾增加一行
@@ -350,6 +357,7 @@ void QKDSim::showOutput()
             ui->tableWidget_out->setItem(newRow, 5, new QTableWidgetItem(QString::number(relayVolume, 'f', 2)));
             ui->tableWidget_out->setItem(newRow, 6, new QTableWidgetItem(isDelivered ? QString::number(completeTime, 'f', 2) : "No"));
             ui->tableWidget_out->setItem(newRow, 7, new QTableWidgetItem(isRouteFailed ? "Yes" : "No"));
+            ui->tableWidget_out->setItem(newRow, 8, new QTableWidgetItem(isWait ? "Wait" : "Transmit"));
 
             demandIter++;
         }
