@@ -242,6 +242,8 @@ void QKDSim::on_bt_start_clicked()
     //    });
     //    watcher->setFuture(future);
     net->InitRelayPath();
+    net->InitLinkDemand();
+
     showOutput();
     ui->statusbar->showMessage(QString("%1 links and %2 demands are init").arg(net->GetLinkNum()).arg(net->GetDemandNum()));
 }
