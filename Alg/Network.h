@@ -72,6 +72,7 @@ public:
     //functions for relay routing	初始化指定需求或所有需求的中继路径
     void InitRelayPath(DEMANDID demandId);
     void InitRelayPath();//for all demands
+    void InitLinkDemand();
 
     // functions for relay rerouting  发生故障时的抗毁（重路由）功能
     // void CheckFault(DEMANDID demandId);
