@@ -32,7 +32,7 @@ private://data structure for algorithms
 
 public:
 //    list<DEMANDID> m_lCarriedDemands;	// 一个需求ID的列表，表示当前链路上正在传输的所有需求   ？？用法感觉不对
-
+    unordered_set<DEMANDID> m_lCarriedDemands; // 我觉得应该是链路驱动传输，而不是节点驱动传输
 
     void SetLinkId(LINKID linkId);
     LINKID GetLinkId();
