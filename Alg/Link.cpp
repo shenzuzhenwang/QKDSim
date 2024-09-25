@@ -25,7 +25,7 @@ CLink::CLink(const CLink& link)
 
     m_dWeight = link.m_dWeight;
 
-
+    
     wait_or_not = link.wait_or_not;
 }
 

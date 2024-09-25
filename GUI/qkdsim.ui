@@ -337,6 +337,9 @@
        <layout class="QFormLayout" name="formLayout_4">
         <item row="0" column="0" colspan="2">
          <widget class="QTableWidget" name="tableWidget_path">
+          <attribute name="horizontalHeaderVisible">
+           <bool>true</bool>
+          </attribute>
           <attribute name="verticalHeaderVisible">
            <bool>false</bool>
           </attribute>
