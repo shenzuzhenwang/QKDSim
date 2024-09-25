@@ -70,8 +70,8 @@ void CKeyManager::ConsumeKeys(VOLUME keys)
     // m_dAvailableKeys -= keys;
     if (m_dAvailableKeys < keys)
     {
-        throw std::runtime_error("Not enough available keys to consume!");
-        //m_dAvailableKeys = 12345;
+        // throw std::runtime_error("Not enough available keys to consume!");
+        m_dAvailableKeys = 0;
     }
     else
     {
