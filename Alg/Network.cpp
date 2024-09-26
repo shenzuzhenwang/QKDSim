@@ -352,17 +352,35 @@ void CNetwork::InitRelayPath(DEMANDID demandId)
     NODEID sinkId = m_vAllDemands[demandId].GetSinkId();
     list<NODEID> nodeList;
     list<LINKID> linkList;
-    // 清空旧路径
-    // CRelayPath old_path = m_vAllDemands[demandId].m_Path;
-    m_vAllDemands[demandId].m_Path.Clear();
 
+    // 重路由时清空旧路径
+    if(m_dSimTime>0)
+    {
+        // CRelayPath old_path = m_vAllDemands[demandId].m_Path;
+        // 清空旧路径上（源节点以外的）所有节点上关于该demand的标记
+        list<NODEID> TraversedNodes;
+        TraversedNodes = m_vAllDemands[demandId].m_Path.m_lTraversedNodes;
+        for (auto it = ++TraversedNodes.begin(); it != TraversedNodes.end(); it++)
+        {
+            m_vAllNodes[*it].m_mRelayVolume.erase(demandId);
+        }
+        // 清空对应的relaypath
+        m_vAllDemands[demandId].m_Path.Clear();
+    }
     //更新nextnode
-    // 调用 ShortestPath 函数，寻找从 sourceId 到 sinkId 的最短路径
+    // 调用 路由函数，寻找从 sourceId 到 sinkId 的最短/负载均衡路径
     // cout << "Demand "<<demandId<<" is rerouting"<< endl;
     if (currentRouteAlg(sourceId, sinkId, nodeList, linkList))
     {
-        cout << "Here Demand " << demandId << " is rerouting" << endl;
-        m_vAllDemands[demandId].InitRelayPath(nodeList, linkList); // 完成指定demand和中继路径的各种信息的匹配（尤其是node上和指定demand相关的下一条的确定操作   ）
+        if(m_dSimTime>0)
+        {
+            cout << "Here Demand " << demandId << " is rerouting" << endl;
+            // 恢复源节点上的待传输数据量，以进行重传
+            VOLUME RemainingVolumem = m_vAllDemands[demandId].GetDemandVolume() - m_vAllDemands[demandId].GetDeliveredVolume();
+            m_vAllNodes[sourceId].m_mRelayVolume[demandId] = RemainingVolumem;
+        }
+        m_vAllDemands[demandId].InitRelayPath(nodeList, linkList); // 完成指定demand和中继路径的各种信息的匹配（尤其是node上和指定demand相关的下一条的确定操作
+
         // CRelayPath new_path = m_vAllDemands[demandId].m_Path;
         // if(old_path.m_lTraversedNodes != new_path.m_lTraversedNodes)
         // {
@@ -384,8 +402,8 @@ void CNetwork::InitLinkDemand()
         {
             LINKID linkid = demand.m_Path.m_lTraversedLinks.front();
             m_vAllLinks[linkid].m_lCarriedDemands.insert(demand.GetDemandId());
-            cout << "linkid" << linkid << endl;
-            cout << "demandid" << demand.GetDemandId() << endl;
+            // cout << "linkid" << linkid << endl;
+            // cout << "demandid" << demand.GetDemandId() << endl;
         }
     }
 
@@ -428,6 +446,7 @@ void CNetwork::InitRelayPath()
     for (auto demandIter = m_vAllDemands.begin(); demandIter != m_vAllDemands.end(); demandIter++)
     {
         InitRelayPath(demandIter->GetDemandId());
+        cout << "Initing Relay Path for demand " << demandIter->GetDemandId() << endl;
     }
 }
 
@@ -842,24 +861,21 @@ TIME CNetwork::OneTimeRelay()
 //    std::cout << "Current Time: " << m_dSimTime << std::endl;
 //    std::cout << "Current FaultTime: " << FaultTime << std::endl;
 
-    // if (CheckFault() && std::abs(m_dSimTime-FaultTime)< SMALLNUM)  //发现fault且时间已经推进到FaultTime
 
-    // std::cout << "failedLink: " << failedLink << std::endl;  123456
-    // 检查一下是否failedLink的赋值有问题
-    // std::cout << "the length of failedLink: " << failedLink.size() << std::endl;
+    // 检查故障并进行重路由
     // 这里需要注意，故障生成需要按照faultTime逐次进行
-    // if (m_dSimTime == FaultTime)
-    // {
-    //     // for(list<LINKID>::iterator index = failedLink.begin(); index!=failedLink.end(); index++)
-    //     // {
-    //     //     int count = 1;
-    //     //     std::cout << "the " << count <<"-th of failedLink: " << *index << std::endl;
-    //     //     count++;
-    //     // }
-    //     Rerouting();
-    // }
-    // failedLink.clear();
-    // CheckFault();
+    if (m_dSimTime == FaultTime)
+    {
+        // for(list<LINKID>::iterator index = failedLink.begin(); index!=failedLink.end(); index++)
+        // {
+        //     int count = 1;
+        //     std::cout << "the " << count <<"-th of failedLink: " << *index << std::endl;
+        //     count++;
+        // }
+        Rerouting();
+    }
+    failedLink.clear();
+    CheckFault();
 //    std::cout << "Current Time after checkfault: " << m_dSimTime << std::endl;
 //    std::cout << "Current FaultTime after checkfault: " << FaultTime << std::endl;
     TIME executeTime = FindDemandToRelay(nodeRelay);
@@ -919,8 +935,6 @@ void CNetwork::CheckFault()
 // 重路由函数
 void CNetwork::Rerouting()
 {
-    // 重新执行CNetwork::InitRelayPath()（修改后的，确保每一个demand的路径都完成更新）
-    // ReInitRelayPath();
     // 检查有哪些demand的relaypath包含了这些故障的link
     // 检查是否存在无法通信的源目的节点对（即无法算出连接源节点和目的节点的路径），并显示相应的源目的节点对
     for (int demandID = static_cast<int>(GetDemandNum()) - 1; demandID >= 0; demandID--) // 从后向前遍历，避免因删除元素导致的vector访问越界
@@ -928,7 +942,7 @@ void CNetwork::Rerouting()
 //        std::cout << "GetDemandNum " << GetDemandNum() << std::endl;
 //        std::cout << "GetLinkNum " << GetLinkNum() << std::endl;
         bool if_break = false;
-        // 这一段没有发挥作用
+
         list<LINKID> TraversedLinks;
         TraversedLinks = m_vAllDemands[demandID].m_Path.m_lTraversedLinks;
         for(list<LINKID>::iterator element = failedLink.begin(); element != failedLink.end(); element++)
@@ -955,14 +969,6 @@ void CNetwork::Rerouting()
                 }
             }
         }
-        // for (LINKID& element : failedLink)
-        // {
-        //     if (std::find(TraversedLinks.begin(), TraversedLinks.end(), element) != TraversedLinks.end())
-        //     {
-        //         InitRelayPath(demandID);
-        //     }
-        // }
-
     }
     // 遍历全部demand，对于每个demand，比较旧relaypath和新relaypath，将不在新relaypath中的node上和上link上的待发送需求清空
 }
