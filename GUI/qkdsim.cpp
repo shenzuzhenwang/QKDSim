@@ -23,8 +23,22 @@ QKDSim::QKDSim(QWidget *parent)
     ui->tableWidget_path->horizontalHeader()->setVisible(false);
 
     // 读取csv文件
-    loadCSV("../../Input/network.csv", Network);
-    loadCSV("../../Input/demand.csv", Demand);
+    // loadCSV("../../Input/network(500).csv", Network);
+    // loadCSV("../../Input/demand(500).csv", Demand);
+
+    // loadCSV("../../Input/network.csv", Network);
+    // loadCSV("../../Input/demand.csv", Demand);
+
+    // loadCSV("../../Input/network(1000) - 副本.csv", Network);
+    // loadCSV("../../Input/demand.csv", Demand);
+
+
+    // loadCSV("../../Input/10规模/network.csv", Network);
+    // loadCSV("../../Input/10规模/demand.csv", Demand);
+
+    loadCSV("../../Input/1000规模/network.csv", Network);
+    loadCSV("../../Input/1000规模/demand.csv", Demand);
+
     // 显示demand
     showCSV(Network);
 
@@ -50,7 +64,7 @@ void QKDSim::Connections()
 {
     // 关于QT
     connect(ui->action_qt, &QAction::triggered, [this]
-    { QMessageBox::aboutQt(this); });
+            { QMessageBox::aboutQt(this); });
 
     // 关闭程序
     connect(ui->action_exit, &QAction::triggered, this, &QWidget::close);
@@ -64,7 +78,7 @@ void QKDSim::Connections()
     // 定时器
     //    connect(timer, &QTimer::timeout, this, &QKDSim::next_step);
     connect(timer, &QTimer::timeout, this, [this]()
-    {
+            {
 //        QFuture<void> future = QtConcurrent::run([this]()
 //        {
 //            QMetaObject::invokeMethod(timer, "stop");  // 定时器阻塞期间不运行
@@ -83,8 +97,7 @@ void QKDSim::Connections()
         timer->stop();
         this->next_step();
         showOutput();
-        timer->start(1000);
-    });
+        timer->start(1000); });
 
     // 进度条界面
     //    connect(this, &QKDSim::progressChanged, progressBar, &ProgressBar::updateProgress);
@@ -231,6 +244,8 @@ void QKDSim::on_bt_start_clicked()
     //    });
     //    watcher->setFuture(future);
     net->InitRelayPath();
+    net->InitLinkDemand();
+
     showOutput();
     ui->statusbar->showMessage(QString("%1 links and %2 demands are init").arg(net->GetLinkNum()).arg(net->GetDemandNum()));
 }

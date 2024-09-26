@@ -1,6 +1,7 @@
 ﻿#pragma once
 #include <random>
 #include <ctime>
+#include <unordered_set>
 #include "StdAfx.h"
 #include "KeyManager.h"
 class CLink
@@ -11,7 +12,7 @@ public:
     ~CLink(void);
     CLink(const CLink& Link);
     void operator=(const CLink& Link);
-    
+
 
 private:
     LINKID m_uiLinkId;	// 链路的唯一标识符
@@ -22,7 +23,7 @@ private:
     RATE m_dBandwidth;	// 链路的带宽
 
     TIME m_dFaultTime;	// 链路故障的时间
-    
+
     CKeyManager m_KeyManager;	// 与链路相关联的密钥管理器，用于管理链路上的密钥分发和消耗
     //TIME m_dLastSimTime = 0; // 用于记录上一次密钥更新的时间，初始化为0或其它适当初值
 
@@ -32,7 +33,7 @@ private://data structure for algorithms
 
 public:
 //    list<DEMANDID> m_lCarriedDemands;	// 一个需求ID的列表，表示当前链路上正在传输的所有需求   ？？用法感觉不对
-
+    unordered_set<DEMANDID> m_lCarriedDemands; // 我觉得应该是链路驱动传输，而不是节点驱动传输
 
     void SetLinkId(LINKID linkId);
     LINKID GetLinkId();
