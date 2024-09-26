@@ -61,7 +61,7 @@ void QKDSim::Connections()
 {
     // 关于QT
     connect(ui->action_qt, &QAction::triggered, [this]
-    { QMessageBox::aboutQt(this); });
+            { QMessageBox::aboutQt(this); });
 
     // 关闭程序
     connect(ui->action_exit, &QAction::triggered, this, &QWidget::close);
@@ -75,7 +75,7 @@ void QKDSim::Connections()
     // 定时器
     //    connect(timer, &QTimer::timeout, this, &QKDSim::next_step);
     connect(timer, &QTimer::timeout, this, [this]()
-    {
+            {
 //        QFuture<void> future = QtConcurrent::run([this]()
 //        {
 //            QMetaObject::invokeMethod(timer, "stop");  // 定时器阻塞期间不运行
@@ -94,8 +94,7 @@ void QKDSim::Connections()
         timer->stop();
         this->next_step();
         showOutput();
-        timer->start(1000);
-    });
+        timer->start(1000); });
 
     // 进度条界面
     //    connect(this, &QKDSim::progressChanged, progressBar, &ProgressBar::updateProgress);
@@ -242,6 +241,7 @@ void QKDSim::on_bt_start_clicked()
     //    });
     //    watcher->setFuture(future);
     net->InitRelayPath();
+    net->InitLinkDemand();
 
     showOutput();
     ui->statusbar->showMessage(QString("%1 links and %2 demands are init").arg(net->GetLinkNum()).arg(net->GetDemandNum()));
