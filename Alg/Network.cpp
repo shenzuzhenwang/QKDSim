@@ -387,28 +387,36 @@ void CNetwork::InitLinkDemand()
         }
     }
 
-    // 遍历link
-    for(auto &link : m_vAllLinks)
-    {
-        NODEID sourceid =  link.GetSourceId();
-        NODEID sinkid =  link.GetSinkId();
-        // 遍历link上的demand
-        for (auto &demandid : link.m_lCarriedDemands)
-        {
-            auto &nextNode = m_vAllDemands[demandid].m_Path.m_mNextNode;
-            // relayVolume就是找到的待传的数据，这个m_mRelayVolume在sourceid或sinkid上
-            if (nextNode.count(sourceid) && nextNode[sourceid] == sinkid)
-            {
-                NODEID nodeid = sourceid;
-                VOLUME relayVolume = m_vAllNodes[nodeid].m_mRelayVolume[demandid];
-            }
-            else if (nextNode.count(sinkid) && nextNode[sinkid] == sourceid)
-            {
-                NODEID nodeid = sinkid;
-                VOLUME relayVolume = m_vAllNodes[nodeid].m_mRelayVolume[demandid];
-            }
-        }
-    }
+    // // 遍历link
+    // for(auto &link : m_vAllLinks)
+    // {
+    //     if (link.m_dFaultTime >= 0 && link.m_dFaultTime <= m_dSimTime)
+    //     {
+    //         continue;
+    //     }
+    //     NODEID sourceid =  link.GetSourceId();
+    //     NODEID sinkid =  link.GetSinkId();
+    //     // 遍历link上的demand
+    //     for (auto &demandid : link.m_lCarriedDemands)
+    //     {
+    //         auto &nextNode = m_vAllDemands[demandid].m_Path.m_mNextNode;
+    //         // relayVolume就是找到的待传的数据，这个m_mRelayVolume在sourceid或sinkid上
+    //         if (nextNode.count(sourceid) && nextNode[sourceid] == sinkid)
+    //         {
+    //             NODEID nodeid = sourceid;
+    //             VOLUME relayVolume = m_vAllNodes[nodeid].m_mRelayVolume[demandid];
+    //         }
+    //         else if (nextNode.count(sinkid) && nextNode[sinkid] == sourceid)
+    //         {
+    //             NODEID nodeid = sinkid;
+    //             VOLUME relayVolume = m_vAllNodes[nodeid].m_mRelayVolume[demandid];
+    //         }
+    //         else
+    //         {
+    //             throw 1;
+    //         }
+    //     }
+    // }
 }
 
 // 为所有需求初始化中继路径
@@ -513,7 +521,8 @@ TIME CNetwork::MinimumRemainingTimeFirst(NODEID nodeId, map<DEMANDID, VOLUME> &r
     // {
     //     executeTime = 5;
     // }
-    cout << "executeTime:" << executeTime << endl;
+    if(executeTime != INF)
+        cout << "executeTime:" << executeTime << endl;
     return executeTime;
 }
 
@@ -522,94 +531,89 @@ TIME CNetwork::MinimumRemainingTimeFirst(NODEID nodeId, map<DEMANDID, VOLUME> &r
 TIME CNetwork::AverageKeyScheduling(NODEID nodeId, map<DEMANDID, VOLUME> &relayDemands)
 {
     TIME executeTime = INF;                // 表示当前的最小执行时间
-    map<LINKID, DEMANDID> scheduledDemand; // 记录每条链路上计划要转发的需求
-    map<DEMANDID, TIME> executeTimeDemand; // 记录需求的执行时间
-    // 遍历当前节点 nodeId 上的所有需求（记录在 m_mRelayVolume 中），跳过尚未到达的需求（通过到达时间判断）
-    for (auto demandIter = m_vAllNodes[nodeId].m_mRelayVolume.begin(); demandIter != m_vAllNodes[nodeId].m_mRelayVolume.end(); demandIter++)
+    // 遍历link
+    for(auto &link : m_vAllLinks)
     {
-        DEMANDID selectedDemand = demandIter->first;
-        if (m_vAllDemands[selectedDemand].GetArriveTime() > m_dSimTime + SMALLNUM)
+        // 跳过故障link和link上没需求的link
+        if (link.GetFaultTime() >= 0 && link.GetFaultTime() <= m_dSimTime || link.m_lCarriedDemands.empty())
         {
-            // this demand has not arrived yet
+            link.wait_or_not = true;
             continue;
         }
-        // 根据链路的带宽 bandwidth 和需求的剩余数据量 demandIter->second，计算需求的执行时间，并更新最小执行时间 executeTime
-        NODEID nextNode = m_vAllDemands[selectedDemand].m_Path.m_mNextNode[nodeId];
-        LINKID midLink = m_mNodePairToLink[make_pair(nodeId, nextNode)];
-        RATE bandwidth = m_vAllLinks[midLink].GetBandwidth();
-
-        // 获取该链路上的可用密钥量
-        VOLUME availableKeyVolume = m_vAllLinks[midLink].GetAvaialbeKeys();
-
-        VOLUME actualTransmittableVolume = min(demandIter->second, availableKeyVolume);
-        cout << "actualTransmittableVolume:" << actualTransmittableVolume << endl;
-        // 根据链路的带宽和实际可传输的数据量，计算需求的执行时间，并更新最小执行时间 executeTime
-
-        TIME demandExecuteTime = actualTransmittableVolume / bandwidth;
-        cout << "demandExecuteTime:" << actualTransmittableVolume / bandwidth << endl;
-        if (demandExecuteTime < executeTime)
+        VOLUME availableKeyVolume = link.GetAvaialbeKeys();
+        RATE bandwidth = link.GetBandwidth();
+        NODEID sourceid =  link.GetSourceId();
+        NODEID sinkid =  link.GetSinkId();
+        TIME tempTime;
+        // 遍历link上的demand，得到一条链路上的执行时间
+        for (auto &demandid : link.m_lCarriedDemands)
         {
-
-            if (demandExecuteTime < 0.1 && demandIter->second > availableKeyVolume)
+            NODEID nodeid;
+            VOLUME relayVolume;
+            auto &nextNode = m_vAllDemands[demandid].m_Path.m_mNextNode;
+            // relayVolume就是找到的待传的数据，这个m_mRelayVolume在sourceid或sinkid上
+            if (nextNode.count(sourceid) && nextNode[sourceid] == sinkid)
             {
-                m_vAllLinks[midLink].wait_or_not = true;
-                TIME waitTime = (demandIter->second - availableKeyVolume) / m_vAllLinks[midLink].GetQKDRate();
-                if (waitTime < executeTime)
-                {
-                    executeTime = waitTime;
-                }
-                continue;
-                // executeTime = (demandIter->second - availableKeyVolume) / m_vAllLinks[midLink].GetQKDRate();
+                nodeid = sourceid;
+                relayVolume = m_vAllNodes[nodeid].m_mRelayVolume[demandid];
+            }
+            else if (nextNode.count(sinkid) && nextNode[sinkid] == sourceid)
+            {
+                nodeid = sinkid;
+                relayVolume = m_vAllNodes[nodeid].m_mRelayVolume[demandid];
             }
             else
             {
-                m_vAllLinks[midLink].wait_or_not = false;
-                executeTime = demandExecuteTime;
+                throw 1;
             }
-        }
-        // 该需求的执行时间
-        executeTimeDemand[selectedDemand] = demandExecuteTime;
 
-
-
-        // 如果该链路上还没有被调度的需求，将当前需求 selectedDemand 设置为该链路的调度需求。
-        // if (availableKeyVolume >= demandIter->second || availableKeyVolume >= minAvailableKeyVolume)
-
-        if (scheduledDemand.find(midLink) == scheduledDemand.end())
-        {
-            scheduledDemand[midLink] = selectedDemand;
-        }
-        else // 如果该链路已经有一个需求被调度，那么比较新需求和已调度需求的剩余数据量，选择数据量较少的需求作为调度对象（最小剩余时间优先）
-        {
-            DEMANDID preDemand = scheduledDemand[midLink];
-            if (m_vAllNodes[nodeId].m_mRelayVolume[preDemand] > m_vAllNodes[nodeId].m_mRelayVolume[selectedDemand])
-                // if (m_vAllNodes[nodeId].m_mRelayVolume[preDemand] > m_vAllNodes[nodeId].m_mRelayVolume[selectedDemand] && m_vAllNodes[nodeId].m_mRelayVolume[selectedDemand] != 0)
+            // 对一个demand，判断链路最小执行时间tempTime
+            if (relayVolume / bandwidth < tempTime)
             {
-                scheduledDemand[midLink] = selectedDemand;
+                tempTime = relayVolume / bandwidth;
             }
         }
+        // 找到了该条链路上的最小执行时间tempTime，计算最小传输量，然后比较可用密钥量
+        VOLUME needVolume = tempTime * bandwidth * link.m_lCarriedDemands.size();
 
-    }
-
-    // 遍历所有被调度的需求，计算它们在执行时间内的转发数据量（带宽乘以执行时间），并将这些数据量记录在 relayDemands 中
-    for (auto scheduledIter = scheduledDemand.begin(); scheduledIter != scheduledDemand.end(); scheduledIter++)
-    {
-        RATE bandwidth = m_vAllLinks[scheduledIter->first].GetBandwidth();
-        if (bandwidth * executeTime < 1)
+        // 如果可用密钥量足够，给每一个nodeid，赋值传同样的最小传输量
+        if (needVolume < availableKeyVolume)
         {
-            relayDemands[scheduledIter->second] = 0;
+            link.wait_or_not = false;
+            for (auto &demandid : link.m_lCarriedDemands)
+            {
+                NODEID nodeid;
+                VOLUME relayVolume;
+                auto &nextNode = m_vAllDemands[demandid].m_Path.m_mNextNode;
+                // relayVolume就是找到的待传的数据，这个m_mRelayVolume在sourceid或sinkid上
+                if (nextNode.count(sourceid) && nextNode[sourceid] == sinkid)
+                {
+                    nodeid = sourceid;
+                    relayVolume = m_vAllNodes[nodeid].m_mRelayVolume[demandid];
+                }
+                else if (nextNode.count(sinkid) && nextNode[sinkid] == sourceid)
+                {
+                    nodeid = sinkid;
+                    relayVolume = m_vAllNodes[nodeid].m_mRelayVolume[demandid];
+                }
+                else
+                {
+                    throw 1;
+                }
+                // 对每一个可以传输的demand，给相应的nodeid传输最小传输量
+                if (nodeid == nodeId)
+                {
+                    relayDemands[demandid] = tempTime * bandwidth;
+                }
+            }
         }
         else
         {
-            relayDemands[scheduledIter->second] = bandwidth * executeTime;
+            link.wait_or_not = true;
         }
-        // relayDemands[scheduledIter->second] = bandwidth * executeTime;
     }
-    // if (executeTime == INF)
-    // {
-    //     executeTime = 5;
-    // }
-    cout << "executeTime:" << executeTime << endl;
+    if(executeTime != INF)
+        cout << "executeTime:" << executeTime << endl;
     return executeTime;
 }
 
@@ -812,8 +816,8 @@ TIME CNetwork::OneTimeRelay()
         // }
         Rerouting();
     }
-    failedLink.clear();
-    CheckFault();
+    // failedLink.clear();
+    // CheckFault();
 //    std::cout << "Current Time after checkfault: " << m_dSimTime << std::endl;
 //    std::cout << "Current FaultTime after checkfault: " << FaultTime << std::endl;
     TIME executeTime = FindDemandToRelay(nodeRelay);

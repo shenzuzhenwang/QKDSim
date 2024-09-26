@@ -30,11 +30,11 @@ QKDSim::QKDSim(QWidget *parent)
     // loadCSV("../../Input/demand.csv", Demand);
 
 
-    // loadCSV("../../Input/10规模/network.csv", Network);
-    // loadCSV("../../Input/10规模/demand.csv", Demand);
+    loadCSV("../../Input/10规模/network.csv", Network);
+    loadCSV("../../Input/10规模/demand.csv", Demand);
 
-    loadCSV("../../Input/1000规模/network.csv", Network);
-    loadCSV("../../Input/1000规模/demand.csv", Demand);
+    // loadCSV("../../Input/1000规模/network.csv", Network);
+    // loadCSV("../../Input/1000规模/demand.csv", Demand);
 
     // 显示demand
     showCSV(Network);
