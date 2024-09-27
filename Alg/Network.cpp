@@ -364,8 +364,17 @@ void CNetwork::InitRelayPath(DEMANDID demandId)
         {
             m_vAllNodes[*it].m_mRelayVolume.erase(demandId);
         }
+        
         // 清空对应的relaypath
+        list<LINKID> TraversedLinks;
+        TraversedLinks = m_vAllDemands[demandId].m_Path.m_lTraversedLinks;
+        for (auto it = TraversedLinks.begin(); it != TraversedLinks.end(); it++)
+        {
+            m_vAllLinks[*it].m_lCarriedDemands.erase(demandId);
+        }
+
         m_vAllDemands[demandId].m_Path.Clear();
+
     }
     //更新nextnode
     // 调用 路由函数，寻找从 sourceId 到 sinkId 的最短/负载均衡路径
@@ -380,7 +389,7 @@ void CNetwork::InitRelayPath(DEMANDID demandId)
             m_vAllNodes[sourceId].m_mRelayVolume[demandId] = RemainingVolumem;
         }
         m_vAllDemands[demandId].InitRelayPath(nodeList, linkList); // 完成指定demand和中继路径的各种信息的匹配（尤其是node上和指定demand相关的下一条的确定操作
-
+        
         // CRelayPath new_path = m_vAllDemands[demandId].m_Path;
         // if(old_path.m_lTraversedNodes != new_path.m_lTraversedNodes)
         // {
@@ -598,10 +607,10 @@ TIME CNetwork::AverageKeyScheduling(NODEID nodeId, map<DEMANDID, VOLUME> &relayD
                 nodeid = sinkid;
                 relayVolume = m_vAllNodes[nodeid].m_mRelayVolume[demandid];
             }
-            else
-            {
-                throw 1;
-            }
+            // else
+            // {
+            //     throw 1;
+            // }
 
             // 对一个demand，判断链路最小执行时间tempTime
             if (relayVolume / bandwidth < tempTime)
@@ -639,10 +648,10 @@ TIME CNetwork::AverageKeyScheduling(NODEID nodeId, map<DEMANDID, VOLUME> &relayD
                 {
                     nodeid = sinkid;
                 }
-                else
-                {
-                    throw 1;
-                }
+                // else
+                // {
+                //     throw 1;
+                // }
                 // 对每一个可以传输的demand，给相应的nodeid传输最小传输量
                 if (nodeid == nodeId)
                 {
@@ -666,10 +675,10 @@ TIME CNetwork::AverageKeyScheduling(NODEID nodeId, map<DEMANDID, VOLUME> &relayD
                 {
                     nodeid = sinkid;
                 }
-                else
-                {
-                    throw 1;
-                }
+                // else
+                // {
+                //     throw 1;
+                // }
                 // 对每一个可以传输的demand，给相应的nodeid传输最小传输量
                 if (nodeid == nodeId)
                 {
@@ -789,8 +798,8 @@ void CNetwork::RelayForOneHop(TIME executeTime, map<NODEID, map<DEMANDID, VOLUME
                 m_vAllNodes[nodeIter->first].m_mRelayVolume[demandIter->first] -= demandIter->second;
 
                 // 当需求从此节点完全传输，则删除此节点上m_mRelayVolume对应的需求
-                // if (m_vAllNodes[nodeIter->first].m_mRelayVolume[demandIter->first] <= INFSMALL)  // 这里可能有问题
-                if (m_vAllNodes[nodeIter->first].m_mRelayVolume[demandIter->first] <= 1)  // 这里可能有问题
+                if (m_vAllNodes[nodeIter->first].m_mRelayVolume[demandIter->first] <= INFSMALL)  // 这里可能有问题
+                // if (m_vAllNodes[nodeIter->first].m_mRelayVolume[demandIter->first] <= 1)  // 这里可能有问题
                 {
                     m_vAllNodes[nodeIter->first].m_mRelayVolume.erase(demandIter->first);
                     // 对link.m_lCarriedDemands进行删除
@@ -952,6 +961,7 @@ void CNetwork::Rerouting()
                 if(*element == *element_2)
                 {
                     InitRelayPath(demandID);
+                    InitLinkDemand();
                     std::cout << "demand " << demandID << " has been rerouted " << std::endl;
                     if (TraversedLinks.empty())
                     {
