@@ -28,7 +28,7 @@
        </font>
       </property>
       <property name="currentIndex">
-       <number>0</number>
+       <number>2</number>
       </property>
       <widget class="QWidget" name="tab">
        <attribute name="title">
@@ -337,7 +337,7 @@
       </widget>
       <widget class="QWidget" name="tab_4">
        <attribute name="title">
-        <string>最短路径</string>
+        <string>中继路径</string>
        </attribute>
        <layout class="QFormLayout" name="formLayout_4">
         <item row="0" column="0" colspan="2">
@@ -492,7 +492,7 @@
      <x>0</x>
      <y>0</y>
      <width>1228</width>
-     <height>30</height>
+     <height>23</height>
     </rect>
    </property>
    <widget class="QMenu" name="menu">
