@@ -280,7 +280,7 @@ bool CNetwork::ShortestPath(NODEID sourceId, NODEID sinkId, list<NODEID> &nodeLi
     return true;
 }
 
-// 只考虑keyrate的最短路算法
+// 只考虑keyrate的基于Dijkstra的最短路算法
 bool CNetwork::KeyRateShortestPath(NODEID sourceId, NODEID sinkId, list<NODEID>& nodeList, list<LINKID>& linkList)
 {
     UINT NodeNum = static_cast<UINT>(m_vAllNodes.size());
@@ -334,6 +334,74 @@ bool CNetwork::KeyRateShortestPath(NODEID sourceId, NODEID sinkId, list<NODEID>&
         exit(0);
     }
     while(curNode != sourceId)
+    {
+        nodeList.push_front(curNode);
+        NODEID pre = preNode[curNode];
+        LINKID midLink = m_mNodePairToLink[make_pair(pre, curNode)];
+        linkList.push_front(midLink);
+        curNode = pre;
+    }
+    nodeList.push_front(sourceId);
+    return true;
+}
+
+// 增加逐个demand路由并修改相应link上的负载的函数
+// 123
+// 使用最短路径算法Dijkstra计算从源节点 sourceId 到汇节点 sinkId 的最短路径，并将路径中的节点和链路记录在 nodeList 和 linkList 中。如果找到有效路径，返回 true，否则返回 false
+// 每次为一个demand求得路径后，就修改路径上link的weight值（为对应的负载）
+bool CNetwork::Load_Balance(NODEID sourceId, NODEID sinkId, list<NODEID> &nodeList, list<LINKID> &linkList)
+{
+    UINT NodeNum = static_cast<UINT>(m_vAllNodes.size());
+    vector<NODEID> preNode(NodeNum, sourceId); // 记录每个节点在最短路径中的前驱节点
+    vector<WEIGHT> curDist(NodeNum, INF);      // 用于记录从 sourceId 到各节点的当前最短距离
+    vector<bool> visited(NodeNum, false);      // 用于记录每个节点是否已被访问
+    curDist[sourceId] = 0;
+    visited[sourceId] = true;
+    NODEID curNode = sourceId;
+    while (curNode != sinkId)
+    {
+        for (auto adjNodeIter = m_vAllNodes[curNode].m_lAdjNodes.begin(); adjNodeIter != m_vAllNodes[curNode].m_lAdjNodes.end(); adjNodeIter++)
+        {
+            if (visited[*adjNodeIter])
+            {
+                continue;
+            }
+            LINKID midLink = m_mNodePairToLink[make_pair(curNode, *adjNodeIter)];
+            if (curDist[curNode] + m_vAllLinks[midLink].GetWeight() < curDist[*adjNodeIter])
+            {
+                curDist[*adjNodeIter] = curDist[curNode] + m_vAllLinks[midLink].GetWeight();
+                preNode[*adjNodeIter] = curNode;
+            }
+        }
+        // Find next node
+        WEIGHT minDist = INF;
+        NODEID nextNode = curNode;
+        for (NODEID nodeId = 0; nodeId < NodeNum; nodeId++)
+        {
+            if (visited[nodeId])
+            {
+                continue;
+            }
+            if (curDist[nodeId] < minDist)
+            {
+                nextNode = nodeId;
+                minDist = curDist[nodeId];
+            }
+        }
+        if (minDist >= INF || nextNode == curNode)
+        {
+            return false;
+        }
+        curNode = nextNode;
+        visited[nextNode] = true;
+    }
+    if (curNode != sinkId)
+    {
+        cout << "why current node is not sink node?? check function shortestPath!" << endl;
+        getchar();
+        exit(0);
+    }
+    while (curNode != sourceId)
     {
         nodeList.push_front(curNode);
         NODEID pre = preNode[curNode];

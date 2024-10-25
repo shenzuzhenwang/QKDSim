@@ -62,6 +62,7 @@ public:
     //common route algorithms
     std::function<bool(NODEID, NODEID, list<NODEID>&, list<LINKID>&)> currentRouteAlg;
     bool ShortestPath(NODEID sourceId, NODEID sinkId, list<NODEID>& nodeList, list<LINKID>& linkList);	// 用于计算从源节点到汇节点的最短路径，返回经过的节点和链路列表
+    bool Load_Balance(NODEID sourceId, NODEID sinkId, list<NODEID>& nodeList, list<LINKID>& linkList);  // 负载均衡路由算法
     bool KeyRateShortestPath(NODEID sourceId, NODEID sinkId, list<NODEID>& nodeList, list<LINKID>& linkList);  // 权重为keyrate的最短路算法，返回经过的节点和链路列表
     //function for scheduling
     std::function<TIME(NODEID, map<DEMANDID, VOLUME>&)> currentScheduleAlg;
