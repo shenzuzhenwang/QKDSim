@@ -1,5 +1,5 @@
 ﻿#pragma once
-#include "StdAfx.h"
+#include "stdafx.h"
 #include "Node.h"
 #include "Link.h"
 #include "Demand.h"

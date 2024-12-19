@@ -1,7 +1,7 @@
 ﻿#pragma once
 #include <random>
 #include <ctime>
-#include "StdAfx.h"
+#include "stdafx.h"
 #include "KeyManager.h"
 class CLink
 {
