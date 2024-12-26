@@ -29,6 +29,7 @@ public:
     TIME FaultTime;  //表示当前故障发生的时间
 
 
+
 private:
     UINT m_uiNodeNum;	// 网络中的节点数量
     UINT m_uiLinkNum;	// 网络中的链路数量
@@ -57,10 +58,13 @@ public:
     void Clear();
 
 
+
+
     //common route algorithms
     std::function<bool(NODEID, NODEID, list<NODEID>&, list<LINKID>&)> currentRouteAlg;
     bool ShortestPath(NODEID sourceId, NODEID sinkId, list<NODEID>& nodeList, list<LINKID>& linkList);	// 用于计算从源节点到汇节点的最短路径，返回经过的节点和链路列表
     bool KeyRateShortestPath(NODEID sourceId, NODEID sinkId, list<NODEID>& nodeList, list<LINKID>& linkList);  // 权重为keyrate的最短路算法，返回经过的节点和链路列表
+    void ShowDemandPaths(); //查看并输出所有demand的路径信息（节点信息）
     //function for scheduling
     std::function<TIME(NODEID, map<DEMANDID, VOLUME>&)> currentScheduleAlg;
     TIME MinimumRemainingTimeFirst(NODEID nodeId, map<DEMANDID, VOLUME>& relayDemands); // 计算给定节点的需求转发执行时间
