@@ -46,3 +46,6 @@ release
 Debug
 build
 git
+
+path.txt
+*.json

@@ -124,19 +124,22 @@ void CDemand::ReduceVolume(VOLUME consumeVolume)
 {
     // 减少剩余的数据量
     m_dRemainingVolume -= consumeVolume;
-
-    // 检查剩余的数据量是否小于一个非常小的负值（表示近似为负数）
-    if (m_dRemainingVolume < NEGSMALLVALUE)
+    if (m_dRemainingVolume < 0)
     {
-        // 输出错误信息，指出哪个需求的剩余数据量变成了负值
-        cout << "check why the volume of DEMAND " << m_uiDemandID << " become a negative value." << endl;
-
-        // 暂停程序，让用户看到错误信息
-        getchar();
-
-        // 退出程序
-        exit(0);
+        m_dRemainingVolume = 0;
     }
+    // // 检查剩余的数据量是否小于一个非常小的负值（表示近似为负数）
+    // if (m_dRemainingVolume < NEGSMALLVALUE)
+    // {
+    //     // 输出错误信息，指出哪个需求的剩余数据量变成了负值
+    //     cout << "check why the volume of DEMAND " << m_uiDemandID << " become a negative value." << endl;
+
+    //     // 暂停程序，让用户看到错误信息
+    //     getchar();
+
+    //     // 退出程序
+    //     exit(0);
+    // }
 }
 
 //void CDemand::SetRouted(bool routed)
@@ -192,6 +195,7 @@ void CDemand::InitRelayPath(list<NODEID>& nodeList, list<LINKID>& linkList) //�
     auto nodeIter = nodeList.begin();
     NODEID curNode = *nodeIter;
     nodeIter++;
+    // 这里对m_Path.m_mNextNode的操作只有增加和修改，没有删除
     for (; nodeIter != nodeList.end(); nodeIter++)
     {
         m_Path.m_mNextNode[curNode] = *nodeIter;
